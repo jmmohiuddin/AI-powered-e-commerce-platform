@@ -121,11 +121,24 @@ p {
   border-bottom: 1px solid var(--colour-border);
 }
 
+/*
+ * The header wraps, and the search field takes its own full-width row on a
+ * phone.
+ *
+ * As a single non-wrapping row it fitted the logo, the search box and three
+ * action links across 375px by crushing the search to ~90px — at which point
+ * the absolutely-positioned Search button covered the input completely and the
+ * store's primary way of finding a product stopped working on the device most
+ * of this market shops from. Wrapping costs one row of height and makes the
+ * field full-width instead.
+ */
 .site-header__inner {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
   min-height: var(--header-height);
+  padding-block: var(--space-2);
 }
 
 .logo {
@@ -140,10 +153,29 @@ p {
 }
 
 .search-form {
-  flex: 1;
+  /* Ordered last so it drops below the logo and the action links, and given a
+     100% basis so it claims the whole of that second row. `min-width: 0` is
+     what actually stops a flex item shrinking below its content — without it
+     the field is squeezable no matter how much room the row has. */
+  order: 3;
+  flex: 1 1 100%;
+  min-width: 0;
   display: flex;
-  max-width: 560px;
   position: relative;
+}
+
+/* Wide enough for one row: the original inline layout, search in the middle. */
+@media (min-width: 760px) {
+  .site-header__inner {
+    flex-wrap: nowrap;
+    padding-block: 0;
+  }
+
+  .search-form {
+    order: 0;
+    flex: 1 1 auto;
+    max-width: 560px;
+  }
 }
 
 .search-form input {
