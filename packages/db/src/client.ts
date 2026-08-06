@@ -16,9 +16,22 @@ function createPool(connectionString: string, max: number): Pool {
     connectionString,
     max,
     idleTimeoutMillis: 30_000,
-    // Fail fast rather than queue forever behind an exhausted pool — a request
-    // that waits 30s for a connection has already lost the customer.
-    connectionTimeoutMillis: 5_000,
+    /**
+     * Long enough for a suspended database to wake, short enough that a genuine
+     * outage still fails rather than hanging.
+     *
+     * 5s was tuned for an always-warm local Postgres and is wrong for managed
+     * providers that auto-suspend on idle — Neon's free tier parks the compute
+     * after a few minutes, and the first connection afterwards pays a cold
+     * start of roughly 5–10s. At a 5s ceiling that first request is guaranteed
+     * to fail, so the first visitor after a quiet period reliably sees an
+     * error on an otherwise healthy store.
+     *
+     * Overridable because the right number is a property of the deployment,
+     * not of this code: a provisioned always-on instance can safely go back
+     * to 5s.
+     */
+    connectionTimeoutMillis: Number(process.env.DATABASE_CONNECT_TIMEOUT_MS || 15_000),
     // Postgres kills idle-in-transaction sessions; keepalive avoids surprise
     // ECONNRESET on connections parked behind a load balancer.
     keepAlive: true,

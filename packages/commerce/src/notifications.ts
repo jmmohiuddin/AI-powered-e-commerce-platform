@@ -25,10 +25,20 @@ import type { Tx } from './types';
  * templates stay pure and the transports stay dumb.
  */
 
-const STORE_NAME = process.env.STORE_NAME ?? 'Voltix';
+/**
+ * `||`, not `??`, on purpose.
+ *
+ * `??` falls back only on null/undefined, and an environment variable set to an
+ * empty string in a hosting dashboard is neither — it is `''`. With `??` a
+ * blank STORE_NAME would render "Thanks for shopping with ." and a blank
+ * STOREFRONT_URL would produce a hostless tracking link, in an email, which is
+ * the least recoverable place to be wrong. Treating empty as absent is the
+ * correct reading for a string with a default.
+ */
+const STORE_NAME = process.env.STORE_NAME || 'Voltix';
 
 function storefrontUrl(path: string): string {
-  const base = (process.env.STOREFRONT_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+  const base = (process.env.STOREFRONT_URL || 'http://localhost:3000').replace(/\/$/, '');
   return `${base}${path}`;
 }
 

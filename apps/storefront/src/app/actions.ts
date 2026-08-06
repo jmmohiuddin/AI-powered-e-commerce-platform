@@ -140,7 +140,10 @@ export async function placeOrder(formData: FormData): Promise<ActionResult> {
     }
 
     const idempotencyKey = randomUUID();
-    const origin = process.env.STOREFRONT_URL ?? 'http://localhost:3000';
+    // `||` not `??`: an empty STOREFRONT_URL would make the gateway return and
+    // cancel URLs relative, and a payment provider given a relative redirect
+    // sends the shopper nowhere.
+    const origin = process.env.STOREFRONT_URL || 'http://localhost:3000';
 
     const result = await inTenant(async (tx) => {
       const cartId = await getOrCreateCart(tx, ctx, { sessionToken });

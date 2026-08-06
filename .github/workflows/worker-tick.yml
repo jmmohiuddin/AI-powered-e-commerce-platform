@@ -1,0 +1,62 @@
+name: Worker tick
+
+# Drives the background job queue on the deployed store.
+#
+# Vercel's Hobby plan fires its own cron only once a day, which is far too slow
+# for order confirmations and for releasing expired stock reservations — a
+# shopper would wait up to 24 hours for a receipt, and stock they abandoned
+# would stay held for the same. This workflow calls the same endpoint every few
+# minutes so the queue actually drains.
+#
+# Two honest caveats:
+#   • GitHub runs scheduled workflows on a best-effort basis. Under load a run
+#     can be delayed by several minutes, and the schedule is disabled entirely
+#     after 60 days with no repository activity. It is a pragmatic scheduler,
+#     not a real-time one.
+#   • On Vercel Pro the native cron supports minute-level schedules and this
+#     workflow becomes redundant — delete it and set the schedule in
+#     apps/storefront/vercel.json instead.
+
+on:
+  schedule:
+    # Every 5 minutes. The endpoint is idempotent and cheap when there is
+    # nothing queued, so a tick that finds an empty queue costs one query.
+    - cron: '*/5 * * * *'
+  # Lets an operator drain the queue immediately from the Actions tab rather
+  # than waiting for the next slot.
+  workflow_dispatch:
+
+# A slow tick must not stack up behind the next one. `cancel-in-progress: false`
+# means an in-flight run finishes rather than being killed mid-send, while a
+# queued duplicate is dropped.
+concurrency:
+  group: worker-tick
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call the worker endpoint
+        env:
+          URL: ${{ secrets.CRON_TICK_URL }}
+          SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${URL:-}" ] || [ -z "${SECRET:-}" ]; then
+            echo "::error::CRON_TICK_URL or CRON_SECRET repository secret is not set."
+            exit 1
+          fi
+
+          # --fail-with-body so a 401/500 fails the step *and* prints why, and
+          # the body is shown either way — a silent green tick on a broken queue
+          # is the exact failure this workflow exists to prevent.
+          http=$(curl --silent --show-error --fail-with-body \
+                      --max-time 120 --retry 2 --retry-delay 10 \
+                      --write-out '\n%{http_code}' \
+                      --header "Authorization: Bearer ${SECRET}" \
+                      "${URL}" | tee /dev/stderr | tail -1)
+
+          echo "HTTP ${http}"

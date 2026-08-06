@@ -28,7 +28,8 @@ import './globals.css';
  */
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.STOREFRONT_URL ?? 'http://localhost:3000'),
+  // `||` not `??`: `new URL('')` throws, which would take down every page.
+  metadataBase: new URL(process.env.STOREFRONT_URL || 'http://localhost:3000'),
   title: {
     default: 'Voltix — Smartphones, accessories & electronics in the UAE',
     template: '%s · Voltix',
