@@ -19,7 +19,19 @@ loadEnv({ path: fileURLToPath(new URL('../../.env', import.meta.url)), override:
 
 const config: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@voltix/core', '@voltix/ui', '@voltix/ai'],
+  // Every workspace package reachable from this app, including the ones
+  // pulled in transitively (commerce → notifications). They ship TypeScript
+  // source rather than build output, so Next has to compile them.
+  transpilePackages: [
+    '@voltix/core',
+    '@voltix/ui',
+    '@voltix/ai',
+    '@voltix/auth',
+    '@voltix/commerce',
+    '@voltix/db',
+    '@voltix/payments',
+    '@voltix/notifications',
+  ],
 
   async headers() {
     return [

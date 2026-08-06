@@ -25,3 +25,7 @@ test-results/
 # Local editor / IDE state.
 .vscode/
 .idea/
+
+# Vercel local link state.
+.vercel*/
+.vercel

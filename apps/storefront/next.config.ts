@@ -23,7 +23,15 @@ const config: NextConfig = {
   // Workspace packages ship TypeScript source rather than build output, so Next
   // compiles them as part of the app. Removes a build step and keeps
   // go-to-definition landing on real source instead of a .d.ts.
-  transpilePackages: ['@voltix/core', '@voltix/ui', '@voltix/ai', '@voltix/commerce', '@voltix/db', '@voltix/payments'],
+  transpilePackages: [
+    '@voltix/core',
+    '@voltix/ui',
+    '@voltix/ai',
+    '@voltix/commerce',
+    '@voltix/db',
+    '@voltix/payments',
+    '@voltix/notifications',
+  ],
 
   images: {
     formats: ['image/avif', 'image/webp'],

@@ -9,7 +9,12 @@
       "@/*": ["./src/*"],
       "@voltix/core": ["../../packages/core/src/index.ts"],
       "@voltix/ui": ["../../packages/ui/src/index.ts"],
-      "@voltix/ai": ["../../packages/ai/src/index.ts"]
+      "@voltix/ai": ["../../packages/ai/src/index.ts"],
+      "@voltix/auth": ["../../packages/auth/src/index.ts"],
+      "@voltix/commerce": ["../../packages/commerce/src/index.ts"],
+      "@voltix/db": ["../../packages/db/src/index.ts"],
+      "@voltix/payments": ["../../packages/payments/src/index.ts"],
+      "@voltix/notifications": ["../../packages/notifications/src/index.ts"]
     },
     "allowJs": true,
     "incremental": true,
@@ -18,5 +23,5 @@
     "verbatimModuleSyntax": false
   },
   "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.test.tsx", "**/*.integration.test.ts"]
 }

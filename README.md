@@ -46,6 +46,21 @@ merchant account, and no load test has been run. Those are the largest remaining
 
 ---
 
+## Live deployment
+
+| App | URL |
+|---|---|
+| Storefront | https://voltix-storefront.vercel.app |
+| Admin | https://voltix-admin-eosin.vercel.app |
+
+Both run on Vercel (Singapore region, `sin1` — closest to the Neon database) against the Neon
+Postgres instance, and auto-deploy from `main`. The background worker (`npm run worker`) is **not**
+on Vercel — serverless functions stop between requests, and a queue poller needs to keep running.
+Run it on any small always-on host (Railway, Fly.io, a VPS) with the same `.env`; until then,
+order confirmations queue in the outbox and send as soon as a worker picks them up.
+
+---
+
 ## Quickstart
 
 ### With the database (recommended — this is the real path)

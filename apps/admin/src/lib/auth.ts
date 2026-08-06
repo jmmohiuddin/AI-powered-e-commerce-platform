@@ -100,7 +100,11 @@ export function tenantContextFor(session: SessionUser) {
     currency: process.env.DEFAULT_CURRENCY ?? 'AED',
     locale: process.env.DEFAULT_LOCALE ?? 'en-AE',
     vatRateBps: Number(process.env.VAT_RATE_BPS ?? 500),
-    pricesIncludeVat: process.env.PRICES_INCLUDE_VAT !== 'false',
+    // VAT_PRICES_INCLUSIVE — the same name the storefront and .env.example
+    // use. These were different names for one rule, so setting it to 'false'
+    // would have been honoured on the storefront and ignored here, making the
+    // admin's totals disagree with the customer's.
+    pricesIncludeVat: process.env.VAT_PRICES_INCLUSIVE !== 'false',
   };
 }
 
