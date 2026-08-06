@@ -1,0 +1,27 @@
+{
+  "name": "@voltix/storefront",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@voltix/ai": "*",
+    "@voltix/commerce": "*",
+    "@voltix/core": "*",
+    "@voltix/db": "*",
+    "@voltix/ui": "*",
+    "dotenv": "^17.4.2",
+    "next": "^16.3.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
+  }
+}

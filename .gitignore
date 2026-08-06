@@ -1,0 +1,27 @@
+node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+*.log
+npm-debug.log*
+
+playwright-report/
+test-results/
+.vitest/
+
+# Per-session hook state, not source code.
+.impeccable/
+
+# Local editor / IDE state.
+.vscode/
+.idea/

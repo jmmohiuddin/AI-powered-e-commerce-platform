@@ -1,0 +1,31 @@
+{
+  "name": "@voltix/admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --port 3001",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@voltix/ai": "*",
+    "@voltix/auth": "*",
+    "@voltix/commerce": "*",
+    "@voltix/core": "*",
+    "@voltix/db": "*",
+    "@voltix/payments": "*",
+    "@voltix/ui": "*",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "next": "^16.3.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
+  }
+}

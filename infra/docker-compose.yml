@@ -1,0 +1,88 @@
+
+# Local development infrastructure for Voltix Commerce.
+# Production runs the managed equivalents (see docs/10-deployment.md):
+#   postgres -> Neon / RDS Aurora Serverless v2, redis -> Upstash / ElastiCache,
+#   minio    -> Cloudflare R2, mailpit -> Resend.
+#
+# Everything here is intentionally the *same major version* as production so that
+# "works locally" is a meaningful statement.
+
+name: voltix
+
+services:
+  postgres:
+    # pgvector image ships Postgres 17 + the vector extension pre-built.
+    image: pgvector/pgvector:pg17
+    container_name: voltix-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: voltix
+      POSTGRES_PASSWORD: voltix_dev_password
+      POSTGRES_DB: voltix
+      # Deterministic collation avoids index-corruption surprises across machines.
+      POSTGRES_INITDB_ARGS: '--locale-provider=icu --icu-locale=en-US --encoding=UTF8'
+    ports:
+      # Host 5433 deliberately: a locally installed Postgres commonly holds
+      # 5432, and a port clash here produces a confusing "database exists but
+      # has no tables" failure when tools connect to the wrong server.
+      - '5433:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U voltix -d voltix']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    command:
+      - postgres
+      - '-c'
+      - 'shared_preload_libraries=pg_stat_statements'
+      - '-c'
+      - 'pg_stat_statements.track=all'
+      - '-c'
+      - 'max_connections=200'
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: voltix-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory', '512mb', '--maxmemory-policy', 'allkeys-lru']
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    # S3-compatible object storage; production uses Cloudflare R2 (same API).
+    image: minio/minio:latest
+    container_name: voltix-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: voltix
+      MINIO_ROOT_PASSWORD: voltix_dev_password
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+
+  mailpit:
+    # Catches all outbound email in development. Never forwards anything.
+    image: axllent/mailpit:latest
+    container_name: voltix-mailpit
+    restart: unless-stopped
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:

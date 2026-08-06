@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": false,
+
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noEmit": true,
+
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@voltix/db": ["packages/db/src/index.ts"],
+      "@voltix/db/*": ["packages/db/src/*"],
+      "@voltix/core": ["packages/core/src/index.ts"],
+      "@voltix/core/*": ["packages/core/src/*"],
+      "@voltix/commerce": ["packages/commerce/src/index.ts"],
+      "@voltix/commerce/*": ["packages/commerce/src/*"],
+      "@voltix/payments": ["packages/payments/src/index.ts"],
+      "@voltix/payments/*": ["packages/payments/src/*"],
+      "@voltix/ai": ["packages/ai/src/index.ts"],
+      "@voltix/ai/*": ["packages/ai/src/*"],
+      "@voltix/ui": ["packages/ui/src/index.ts"],
+      "@voltix/ui/*": ["packages/ui/src/*"],
+      "@voltix/config": ["packages/config/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "dist", ".next", "build"]
+}

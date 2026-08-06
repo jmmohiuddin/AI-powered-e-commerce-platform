@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "mfa_recovery_codes" jsonb DEFAULT '[]'::jsonb NOT NULL;

@@ -1,0 +1,142 @@
+/**
+ * VOLTIX DESIGN TOKENS
+ *
+ * One source of truth for both apps. Tokens, not component styles — components
+ * compose these, so a merchant re-theming their store changes values here and
+ * nothing else.
+ *
+ * COLOUR
+ * Neutrals are a warm-tinted grey rather than pure grey: pure #808080 greys read
+ * as cold and cheap next to product photography, which on an electronics site is
+ * most of the page. The accent is a single confident blue — electronics retail
+ * has enough visual noise from product imagery without a second brand colour
+ * competing with it.
+ *
+ * Semantic colours are named for meaning (`--price`, `--in-stock`), not
+ * appearance (`--green-500`), so dark mode and merchant theming are a token
+ * swap rather than a find-and-replace through the components.
+ *
+ * TYPE SCALE
+ * A 1.2 (minor third) ratio. Larger ratios look dramatic in a design tool and
+ * fall apart on a 360px phone, which is where the majority of this traffic
+ * lands. Everything is clamp()-based so it scales fluidly without breakpoint
+ * jumps.
+ *
+ * SPACING
+ * A 4px base grid. Every gap in the UI is a multiple, which is what makes a
+ * layout feel deliberate rather than assembled.
+ */
+
+:root {
+  /* Neutrals — warm-tinted */
+  --colour-bg: #ffffff;
+  --colour-surface: #fafaf9;
+  --colour-surface-raised: #ffffff;
+  --colour-border: #e7e5e4;
+  --colour-border-strong: #d6d3d1;
+  --colour-text: #1c1917;
+  --colour-text-muted: #57534e;
+  --colour-text-subtle: #78716c;
+
+  /* Brand */
+  --colour-accent: #1d4ed8;
+  --colour-accent-hover: #1e40af;
+  --colour-accent-subtle: #eff6ff;
+  --colour-accent-text: #ffffff;
+
+  /* Semantic */
+  --colour-price: #1c1917;
+  --colour-price-was: #a8a29e;
+  --colour-discount: #b91c1c;
+  --colour-in-stock: #15803d;
+  --colour-low-stock: #b45309;
+  --colour-out-of-stock: #78716c;
+  --colour-rating: #f59e0b;
+  --colour-danger: #b91c1c;
+  --colour-success: #15803d;
+
+  /* Type */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, 'Noto Sans Bengali', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  --text-xs: clamp(0.72rem, 0.7rem + 0.1vw, 0.78rem);
+  --text-sm: clamp(0.82rem, 0.8rem + 0.12vw, 0.9rem);
+  --text-base: clamp(0.94rem, 0.9rem + 0.16vw, 1rem);
+  --text-lg: clamp(1.08rem, 1rem + 0.3vw, 1.2rem);
+  --text-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  --text-3xl: clamp(1.85rem, 1.4rem + 1.8vw, 2.75rem);
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.6;
+
+  /* Space — 4px grid */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* Shadows are deliberately restrained. Heavy drop shadows are the single
+     fastest way to make an interface look dated. */
+  --shadow-sm: 0 1px 2px rgb(28 25 23 / 0.06);
+  --shadow-md: 0 2px 8px rgb(28 25 23 / 0.08);
+  --shadow-lg: 0 8px 30px rgb(28 25 23 / 0.1);
+
+  --container: 1280px;
+  --header-height: 64px;
+
+  /* Motion. 150–200ms is the band where an interaction feels responsive rather
+     than either instant-and-jarring or sluggish. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --colour-bg: #0c0a09;
+    --colour-surface: #1c1917;
+    --colour-surface-raised: #292524;
+    --colour-border: #292524;
+    --colour-border-strong: #44403c;
+    --colour-text: #fafaf9;
+    --colour-text-muted: #d6d3d1;
+    --colour-text-subtle: #a8a29e;
+
+    --colour-accent: #60a5fa;
+    --colour-accent-hover: #93c5fd;
+    --colour-accent-subtle: #172554;
+    --colour-accent-text: #0c0a09;
+
+    --colour-price: #fafaf9;
+    --colour-price-was: #78716c;
+    --colour-discount: #f87171;
+    --colour-in-stock: #4ade80;
+    --colour-low-stock: #fbbf24;
+    --colour-out-of-stock: #a8a29e;
+  }
+}
+
+/* Respect the user's motion preference. Not optional — vestibular disorders are
+   real and the fix costs three lines. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

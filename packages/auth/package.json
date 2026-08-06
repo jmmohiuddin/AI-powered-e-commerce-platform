@@ -1,0 +1,25 @@
+{
+  "name": "@voltix/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "create-user": "tsx scripts/create-user.ts"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "^2.0.2",
+    "@voltix/config": "*",
+    "@voltix/core": "*",
+    "@voltix/db": "*",
+    "drizzle-orm": "^0.45.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
+}

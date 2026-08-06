@@ -1,0 +1,38 @@
+{
+  "name": "voltix-commerce",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Voltix Commerce — AI-powered, multi-tenant commerce platform for electronics & mobile retail",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace=@voltix/storefront",
+    "dev:admin": "npm run dev --workspace=@voltix/admin",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "db:generate": "npm run generate --workspace=@voltix/db",
+    "db:migrate": "npm run migrate --workspace=@voltix/db",
+    "db:seed": "npm run seed --workspace=@voltix/db",
+    "db:studio": "npm run studio --workspace=@voltix/db",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "infra:reset": "docker compose -f infra/docker-compose.yml down -v && npm run infra:up",
+    "worker": "npm run worker --workspace=@voltix/commerce",
+    "db:create-user": "npm run create-user --workspace=@voltix/auth --"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^4.1.10"
+  }
+}
