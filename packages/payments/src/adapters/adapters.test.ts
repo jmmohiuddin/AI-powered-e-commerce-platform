@@ -207,11 +207,16 @@ describe('N-Genius adapter', () => {
 /* ────────────────────────────── Tabby ─────────────────────────────── */
 
 describe('Tabby adapter', () => {
+  // Every value here is a placeholder — the tests never let a real request
+  // leave the process. `test-` prefixes rather than `sk_`/`whsec_` shapes so
+  // gitleaks does not flag them as generic API keys: those prefixes are
+  // Tabby's and Stripe's real credential formats and are indistinguishable
+  // from a leak to any pattern-based scanner.
   const opts = {
-    secretKey: 'sk_test',
-    publicKey: 'pk_test',
+    secretKey: 'test-secret',
+    publicKey: 'test-public',
     merchantCode: 'MC-AE',
-    webhookSecret: 'whsec_1234567890',
+    webhookSecret: 'test-webhook',
   } as const;
 
   function withFetch(fetchImpl: typeof fetch) {
