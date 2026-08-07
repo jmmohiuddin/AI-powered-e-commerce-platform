@@ -54,10 +54,19 @@ merchant account, and no load test has been run. Those are the largest remaining
 | Admin | https://voltix-admin-eosin.vercel.app |
 
 Both run on Vercel (Singapore region, `sin1` — closest to the Neon database) against the Neon
-Postgres instance, and auto-deploy from `main`. The background worker (`npm run worker`) is **not**
-on Vercel — serverless functions stop between requests, and a queue poller needs to keep running.
-Run it on any small always-on host (Railway, Fly.io, a VPS) with the same `.env`; until then,
-order confirmations queue in the outbox and send as soon as a worker picks them up.
+Postgres instance, and auto-deploy from `main`.
+
+**Background jobs.** A serverless platform has nowhere to run a long-lived queue poller, so the
+worker loop is also exposed as one HTTP call at `/api/cron/tick` on the storefront. It runs the
+same three steps `npm run worker` does, calling the identical functions so the two cannot drift,
+and is authenticated with a bearer `CRON_SECRET` (it refuses to run at all if that is unset — an
+open job runner is a free denial-of-service). Two schedules drive it: Vercel's own cron once a
+day as a safety net, and a GitHub Actions workflow every five minutes as the real cadence,
+because Vercel's Hobby plan only fires cron daily and a shopper should not wait a day for a
+receipt. On Vercel Pro the native cron supports minute-level schedules and the workflow can go.
+
+`npm run worker` is still the right thing to run on an always-on host (Railway, Fly.io, a VPS) if
+you would rather not depend on an external scheduler — both paths are supported and equivalent.
 
 ---
 
