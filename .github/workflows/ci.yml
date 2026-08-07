@@ -16,6 +16,20 @@ jobs:
   static:
     name: Typecheck & unit tests
     runs-on: ubuntu-latest
+    # Job-level env, inherited by every step below. GitHub Actions does not
+    # support YAML anchors, so this is the only way to share it without
+    # repeating the block three times and letting the copies drift.
+    env:
+      # Owner: runs migrations, and the cross-tenant reads the worker does.
+      DATABASE_ADMIN_URL: postgres://voltix:voltix@localhost:5432/voltix_test
+      # Restricted role: what the app connects as, and the only way an
+      # isolation test proves anything — the owner bypasses every policy.
+      DATABASE_URL: postgres://voltix_app:voltix_app_dev_password@localhost:5432/voltix_test
+      REDIS_URL: redis://localhost:6379
+      AUTH_SECRET: ci-secret-that-is-definitely-long-enough-32
+      AUTH_URL: http://localhost:3000
+      STOREFRONT_URL: http://localhost:3000
+      ADMIN_URL: http://localhost:3001
     services:
       postgres:
         image: pgvector/pgvector:pg17
@@ -39,15 +53,46 @@ jobs:
       - run: npm ci
       - name: Typecheck
         run: npm run typecheck
+
+      # Without this the integration suites find an empty database, skip
+      # themselves, and the run goes green having tested none of the things
+      # only a real Postgres can test — RLS, row locking, transactional
+      # rollback. A silently-skipped test is worse than a missing one.
+      #
+      # `db:migrate` also creates the restricted `voltix_app` role the tests
+      # connect as, and applies the very RLS policies being asserted.
+      - name: Apply migrations and RLS policies
+        run: npm run db:migrate
+
+      # The admin read-model tests query the seeded tenant. Without a seed they
+      # pass trivially against zero rows.
+      - name: Seed the demo catalogue
+        run: npm run db:seed
+
       - name: Unit + integration tests
-        run: npm test -- --coverage
-        env:
-          DATABASE_URL: postgres://voltix:voltix@localhost:5432/voltix_test
-          REDIS_URL: redis://localhost:6379
-          AUTH_SECRET: ci-secret-that-is-definitely-long-enough-32
-          AUTH_URL: http://localhost:3000
-          STOREFRONT_URL: http://localhost:3000
-          ADMIN_URL: http://localhost:3001
+        run: npm test -- --coverage --reporter=default --reporter=json --outputFile.json=vitest-results.json
+
+      # Proves the integration suites actually executed. They skip themselves
+      # when Postgres is unreachable, so a green run is not by itself evidence
+      # that anything touched the database — without this, the most valuable
+      # tests in the repo could stop running and CI would never say so.
+      # Reuses the JSON report from the run above rather than re-running.
+      - name: Assert no test was silently skipped
+        run: |
+          node -e "
+            const r = require('./vitest-results.json');
+            const total = r.numTotalTests || 0;
+            const skipped = r.numPendingTests || 0;
+            console.log('ran ' + total + ' tests, ' + skipped + ' skipped');
+            if (total === 0) {
+              console.log('::error::No tests ran at all.');
+              process.exit(1);
+            }
+            if (skipped > 0) {
+              console.log('::error::' + skipped + ' test(s) skipped - the integration suites did not run against Postgres.');
+              process.exit(1);
+            }
+          "
 
   build:
     name: Build apps

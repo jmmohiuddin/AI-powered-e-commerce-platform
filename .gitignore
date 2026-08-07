@@ -29,3 +29,6 @@ test-results/
 # Vercel local link state.
 .vercel*/
 .vercel
+
+# Vitest JSON report, written by CI.
+vitest-results.json
