@@ -26,7 +26,6 @@ jobs:
       # isolation test proves anything — the owner bypasses every policy.
       DATABASE_URL: postgres://voltix_app:voltix_app_dev_password@localhost:5432/voltix_test
       REDIS_URL: redis://localhost:6379
-      AUTH_SECRET: ci-secret-that-is-definitely-long-enough-32
       AUTH_URL: http://localhost:3000
       STOREFRONT_URL: http://localhost:3000
       ADMIN_URL: http://localhost:3001
@@ -51,6 +50,16 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
+
+      # Generated per run rather than hardcoded. A literal 32-char secret in a
+      # tracked file is indistinguishable from a real leaked credential to any
+      # scanner — gitleaks flagged exactly that here — and the alternative of
+      # allowlisting the pattern blunts the scanner for the real thing it is
+      # there to catch. A fresh random value per run is both cleaner and a
+      # better test: nothing can come to depend on a known secret.
+      - name: Generate an ephemeral auth secret
+        run: echo "AUTH_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+
       - name: Typecheck
         run: npm run typecheck
 
