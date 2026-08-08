@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import { uuidv7, type Database } from '@voltix/db';
 import { sweepExpiredReservations } from './reservations';
 import { handleNotificationJob } from './notifications';
+import { classifyInventoryHealth, refreshForecasts } from './analytics-jobs';
 import type { Tx } from './types';
 
 /**
@@ -241,8 +242,6 @@ const reconcilePayments: JobHandler = async (tx) => {
   if (stuck.rows.length > 0) console.log(`  flagged ${stuck.rows.length} unreconciled payment(s)`);
 };
 
-const noop: JobHandler = async () => {};
-
 export const HANDLERS: Record<JobKind, JobHandler> = {
   'reservations.sweep': sweepReservations,
   'carts.detect_abandoned': detectAbandonedCarts,
@@ -250,11 +249,10 @@ export const HANDLERS: Record<JobKind, JobHandler> = {
   // Renders the message and writes the outbox row (see ./notifications). The
   // actual send is a separate step run by the worker outside any transaction.
   'notifications.send': handleNotificationJob,
-  // Wired to real implementations once the nightly analytics pipeline lands.
-  // No-ops rather than missing, so an enqueued job fails loudly on an unknown
-  // kind instead of vanishing.
-  'forecast.refresh': noop,
-  'inventory.classify': noop,
+  // The nightly analytics pipeline. `inventory.classify` reads the same
+  // forecast `forecast.refresh` writes, so it is scheduled after it.
+  'forecast.refresh': (tx) => refreshForecasts(tx),
+  'inventory.classify': (tx) => classifyInventoryHealth(tx),
 };
 
 /**
@@ -310,5 +308,26 @@ export async function scheduleRecurring(tx: Tx): Promise<void> {
   await enqueue(tx, {
     kind: 'payments.reconcile',
     dedupeKey: `reconcile-scan:${Math.floor(minute / 15)}`,
+  });
+
+  // The analytics pair, once a day.
+  //
+  // Keyed on the day rather than the minute, so however often the worker ticks
+  // exactly one of each is enqueued per day and the dedupe index drops the
+  // rest. They scan 90 days of order history for every variant of every
+  // tenant — cheap nightly, wasteful every five minutes, and nothing they
+  // compute changes meaningfully within a day.
+  //
+  // `classify` is enqueued a minute behind `forecast` so it reads a fresh
+  // forecast rather than yesterday's on the first run of a new variant.
+  const day = Math.floor(minute / 1440);
+  await enqueue(tx, {
+    kind: 'forecast.refresh',
+    dedupeKey: `forecast:${day}`,
+  });
+  await enqueue(tx, {
+    kind: 'inventory.classify',
+    dedupeKey: `classify:${day}`,
+    runAt: new Date(Date.now() + 60_000),
   });
 }

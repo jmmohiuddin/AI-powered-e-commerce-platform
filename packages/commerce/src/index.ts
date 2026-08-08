@@ -6,3 +6,4 @@ export * from './checkout';
 export * from './orders';
 export * from './payment-ops';
 export * from './jobs';
+export * from './analytics-jobs';

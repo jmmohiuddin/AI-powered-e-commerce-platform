@@ -39,8 +39,8 @@ const NAV = [
       // The dashboard has no permission gate: anyone with a seat needs a
       // landing page, and its contents are themselves permission-filtered.
       { href: '/', label: 'Dashboard', permission: null, ready: true },
-      { href: '/products', label: 'Products', permission: 'product:read', ready: false },
-      { href: '/customers', label: 'Customers', permission: 'customer:read', ready: false },
+      { href: '/products', label: 'Products', permission: 'product:read', ready: true },
+      { href: '/customers', label: 'Customers', permission: 'customer:read', ready: true },
     ],
   },
   {
