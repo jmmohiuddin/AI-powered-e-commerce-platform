@@ -1,5 +1,12 @@
 # Data Model
 
+> ⚠️ **This document has drifted from the implementation.** See
+> [`PRODUCT-TECHNICAL-MASTER.md`](./PRODUCT-TECHNICAL-MASTER.md) for the audited
+> current state. Specific inaccuracies are listed there.
+
+> **Known inaccuracy:** 45 tables stated; 72 exist.
+
+
 45 tables across seven domains. Full definitions in `packages/db/src/schema/`. This document covers
 the relationships and — more usefully — the modelling decisions that are not obvious from the DDL.
 

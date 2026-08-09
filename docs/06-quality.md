@@ -1,5 +1,12 @@
 # Performance, Testing & Deployment
 
+> ⚠️ **This document has drifted from the implementation.** See
+> [`PRODUCT-TECHNICAL-MASTER.md`](./PRODUCT-TECHNICAL-MASTER.md) for the audited
+> current state. Specific inaccuracies are listed there.
+
+> **Known inaccuracy:** Playwright E2E and CI-enforced performance budgets do not exist.
+
+
 ## Performance budgets
 
 Budgets, not aspirations: CI fails when a page exceeds them.

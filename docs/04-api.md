@@ -1,5 +1,12 @@
 # API Specification
 
+> ⚠️ **This document has drifted from the implementation.** See
+> [`PRODUCT-TECHNICAL-MASTER.md`](./PRODUCT-TECHNICAL-MASTER.md) for the audited
+> current state. Specific inaccuracies are listed there.
+
+> **Known inaccuracy:** The REST API described here was never built. Only /api/cron/tick exists.
+
+
 ## Shape
 
 Three surfaces, chosen per use case rather than uniformly:
