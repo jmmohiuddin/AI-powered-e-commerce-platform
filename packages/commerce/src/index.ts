@@ -4,6 +4,7 @@ export * from './reservations';
 export * from './cart';
 export * from './checkout';
 export * from './orders';
+export * from './returns';
 export * from './payment-ops';
 export * from './jobs';
 export * from './analytics-jobs';

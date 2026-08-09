@@ -19,11 +19,29 @@ import type { TenantContext } from './types';
  * while proving nothing.
  */
 
+/**
+ * These tests get their OWN database, and never inherit `DATABASE_URL`.
+ *
+ * That used to be the fallback, and it was a genuine hazard once the app was
+ * pointed at a hosted Postgres: `createFixture` creates tenants and `cleanup`
+ * deletes across twenty tables, so the suite was creating and destroying rows
+ * in the production database. Worse, cleanup only runs in `afterAll` — every
+ * timed-out run leaked its tenant, and 21 abandoned test tenants accumulated in
+ * the live database before anyone looked.
+ *
+ * It was also unusable: each query costs a network round trip to another
+ * region, and a test that makes a few hundred of them goes from milliseconds
+ * to minutes.
+ *
+ * So: `DATABASE_TEST_URL` if you want to point somewhere specific, otherwise
+ * local Docker (`npm run infra:up`). Never the app's own connection string.
+ * If neither is reachable the suites skip, which is the documented behaviour.
+ */
 const APP_URL =
-  process.env.DATABASE_URL ??
+  process.env.DATABASE_TEST_URL ??
   'postgres://voltix_app:voltix_app_dev_password@localhost:5433/voltix';
 const OWNER_URL =
-  process.env.DATABASE_ADMIN_URL ??
+  process.env.DATABASE_TEST_ADMIN_URL ??
   'postgres://voltix:voltix_dev_password@localhost:5433/voltix';
 
 let appPool: Pool | undefined;
@@ -32,12 +50,15 @@ let ownerPool: Pool | undefined;
 export type Db = NodePgDatabase<typeof schema>;
 
 export function appDb(): Db {
-  appPool ??= new Pool({ connectionString: APP_URL, max: 12 });
+  // Sized for the oversell race, which needs 8 genuinely concurrent
+  // transactions, plus headroom — not larger, because every extra idle
+  // connection is one a small managed Postgres has to hold open.
+  appPool ??= new Pool({ connectionString: APP_URL, max: 10 });
   return drizzle(appPool, { schema, casing: 'snake_case' });
 }
 
 export function ownerDb(): Db {
-  ownerPool ??= new Pool({ connectionString: OWNER_URL, max: 4 });
+  ownerPool ??= new Pool({ connectionString: OWNER_URL, max: 3 });
   return drizzle(ownerPool, { schema, casing: 'snake_case' });
 }
 
@@ -172,6 +193,13 @@ export async function createFixture(label: string): Promise<Fixture> {
       await owner.execute(sql`DELETE FROM stock_movements WHERE tenant_id = ${tenantId}`);
       await owner.execute(sql`DELETE FROM transactions WHERE tenant_id = ${tenantId}`);
       await owner.execute(sql`DELETE FROM stock_reservations WHERE tenant_id = ${tenantId}`);
+      // Returns before order_items: `return_items.order_item_id` is RESTRICT,
+      // so deleting the line first fails rather than cascading. That RESTRICT
+      // is deliberate — it means a returned line cannot be erased out from
+      // under the return that references it — and the teardown has to respect
+      // the same ordering a real offboarding would.
+      await owner.execute(sql`DELETE FROM return_items WHERE tenant_id = ${tenantId}`);
+      await owner.execute(sql`DELETE FROM returns WHERE tenant_id = ${tenantId}`);
       await owner.execute(sql`DELETE FROM order_items WHERE tenant_id = ${tenantId}`);
       await owner.execute(sql`DELETE FROM order_events WHERE tenant_id = ${tenantId}`);
       await owner.execute(sql`DELETE FROM payment_intents WHERE tenant_id = ${tenantId}`);

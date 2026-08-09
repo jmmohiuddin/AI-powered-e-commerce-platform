@@ -7,6 +7,7 @@ import {
   cancelOrder,
   recordCodCollection,
   refreshDerivedStatus,
+  createReturn,
   refundOrder,
   transitionOrder,
 } from '@voltix/commerce';
@@ -271,4 +272,58 @@ export async function addNoteAction(number: string, formData: FormData): Promise
 
   revalidatePath(`/orders/${number}`);
   return { ok: true, message: 'Note added.' };
+}
+
+/**
+ * Opens a return for the whole order.
+ *
+ * Deliberately all-lines-in-full rather than a per-line picker: the common case
+ * on a single-item electronics order is "send the whole thing back", and the
+ * partial case is rare enough that forcing every operator through a quantity
+ * grid to serve it costs more than it saves. `createReturn` validates the
+ * quantities regardless, so a partial return opened elsewhere still reconciles.
+ */
+export async function openReturnAction(
+  number: string,
+  formData: FormData,
+): Promise<ActionResult> {
+  const session = await requirePermission('return:manage');
+  const reason = String(formData.get('reason') ?? 'changed_mind');
+  const resolution = String(formData.get('resolution') ?? 'refund');
+
+  const orderId = await orderIdFor(session.tenantId, number);
+  if (!orderId) return { ok: false, error: 'Order not found.' };
+
+  const ctx = tenantContextFor(session);
+  const actor = actorFor(session, await requestOrigin());
+
+  try {
+    const created = await withTenant(session.tenantId, async (tx) => {
+      // Only lines with something left to return — asking for zero on an
+      // already-returned line would fail the whole request.
+      const lines = await tx.execute<{ id: string; remaining: number }>(sql`
+        SELECT id, (quantity - quantity_returned) AS remaining
+        FROM order_items
+        WHERE tenant_id = ${session.tenantId} AND order_id = ${orderId}
+          AND quantity > quantity_returned
+      `);
+      if (lines.rows.length === 0) {
+        throw new DomainError('CONFLICT', 'Everything on this order is already returned', {
+          publicMessage: 'Every item on this order has already been returned.',
+        });
+      }
+      return createReturn(tx, ctx, actor, {
+        orderId,
+        reason,
+        resolution,
+        lines: lines.rows.map((l) => ({ orderItemId: l.id, quantity: Number(l.remaining) })),
+      });
+    });
+
+    revalidatePath(`/orders/${number}`);
+    revalidatePath('/returns');
+    return { ok: true, message: `Return ${created.number} opened.` };
+  } catch (error) {
+    return toResult(error);
+  }
 }

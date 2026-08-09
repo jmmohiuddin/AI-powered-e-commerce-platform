@@ -79,6 +79,7 @@ export default async function OrderDetailPage({
         canCancel={await can('order:cancel')}
         canWrite={await can('order:write')}
         canRefund={await can('order:refund')}
+        canManageReturns={await can('return:manage')}
         // Which provider took the money decides whether "record cash collected"
         // is meaningful. Derived from the payment ledger rather than the order,
         // because that is where the truth about the provider lives.

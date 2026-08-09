@@ -48,7 +48,7 @@ const NAV = [
     items: [
       { href: '/orders', label: 'Orders', permission: 'order:read', ready: true },
       { href: '/shipments', label: 'Shipments', permission: 'order:write', ready: false },
-      { href: '/returns', label: 'Returns', permission: 'return:manage', ready: false },
+      { href: '/returns', label: 'Returns', permission: 'return:manage', ready: true },
     ],
   },
   {
