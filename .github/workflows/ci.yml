@@ -25,6 +25,13 @@ jobs:
       # Restricted role: what the app connects as, and the only way an
       # isolation test proves anything — the owner bypasses every policy.
       DATABASE_URL: postgres://voltix_app:voltix_app_dev_password@localhost:5432/voltix_test
+      # The integration suites deliberately refuse to inherit the app's
+      # connection string — they create and destroy tenants, and pointing that
+      # at whatever DATABASE_URL happens to be is how a test run ends up
+      # mutating a production database. They read these instead. Here the two
+      # are the same throwaway container; in a real environment they are not.
+      DATABASE_TEST_URL: postgres://voltix_app:voltix_app_dev_password@localhost:5432/voltix_test
+      DATABASE_TEST_ADMIN_URL: postgres://voltix:voltix@localhost:5432/voltix_test
       REDIS_URL: redis://localhost:6379
       AUTH_URL: http://localhost:3000
       STOREFRONT_URL: http://localhost:3000
