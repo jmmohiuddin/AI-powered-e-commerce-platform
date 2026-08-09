@@ -48,6 +48,9 @@ export default async function ProductsPage({
             {filtered ? ' matching your filters' : ''}
           </p>
         </div>
+        <Link className="btn btn--primary" href="/products/new">
+          New product
+        </Link>
       </div>
 
       {/* A plain GET form, like the orders screen: the filtered view gets a
@@ -85,9 +88,13 @@ export default async function ProductsPage({
       {result.rows.length === 0 ? (
         <div className="card">
           <p className="muted">
-            {filtered
-              ? 'No products match those filters.'
-              : 'No products yet. Run npm run db:seed for a sample UAE catalogue.'}
+            {filtered ? (
+              'No products match those filters.'
+            ) : (
+              <>
+                No products yet. <Link href="/products/new">Add your first product</Link>.
+              </>
+            )}
           </p>
         </div>
       ) : (

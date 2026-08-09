@@ -867,3 +867,78 @@ table.data tbody tr:hover {
   color: var(--colour-danger);
   background: color-mix(in oklab, var(--colour-danger) 8%, var(--colour-surface));
 }
+
+/* ────────────────────── Catalogue forms & controls ───────────────────── */
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.field > span {
+  font-weight: 560;
+  font-size: var(--text-sm);
+}
+
+.field input,
+.field select,
+.field textarea {
+  font: inherit;
+  /* 16px floor: iOS Safari zooms the viewport on focus for anything smaller,
+     which throws a long form off-screen mid-entry. */
+  font-size: max(1rem, var(--text-sm));
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  background: var(--colour-surface);
+  color: inherit;
+  width: 100%;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+/* Fields that belong together sit on one row on a wide screen and stack on a
+   narrow one, rather than being forced into a fixed grid that breaks. */
+.field-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.field-row > .field {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.btn--small {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+}
+
+.stock-adjust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.stock-adjust .field {
+  gap: 0;
+}
+
+.stock-adjust input,
+.stock-adjust select {
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-2);
+  width: auto;
+  min-width: 6rem;
+}
+
+.stock-adjust .actions__result {
+  flex-basis: 100%;
+  font-size: var(--text-xs);
+  padding: var(--space-2);
+}

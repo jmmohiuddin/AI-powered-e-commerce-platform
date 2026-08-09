@@ -26,7 +26,9 @@ export interface ProductRow {
   readonly title: string;
   readonly status: string;
   readonly condition: string;
+  readonly brandId: string | null;
   readonly brandName: string | null;
+  readonly categoryId: string | null;
   readonly categoryName: string | null;
   readonly priceFrom: number | null;
   readonly compareAtFrom: number | null;
@@ -113,7 +115,9 @@ export async function listProducts(
       title: string;
       status: string;
       condition: string;
+      brand_id: string | null;
       brand_name: string | null;
+      category_id: string | null;
       category_name: string | null;
       price_from: string | null;
       compare_at_price_from: string | null;
@@ -126,8 +130,8 @@ export async function listProducts(
       published_at: Date | string | null;
     }>(sql`
       SELECT p.id, p.slug, p.title, p.status::text, p.condition::text,
-             b.name AS brand_name,
-             c.name AS category_name,
+             p.brand_id, b.name AS brand_name,
+             p.category_id, c.name AS category_name,
              p.price_from, p.compare_at_price_from, p.currency,
              (SELECT count(*)::int FROM variants v
                WHERE v.product_id = p.id AND v.deleted_at IS NULL) AS variant_count,
@@ -155,7 +159,9 @@ export async function listProducts(
         title: r.title,
         status: r.status,
         condition: r.condition,
+        brandId: r.brand_id,
         brandName: r.brand_name,
+        categoryId: r.category_id,
         categoryName: r.category_name,
         priceFrom: r.price_from === null ? null : Number(r.price_from),
         compareAtFrom: r.compare_at_price_from === null ? null : Number(r.compare_at_price_from),

@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { formatPrice } from '@voltix/ui';
-import { requirePermission } from '../../../lib/auth';
+import { can, requirePermission } from '../../../lib/auth';
 import { getProductDetail } from '../../../lib/catalogue-queries';
+import { ProductControls, StockAdjuster } from './product-controls';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,7 @@ export default async function ProductDetailPage({
   const product = await getProductDetail(session.tenantId, slug);
   if (!product) notFound();
 
+  const [canWrite, canAdjust] = await Promise.all([can('product:write'), can('inventory:adjust')]);
   const storefront = (process.env.STOREFRONT_URL || 'http://localhost:3000').replace(/\/$/, '');
   const totalOnHand = product.variants.reduce((sum, v) => sum + v.onHand, 0);
   const totalReserved = product.variants.reduce((sum, v) => sum + v.reserved, 0);
@@ -70,6 +72,13 @@ export default async function ProductDetailPage({
           <span className="pill pill--neutral">{product.condition.replace(/_/g, ' ')}</span>
         </div>
       </div>
+
+      <ProductControls
+        productId={product.id}
+        slug={product.slug}
+        status={product.status}
+        canWrite={canWrite}
+      />
 
       <div className="kpi-grid">
         <div className="card">
@@ -115,6 +124,7 @@ export default async function ProductDetailPage({
               <th className="numeric">On hand</th>
               <th className="numeric">Reserved</th>
               <th className="numeric">Incoming</th>
+              <th />
             </tr>
           </thead>
           <tbody>
@@ -151,6 +161,14 @@ export default async function ProductDetailPage({
                 </td>
                 <td className="numeric">{v.reserved || '—'}</td>
                 <td className="numeric">{v.incoming || '—'}</td>
+                <td>
+                  <StockAdjuster
+                    variantId={v.id}
+                    sku={v.sku}
+                    slug={product.slug}
+                    canAdjust={canAdjust}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
