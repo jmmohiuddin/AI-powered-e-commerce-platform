@@ -102,6 +102,10 @@ jobs:
           chmod +x /usr/local/bin/mc
           mc alias set ci http://localhost:9000 voltix voltix_dev_password
           mc mb --ignore-existing ci/voltix-media
+          # Anonymous read, to match dev — the storefront and the image
+          # optimiser fetch these URLs without credentials, and the test
+          # asserts on that. Without it MinIO returns 403.
+          mc anonymous set download ci/voltix-media
 
       - name: Typecheck
         run: npm run typecheck
