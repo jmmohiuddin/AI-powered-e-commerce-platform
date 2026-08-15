@@ -33,6 +33,11 @@ jobs:
       DATABASE_TEST_URL: postgres://voltix_app:voltix_app_dev_password@localhost:5432/voltix_test
       DATABASE_TEST_ADMIN_URL: postgres://voltix:voltix@localhost:5432/voltix_test
       REDIS_URL: redis://localhost:6379
+      S3_ENDPOINT: http://localhost:9000
+      S3_BUCKET: voltix-media
+      S3_REGION: auto
+      S3_ACCESS_KEY_ID: voltix
+      S3_SECRET_ACCESS_KEY: voltix_dev_password
       AUTH_URL: http://localhost:3000
       STOREFRONT_URL: http://localhost:3000
       ADMIN_URL: http://localhost:3001
@@ -50,6 +55,19 @@ jobs:
       redis:
         image: redis:7.4-alpine
         ports: ['6379:6379']
+      # Object storage for the media tests. Without it those three suites skip
+      # themselves, and a hand-rolled SigV4 signer is exactly the code that
+      # cannot be proven correct by a mock — it either satisfies a real S3
+      # implementation or it does not.
+      minio:
+        image: minio/minio:latest
+        env:
+          MINIO_ROOT_USER: voltix
+          MINIO_ROOT_PASSWORD: voltix_dev_password
+        ports: ['9000:9000']
+        options: >-
+          --health-cmd "mc ready local || curl -f http://localhost:9000/minio/health/live"
+          --health-interval 5s --health-timeout 5s --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -66,6 +84,19 @@ jobs:
       # better test: nothing can come to depend on a known secret.
       - name: Generate an ephemeral auth secret
         run: echo "AUTH_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+
+      # MinIO starts empty. Without the bucket the first upload fails with
+      # NoSuchBucket, which reads like a credentials problem and is not one.
+      - name: Create the media bucket
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:9000/minio/health/live && break
+            sleep 2
+          done
+          curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
+          chmod +x /usr/local/bin/mc
+          mc alias set ci http://localhost:9000 voltix voltix_dev_password
+          mc mb --ignore-existing ci/voltix-media
 
       - name: Typecheck
         run: npm run typecheck
