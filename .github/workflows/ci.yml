@@ -55,19 +55,6 @@ jobs:
       redis:
         image: redis:7.4-alpine
         ports: ['6379:6379']
-      # Object storage for the media tests. Without it those three suites skip
-      # themselves, and a hand-rolled SigV4 signer is exactly the code that
-      # cannot be proven correct by a mock — it either satisfies a real S3
-      # implementation or it does not.
-      minio:
-        image: minio/minio:latest
-        env:
-          MINIO_ROOT_USER: voltix
-          MINIO_ROOT_PASSWORD: voltix_dev_password
-        ports: ['9000:9000']
-        options: >-
-          --health-cmd "mc ready local || curl -f http://localhost:9000/minio/health/live"
-          --health-interval 5s --health-timeout 5s --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -85,14 +72,32 @@ jobs:
       - name: Generate an ephemeral auth secret
         run: echo "AUTH_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
 
-      # MinIO starts empty. Without the bucket the first upload fails with
-      # NoSuchBucket, which reads like a credentials problem and is not one.
-      - name: Create the media bucket
+      # Object storage for the media tests. Started with `docker run` rather
+      # than as a service container because the minio image needs a
+      # `server /data` argument, and Actions service containers cannot override
+      # an image's command — that is what failed the previous run.
+      #
+      # Worth the trouble: a hand-rolled SigV4 signer either satisfies a real S3
+      # implementation or it does not, and a mock cannot tell you which.
+      - name: Start object storage
         run: |
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:9000/minio/health/live && break
+          docker run -d --name minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=voltix \
+            -e MINIO_ROOT_PASSWORD=voltix_dev_password \
+            minio/minio:latest server /data
+
+          # Readiness, from the runner rather than inside the container — the
+          # image ships no curl of its own.
+          for i in $(seq 1 40); do
+            curl -sf http://localhost:9000/minio/health/live >/dev/null && break
             sleep 2
           done
+          curl -sf http://localhost:9000/minio/health/live >/dev/null \
+            || { echo "::error::MinIO never became ready"; docker logs minio; exit 1; }
+
+          # The bucket does not exist on a fresh server, and the first upload
+          # would fail with NoSuchBucket — which reads like a credentials
+          # problem and is not one.
           curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
           chmod +x /usr/local/bin/mc
           mc alias set ci http://localhost:9000 voltix voltix_dev_password
