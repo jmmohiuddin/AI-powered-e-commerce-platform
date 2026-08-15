@@ -29,9 +29,32 @@ const config: NextConfig = {
     '@voltix/auth',
     '@voltix/commerce',
     '@voltix/db',
+    '@voltix/media',
     '@voltix/payments',
     '@voltix/notifications',
   ],
+
+  // `sharp` is a native addon. Bundling it into the server build breaks the
+  // .node binary resolution, so it stays external and is required at runtime.
+  serverExternalPackages: ['sharp'],
+
+  experimental: {
+    serverActions: {
+      /**
+       * Product image uploads go through a Server Action, and the default body
+       * limit is 1 MB — smaller than essentially every photograph taken on a
+       * phone. Left at the default, uploading stock photos fails with a 413
+       * that surfaces as a generic error, which is a miserable thing to debug.
+       *
+       * Sized for one file at a time: the pipeline accepts 12 MB per image and
+       * the media form uploads sequentially, so this is a single image plus
+       * multipart overhead rather than a whole selection at once. Keeping it
+       * per-file is what stops a twelve-photo upload from asking the server to
+       * hold 144 MB in memory.
+       */
+      bodySizeLimit: '16mb',
+    },
+  },
 
   async headers() {
     return [

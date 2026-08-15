@@ -138,6 +138,35 @@ export const TAX_INVOICE_REQUIRED_FIELDS = [
   'grossTotal',
 ] as const;
 
+/**
+ * Above this consideration, a supply requires a FULL tax invoice even to a
+ * consumer. Below it, and only when the buyer is not a business, a simplified
+ * invoice is permitted (Art. 59(5) of the VAT Executive Regulations).
+ *
+ * AED 10,000, in fils. A threshold, not a rounding — a supply *at* 10,000 is
+ * not above it.
+ */
+export const FULL_TAX_INVOICE_THRESHOLD = money(1_000_000, 'AED');
+
+/**
+ * Which document a supply legally requires.
+ *
+ * Two triggers, either of which forces the full form: the buyer is a business
+ * (they gave a TRN, and they cannot reclaim input VAT without a full invoice),
+ * or the consideration exceeds the threshold above.
+ *
+ * Deliberately a pure function of the facts rather than a caller's choice —
+ * `packages/invoicing` builds every document through it, so nothing in the
+ * system is able to decide for itself that it is a tax invoice.
+ */
+export function requiredInvoiceKind(input: {
+  grossTotal: Money;
+  recipientTrn?: string | null;
+}): 'tax' | 'simplified' {
+  if (input.recipientTrn && isValidTrn(input.recipientTrn)) return 'tax';
+  return input.grossTotal.amount > FULL_TAX_INVOICE_THRESHOLD.amount ? 'tax' : 'simplified';
+}
+
 /* ───────────────────────────── Addresses ────────────────────────────── */
 
 /**
@@ -358,8 +387,63 @@ function isNonWorkingDay(date: Date, holidays: ReadonlySet<string>): boolean {
  *
  * Not legal advice; the merchant's own terms govern.
  */
+
+/** The window as shipped, and the value used whenever the override is absent or unusable. */
+export const DEFAULT_CHANGE_OF_MIND_DAYS = 14;
+
+/**
+ * The change-of-mind window, in days.
+ *
+ * CONFIGURATION, NOT A CONSTANT — and the reason is specific rather than
+ * stylistic. The 14-day cooling-off right for online purchases is widely
+ * reported but was **not found in the primary text** of the sources reviewed
+ * (PRD requirement L-06, open question Q-08). Counsel has to confirm it against
+ * Cabinet Decision 66/2023, and when they do the answer may be a different
+ * number or none at all.
+ *
+ * A number that legal may correct must not require a code change to correct.
+ * `RETURNS_CHANGE_OF_MIND_DAYS` is read on every access rather than captured at
+ * module load, so the deployed window follows the environment across a restart
+ * with nothing rebuilt and nothing redeployed.
+ *
+ * A malformed value falls back to the default rather than throwing. This number
+ * renders the published returns policy and gates the returns workflow: a typo
+ * in an env file should quietly mean "the policy we shipped", not take the
+ * storefront down or — far worse — silently publish a nonsense window like
+ * `NaN` or `-3` days to customers.
+ */
+export function changeOfMindWindowDays(): number {
+  const raw = process.env.RETURNS_CHANGE_OF_MIND_DAYS;
+  if (raw === undefined || raw.trim() === '') return DEFAULT_CHANGE_OF_MIND_DAYS;
+
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    console.warn(
+      '[uae] RETURNS_CHANGE_OF_MIND_DAYS=%s is not a whole number of days; using %d',
+      raw,
+      DEFAULT_CHANGE_OF_MIND_DAYS,
+    );
+    return DEFAULT_CHANGE_OF_MIND_DAYS;
+  }
+  return parsed;
+}
+
 export const RETURN_POLICY = {
-  changeOfMindDays: 14,
+  /**
+   * A getter, so every reader — the published policy page and the returns
+   * workflow alike — resolves the configured window at the moment it is read.
+   * A plain property would freeze whatever the environment said when this
+   * module was first imported, which is the failure this requirement exists to
+   * prevent: a policy page and a workflow that disagree about the same number.
+   */
+  get changeOfMindDays(): number {
+    return changeOfMindWindowDays();
+  },
+  /**
+   * Not configurable. This one tracks the statutory defective-goods right under
+   * Federal Law 15/2020 rather than a merchant choice, so it is not an env knob
+   * somebody can shorten to save money.
+   */
   defectiveGoodsDays: 30,
   /** Sealed software, personalised items, and opened earphones on hygiene grounds. */
   nonReturnableCategories: ['software', 'personalised', 'in-ear-audio-opened'] as const,

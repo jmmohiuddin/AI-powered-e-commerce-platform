@@ -15,6 +15,17 @@ export interface CodOptions {
   readonly maxOrderAmount?: number;
   /** Advance payment required, in basis points of order total. */
   readonly advancePaymentBps?: number;
+  /**
+   * Advance demanded when the risk model asks for one, in basis points.
+   *
+   * Separate from `advancePaymentBps` because they answer different questions.
+   * The first is the merchant's standing policy — "every COD order pays 20%
+   * up front". This one is the exception: a specific order the model has
+   * flagged, where the merchant may want a deposit even though they ask most
+   * customers for nothing. Defaults to the standing policy, so a merchant who
+   * sets only one knob gets the behaviour they described.
+   */
+  readonly riskAdvancePaymentBps?: number;
   /** Risk score at or above which COD is refused for this customer. */
   readonly maxCustomerRiskScore?: number;
   readonly currency?: string;
@@ -137,9 +148,16 @@ export class CashOnDeliveryGateway implements PaymentGateway {
 
   /* ── COD-specific policy, consumed by checkout ────────────────────── */
 
-  /** Advance payment required before dispatch. Zero when not configured. */
-  advanceAmount(orderTotal: Money): Money {
-    const bps = this.options.advancePaymentBps ?? 0;
+  /**
+   * Advance payment required before dispatch. Zero when not configured.
+   *
+   * `riskFlagged` selects the exception rate rather than the standing one. The
+   * two are deliberately allowed to be equal, and are by default: a merchant
+   * with one policy for everyone should not have to discover a second knob.
+   */
+  advanceAmount(orderTotal: Money, riskFlagged = false): Money {
+    const standing = this.options.advancePaymentBps ?? 0;
+    const bps = riskFlagged ? (this.options.riskAdvancePaymentBps ?? standing) : standing;
     if (bps <= 0) return money(0, orderTotal.currency);
     return money(Math.round((orderTotal.amount * bps) / 10_000), orderTotal.currency);
   }
@@ -161,8 +179,9 @@ export class CashOnDeliveryGateway implements PaymentGateway {
     customerRiskScore?: number;
     phoneVerified?: boolean;
     previousRefusedDeliveries?: number;
+    riskRequiresAdvance?: boolean;
   }): { allowed: boolean; reason?: string; advanceRequired: Money } {
-    const advanceRequired = this.advanceAmount(input.orderTotal);
+    const advanceRequired = this.advanceAmount(input.orderTotal, input.riskRequiresAdvance === true);
 
     if (this.options.maxOrderAmount != null && input.orderTotal.amount > this.options.maxOrderAmount) {
       return {
@@ -190,9 +209,14 @@ export class CashOnDeliveryGateway implements PaymentGateway {
     }
 
     if (input.phoneVerified === false) {
+      // Every refusal names the alternative in the same breath (requirement
+      // S-05). "Verify your phone number" on its own is a dead end for a
+      // shopper who has no intention of doing that right now, and a dead end at
+      // the payment step is an abandoned basket.
       return {
         allowed: false,
-        reason: 'Please verify your phone number to use cash on delivery.',
+        reason:
+          'Please verify your phone number to use cash on delivery, or pay online to continue now.',
         advanceRequired,
       };
     }

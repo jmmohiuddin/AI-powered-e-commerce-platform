@@ -17,6 +17,16 @@ export type ErrorCode =
   | 'PRICE_CHANGED'
   | 'PAYMENT_FAILED'
   | 'PAYMENT_DECLINED'
+  /** The risk model refused the order outright. Distinct from a declined card. */
+  | 'RISK_BLOCKED'
+  /**
+   * Cash on delivery is available, but only with a deposit paid now.
+   *
+   * Its own code because the client's response is neither "try again" nor "pick
+   * something else" — it is "show a deposit step". `details.advanceDue` carries
+   * the amount in minor units.
+   */
+  | 'ADVANCE_REQUIRED'
   | 'GATEWAY_UNAVAILABLE'
   | 'RATE_LIMITED'
   | 'AI_BUDGET_EXCEEDED'
@@ -33,6 +43,8 @@ const DEFAULT_STATUS: Record<ErrorCode, number> = {
   PRICE_CHANGED: 409,
   PAYMENT_FAILED: 402,
   PAYMENT_DECLINED: 402,
+  RISK_BLOCKED: 403,
+  ADVANCE_REQUIRED: 402,
   GATEWAY_UNAVAILABLE: 503,
   RATE_LIMITED: 429,
   AI_BUDGET_EXCEEDED: 429,

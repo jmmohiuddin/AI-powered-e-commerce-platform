@@ -3,6 +3,7 @@ export * from './tenancy';
 export * from './catalog';
 export * from './inventory';
 export * from './commerce';
+export * from './invoicing';
 export * from './payments';
 export * from './marketing';
 export * from './ai';

@@ -1,0 +1,1 @@
+CREATE INDEX "notifications_provider_message_idx" ON "notifications" USING btree ("provider_message_id","provider");

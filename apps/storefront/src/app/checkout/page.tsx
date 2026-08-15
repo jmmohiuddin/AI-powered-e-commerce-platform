@@ -84,6 +84,15 @@ export default async function CheckoutPage() {
           currency={cart.currency}
           locale={locale}
           paymentOptions={paymentOptions}
+          // Resolved here because the form is a client component and the
+          // dictionary is read from a cookie on the server.
+          deposit={{
+            legend: t('deposit.legend'),
+            explainer: t('deposit.explainer'),
+            refundCondition: t('deposit.refundCondition'),
+            chooseCard: t('deposit.chooseCard'),
+            noCard: t('deposit.noCard'),
+          }}
         />
       </section>
 

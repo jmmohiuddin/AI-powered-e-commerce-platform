@@ -13,12 +13,14 @@
     "@voltix/commerce": "*",
     "@voltix/core": "*",
     "@voltix/db": "*",
+    "@voltix/invoicing": "*",
     "@voltix/notifications": "*",
     "@voltix/ui": "*",
     "dotenv": "^17.4.2",
     "next": "^16.3.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "redis": "^6.2.1",
     "server-only": "^0.0.1"
   },
   "devDependencies": {

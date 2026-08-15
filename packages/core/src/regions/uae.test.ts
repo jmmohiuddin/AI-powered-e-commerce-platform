@@ -1,8 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { money } from '../money';
 import { calculatePricing } from '../pricing/engine';
 import type { PricingLineInput } from '../pricing/types';
 import {
+  changeOfMindWindowDays,
+  DEFAULT_CHANGE_OF_MIND_DAYS,
   DELIVERY_ZONES,
   estimateDelivery,
   extractVat,
@@ -13,6 +15,7 @@ import {
   isValidUaePhone,
   netOfVat,
   normaliseUaePhone,
+  RETURN_POLICY,
   UAE_STANDARD_VAT,
   validateAddress,
 } from './uae';
@@ -204,5 +207,61 @@ describe('delivery estimates', () => {
       expect(DELIVERY_ZONES[code]).toBeDefined();
       expect(DELIVERY_ZONES[code].standardDays).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('return window configuration', () => {
+  /**
+   * The change-of-mind window is configuration rather than a constant because
+   * the 14-day cooling-off right is REPORTED, not confirmed in the primary
+   * sources reviewed (PRD L-06 / Q-08). What these tests protect is the
+   * property that makes that useful: the published policy page and the returns
+   * workflow read the same number, at the moment they read it, so counsel can
+   * change it without a deploy and the two cannot end up disagreeing.
+   */
+  const original = process.env.RETURNS_CHANGE_OF_MIND_DAYS;
+
+  afterEach(() => {
+    if (original === undefined) delete process.env.RETURNS_CHANGE_OF_MIND_DAYS;
+    else process.env.RETURNS_CHANGE_OF_MIND_DAYS = original;
+  });
+
+  it('defaults to 14 days when unset', () => {
+    delete process.env.RETURNS_CHANGE_OF_MIND_DAYS;
+    expect(changeOfMindWindowDays()).toBe(DEFAULT_CHANGE_OF_MIND_DAYS);
+    expect(RETURN_POLICY.changeOfMindDays).toBe(14);
+  });
+
+  it('takes the configured window', () => {
+    process.env.RETURNS_CHANGE_OF_MIND_DAYS = '7';
+    expect(RETURN_POLICY.changeOfMindDays).toBe(7);
+  });
+
+  it('re-reads on every access, so a restart is enough to change the policy', () => {
+    // The point of the getter. A property captured at module load would still
+    // be reporting the first value read here, which is how a policy page and a
+    // workflow drift apart.
+    process.env.RETURNS_CHANGE_OF_MIND_DAYS = '30';
+    expect(RETURN_POLICY.changeOfMindDays).toBe(30);
+    process.env.RETURNS_CHANGE_OF_MIND_DAYS = '3';
+    expect(RETURN_POLICY.changeOfMindDays).toBe(3);
+  });
+
+  it('accepts zero — "no cooling-off window" is a legitimate ruling', () => {
+    process.env.RETURNS_CHANGE_OF_MIND_DAYS = '0';
+    expect(RETURN_POLICY.changeOfMindDays).toBe(0);
+  });
+
+  it.each(['', '  ', 'fourteen', '14.5', '-3', 'NaN'])(
+    'falls back to the default rather than publishing %o to customers',
+    (value) => {
+      process.env.RETURNS_CHANGE_OF_MIND_DAYS = value;
+      expect(RETURN_POLICY.changeOfMindDays).toBe(DEFAULT_CHANGE_OF_MIND_DAYS);
+    },
+  );
+
+  it('leaves the defective-goods window alone — it tracks a statutory right', () => {
+    process.env.RETURNS_CHANGE_OF_MIND_DAYS = '1';
+    expect(RETURN_POLICY.defectiveGoodsDays).toBe(30);
   });
 });

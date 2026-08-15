@@ -1,0 +1,42 @@
+# Gitleaks configuration.
+#
+# The default ruleset is inherited in full — this file only *narrows* what is
+# ignored, and every entry states why. The temptation with a scanner that fires
+# on a test fixture is to disable the rule; that trades a real control for a
+# convenience, and the next genuine leak goes unreported.
+
+[extend]
+useDefault = true
+
+[[rules]]
+# Keep the default generic-api-key rule, but do not let it fire inside the
+# webhook conformance test. That file necessarily contains a vendor's published
+# example secret verbatim (see the allowlist below), and the alternative —
+# rewriting the fixture — would break a test that verifies our signature
+# implementation against a known-good vector.
+id = "generic-api-key"
+[rules.allowlist]
+paths = ['''packages/notifications/src/webhooks\.test\.ts''']
+# Scoped to the exact literal. Any *other* secret-shaped string in that same
+# file is still reported.
+regexes = ['''whsec_plJ3nmyCDGBKInavdOK15jsl''']
+
+[allowlist]
+description = "Fixtures that are structurally secret-shaped but carry no access"
+paths = [
+  # The template. Every value is a placeholder by definition.
+  '''\.env\.example''',
+]
+# Enumerated one by one, NOT as a `whsec_.*` wildcard. A wildcard here would
+# match a genuine leaked secret just as happily as a fixture, which is the
+# whole failure this file exists to avoid. Adding a new test secret should
+# require adding a line here — that friction is the point.
+regexes = [
+  '''whsec_integration_test''',
+  '''whsec_integration_test_secret_value''',
+  '''whsec_test_secret''',
+  # base64("emailwebhooktestsecret")
+  '''whsec_ZW1haWx3ZWJob29rdGVzdHNlY3JldA==''',
+  # base64("someothersecret")
+  '''whsec_c29tZW90aGVyc2VjcmV0''',
+]

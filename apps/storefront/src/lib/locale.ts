@@ -31,6 +31,8 @@ export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = 'en-AE';
 export const LOCALE_COOKIE = 'voltix_locale';
+/** A year. Exported so the privacy notice states the lifetime that is actually set. */
+export const LOCALE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 
 export function isLocale(value: string | undefined): value is Locale {
   return LOCALES.includes(value as Locale);
@@ -74,12 +76,48 @@ const MESSAGES: Record<Locale, Record<string, string>> = {
     'home.shopPhones': 'Shop smartphones',
     'home.whatsapp': 'Order on WhatsApp',
     'home.whyTitle': 'Why buy here',
+
+    /*
+      THE HOMEPAGE REASSURANCE PANEL.
+      Moved here from page.tsx, where it was hardcoded English and therefore
+      rendered in English on the Arabic homepage — the one panel a hesitant
+      shopper actually reads.
+
+      `home.whyWarrantyBody` no longer says the IMEI is recorded. See the
+      comment at its call site in app/page.tsx for why, and for what would have
+      to become true before that sentence may return.
+    */
+    'home.whyWarrantyTitle': 'Official UAE warranty',
+    'home.whyWarrantyBody':
+      'Every handset carries the manufacturer’s regional warranty, and every order is invoiced — dated and carrying our TRN, which is the proof of purchase a service centre asks for.',
+    'home.whyDeliveryTitle': 'Delivered across all seven emirates',
+    'home.whyDeliveryBody':
+      'Same-day in Dubai on orders before 2pm, next day to Abu Dhabi and Sharjah.',
+    'home.whyPaymentTitle': 'Pay how you like',
+    'home.whyPaymentBody':
+      'Card, Apple Pay, Tabby in four instalments, or cash on delivery.',
+    'home.whyStockTitle': 'Real stock counts',
+    'home.whyStockBody': 'If the site says three left, there are three.',
     'home.categories': 'Shop by category',
     'home.browseAll': 'Browse everything',
     'home.deals': 'On offer now',
     'home.allDeals': 'See all deals',
     'home.popular': 'Popular right now',
     'home.topRated': 'Top rated',
+    'home.emptyTitle': 'Nothing is listed yet.',
+    'home.emptyBody':
+      'This store has no published products at the moment. Please check back shortly.',
+
+    'nav.home': 'Home',
+
+    'category.emptyTitle': 'Nothing in this category yet.',
+    'category.emptyBody': 'Try another category, or browse everything in the store.',
+    'category.metaDescription':
+      'Buy {name} in the UAE — genuine stock, official warranty, delivery across all seven emirates and cash on delivery.',
+
+    'limit.title': 'Too many attempts.',
+    'limit.orders': 'Please wait a few minutes before looking up another order.',
+    'limit.search': 'Please wait a moment before searching again.',
 
     'product.chooseOption': 'Choose an option',
     'product.quantity': 'Quantity',
@@ -91,9 +129,27 @@ const MESSAGES: Record<Locale, Record<string, string>> = {
     'product.warranty': 'Warranty',
     'product.related': 'Frequently bought with this',
     'product.deliveryPayment': 'Delivery & payment',
+
+    /* The four cards under "Delivery & payment" on a product page. Same story
+       as the homepage panel: previously hardcoded English, and the warranty
+       card previously promised IMEI recording. */
+    'product.dpDeliveryTitle': 'Same-day in Dubai',
+    'product.dpDeliveryBody':
+      'Order before 2pm for same-day delivery in Dubai, next day to Abu Dhabi and Sharjah.',
+    'product.dpPaymentTitle': 'Card, Apple Pay or Tabby',
+    'product.dpPaymentBody':
+      'Pay in full, or split into four interest-free payments with Tabby.',
+    'product.dpCodTitle': 'Cash on delivery',
+    'product.dpCodBody': 'Available across all seven emirates. Check the box before you pay.',
+    'product.dpWarrantyTitle': 'Official UAE warranty',
+    'product.dpWarrantyBody':
+      '{n} months from the manufacturer, honoured here in the UAE. Your dated invoice is the proof of purchase.',
+
     'product.months': 'months',
     'product.reviews': 'reviews',
     'product.outOf5': 'out of 5',
+    'product.gallery': 'Product images',
+    'product.imageOf': 'Image {n} of {total}',
 
     'stock.inStock': 'In stock',
     'stock.only': 'Only {n} left',
@@ -118,8 +174,44 @@ const MESSAGES: Record<Locale, Record<string, string>> = {
     'search.priceAsc': 'Price: low to high',
     'search.priceDesc': 'Price: high to low',
     'search.rating': 'Rating',
+    'search.subcategories': 'Refine',
+    'search.priceMin': 'Min price, AED',
+    'search.priceMax': 'Max price, AED',
+    'search.priceMinShort': 'Min',
+    'search.priceMaxShort': 'Max',
+    'search.priceApply': 'Apply',
+    'search.pagination': 'Pagination',
+    'search.previous': 'Previous',
+    'search.next': 'Next',
+    'search.pageN': 'Page {n}',
+    'search.pageOf': 'Page {n} of {total}',
     'search.emptyTitle': 'Nothing matched that search.',
     'search.emptyBody': 'Try a broader search, or ask us on WhatsApp — we can often source a product that is not listed.',
+
+    'deposit.legend': 'Deposit for cash on delivery',
+    'deposit.explainer':
+      'Pay {amount} now to confirm this order. It comes off your total — the courier collects the remaining {balance} in cash when your parcel arrives.',
+    'deposit.refundCondition':
+      'If we cancel the order or cannot deliver it, the deposit is refunded in full to the same card. If you refuse the delivery, the deposit covers the return courier cost and is not refunded.',
+    'deposit.chooseCard': 'Pay the deposit with',
+    'deposit.noCard':
+      'No online payment method is available right now, so a deposit cannot be taken. Please message us and we will confirm your order another way.',
+
+    'return.orderLabel': 'Order',
+    'return.pendingBadge': 'Payment in progress',
+    'return.pendingTitle': 'We’re confirming your payment',
+    'return.pendingBody':
+      'Your bank has not finished confirming this payment yet. This page checks again every few seconds — you can safely leave it open, or come back later and track the order. Nothing else is needed from you.',
+    'return.failedBadge': 'Payment not completed',
+    'return.failedTitle': 'That payment did not go through',
+    'return.failedBody':
+      'You have not been charged, and your basket is exactly as you left it. Try again with another card, or choose cash on delivery at checkout.',
+    'return.retry': 'Back to checkout',
+    'return.help': 'Talk to us',
+    'return.whatsappMessage': 'Hello, I need help with payment for order #{n}.',
+    'return.unknownTitle': 'We could not find that order',
+    'return.unknownBody':
+      'This browser has no order in progress — it can happen if cookies were cleared or the payment was finished on another device. If money has left your account, track the order with your order number and phone, or message us and we will find it.',
 
     'vat.inclusive': 'Price includes 5% VAT',
     'trust.cod': 'Cash on delivery available',
@@ -149,12 +241,36 @@ const MESSAGES: Record<Locale, Record<string, string>> = {
     'home.shopPhones': 'تسوق الهواتف',
     'home.whatsapp': 'اطلب عبر واتساب',
     'home.whyTitle': 'لماذا تشتري من هنا',
+
+    'home.whyWarrantyTitle': 'ضمان رسمي في الإمارات',
+    'home.whyWarrantyBody':
+      'كل جهاز يحمل ضمان الشركة المصنّعة الإقليمي، ولكل طلب فاتورة مؤرّخة تحمل رقمنا الضريبي — وهي إثبات الشراء الذي يطلبه مركز الخدمة.',
+    'home.whyDeliveryTitle': 'توصيل إلى الإمارات السبع',
+    'home.whyDeliveryBody':
+      'توصيل في نفس اليوم داخل دبي للطلبات قبل الساعة ٢ ظهراً، واليوم التالي إلى أبوظبي والشارقة.',
+    'home.whyPaymentTitle': 'ادفع كما يناسبك',
+    'home.whyPaymentBody': 'بالبطاقة أو Apple Pay أو تابي على أربع دفعات أو نقداً عند الاستلام.',
+    'home.whyStockTitle': 'أرصدة مخزون حقيقية',
+    'home.whyStockBody': 'إذا قال الموقع إنه بقي ثلاثة، فهناك ثلاثة فعلاً.',
     'home.categories': 'تسوق حسب الفئة',
     'home.browseAll': 'تصفح كل المنتجات',
     'home.deals': 'العروض الحالية',
     'home.allDeals': 'كل العروض',
     'home.popular': 'الأكثر رواجاً',
     'home.topRated': 'الأعلى تقييماً',
+    'home.emptyTitle': 'لا توجد منتجات معروضة بعد.',
+    'home.emptyBody': 'لا توجد منتجات منشورة في هذا المتجر حالياً. يرجى العودة قريباً.',
+
+    'nav.home': 'الرئيسية',
+
+    'category.emptyTitle': 'لا توجد منتجات في هذه الفئة بعد.',
+    'category.emptyBody': 'جرّب فئة أخرى، أو تصفّح كل منتجات المتجر.',
+    'category.metaDescription':
+      'اشترِ {name} في الإمارات — منتجات أصلية بضمان رسمي، وتوصيل إلى جميع الإمارات السبع، والدفع عند الاستلام.',
+
+    'limit.title': 'محاولات كثيرة جداً.',
+    'limit.orders': 'يرجى الانتظار بضع دقائق قبل البحث عن طلب آخر.',
+    'limit.search': 'يرجى الانتظار قليلاً قبل البحث مرة أخرى.',
 
     'product.chooseOption': 'اختر النسخة',
     'product.quantity': 'الكمية',
@@ -166,9 +282,23 @@ const MESSAGES: Record<Locale, Record<string, string>> = {
     'product.warranty': 'الضمان',
     'product.related': 'يُشترى عادةً مع هذا المنتج',
     'product.deliveryPayment': 'التوصيل والدفع',
+
+    'product.dpDeliveryTitle': 'توصيل في نفس اليوم داخل دبي',
+    'product.dpDeliveryBody':
+      'اطلب قبل الساعة ٢ ظهراً للتوصيل في نفس اليوم داخل دبي، واليوم التالي إلى أبوظبي والشارقة.',
+    'product.dpPaymentTitle': 'بطاقة أو Apple Pay أو تابي',
+    'product.dpPaymentBody': 'ادفع المبلغ كاملاً، أو قسّمه على أربع دفعات بدون فوائد مع تابي.',
+    'product.dpCodTitle': 'الدفع عند الاستلام',
+    'product.dpCodBody': 'متاح في جميع الإمارات السبع. اختر هذا الخيار قبل الدفع.',
+    'product.dpWarrantyTitle': 'ضمان رسمي في الإمارات',
+    'product.dpWarrantyBody':
+      '{n} شهراً من الشركة المصنّعة، معتمد داخل الإمارات. فاتورتك المؤرّخة هي إثبات الشراء.',
+
     'product.months': 'شهراً',
     'product.reviews': 'تقييم',
     'product.outOf5': 'من ٥',
+    'product.gallery': 'صور المنتج',
+    'product.imageOf': 'الصورة {n} من {total}',
 
     'stock.inStock': 'متوفر',
     'stock.only': 'بقي {n} فقط',
@@ -193,8 +323,44 @@ const MESSAGES: Record<Locale, Record<string, string>> = {
     'search.priceAsc': 'السعر: من الأقل للأعلى',
     'search.priceDesc': 'السعر: من الأعلى للأقل',
     'search.rating': 'التقييم',
+    'search.subcategories': 'تصفية',
+    'search.priceMin': 'أقل سعر بالدرهم',
+    'search.priceMax': 'أعلى سعر بالدرهم',
+    'search.priceMinShort': 'من',
+    'search.priceMaxShort': 'إلى',
+    'search.priceApply': 'تطبيق',
+    'search.pagination': 'ترقيم الصفحات',
+    'search.previous': 'السابق',
+    'search.next': 'التالي',
+    'search.pageN': 'صفحة {n}',
+    'search.pageOf': 'صفحة {n} من {total}',
     'search.emptyTitle': 'لا توجد نتائج مطابقة.',
     'search.emptyBody': 'جرّب بحثاً أوسع، أو راسلنا على واتساب — يمكننا غالباً توفير منتج غير مدرج.',
+
+    'deposit.legend': 'دفعة مقدمة للدفع عند الاستلام',
+    'deposit.explainer':
+      'ادفع {amount} الآن لتأكيد الطلب. يُخصم هذا المبلغ من إجمالي طلبك — ويحصّل مندوب التوصيل المبلغ المتبقي {balance} نقداً عند وصول الطرد.',
+    'deposit.refundCondition':
+      'إذا ألغينا الطلب أو تعذّر علينا توصيله، تُعاد الدفعة المقدمة بالكامل إلى البطاقة نفسها. أما إذا رفضت استلام الطرد، فتُستخدم الدفعة لتغطية تكلفة إعادة الشحن ولا تُعاد.',
+    'deposit.chooseCard': 'ادفع الدفعة المقدمة بواسطة',
+    'deposit.noCard':
+      'لا تتوفر حالياً وسيلة دفع إلكتروني، لذا لا يمكن تحصيل الدفعة المقدمة. راسلنا وسنؤكد طلبك بطريقة أخرى.',
+
+    'return.orderLabel': 'الطلب',
+    'return.pendingBadge': 'جارٍ تنفيذ الدفع',
+    'return.pendingTitle': 'نؤكد عملية الدفع الآن',
+    'return.pendingBody':
+      'لم ينتهِ البنك من تأكيد هذه العملية بعد. تتحقق هذه الصفحة تلقائياً كل بضع ثوانٍ — يمكنك تركها مفتوحة أو العودة لاحقاً وتتبّع الطلب. لا حاجة لأي إجراء منك.',
+    'return.failedBadge': 'لم تكتمل عملية الدفع',
+    'return.failedTitle': 'لم تتم عملية الدفع',
+    'return.failedBody':
+      'لم يتم خصم أي مبلغ، وسلّتك كما تركتها تماماً. جرّب بطاقة أخرى، أو اختر الدفع عند الاستلام عند إتمام الطلب.',
+    'return.retry': 'العودة إلى إتمام الطلب',
+    'return.help': 'تواصل معنا',
+    'return.whatsappMessage': 'مرحباً، أحتاج مساعدة بخصوص الدفع للطلب رقم {n}.',
+    'return.unknownTitle': 'لم نتمكن من العثور على هذا الطلب',
+    'return.unknownBody':
+      'لا يوجد طلب قيد التنفيذ في هذا المتصفح — قد يحدث ذلك عند مسح ملفات تعريف الارتباط أو إتمام الدفع على جهاز آخر. إذا خُصم المبلغ من حسابك، تتبّع الطلب برقم الطلب ورقم الهاتف، أو راسلنا وسنجده لك.',
 
     'vat.inclusive': 'السعر شامل ضريبة القيمة المضافة ٥٪',
     'trust.cod': 'الدفع عند الاستلام متاح',

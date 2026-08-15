@@ -221,3 +221,53 @@ export function shouldCommitStock(outcome: PaymentOutcome): boolean {
 export function isTerminal(outcome: PaymentOutcome): boolean {
   return outcome.kind === 'succeeded' || outcome.kind === 'failed' || outcome.kind === 'deferred';
 }
+
+/**
+ * Turns pull- or push-based *truth* back into the outcome type the ledger
+ * speaks.
+ *
+ * `createPayment` returns a `PaymentOutcome`, but the two inbound paths do not:
+ * `fetchStatus` returns a `PaymentStatusResult` and `verifyWebhook` a
+ * `WebhookVerification`, and both carry the same small vocabulary of statuses.
+ * Without this, every caller that reconciles a payment after checkout — the
+ * webhook worker, the shopper's return page — would write its own mapping, and
+ * a store where two mappings disagree about what `authorised` means is a store
+ * that ships against a hold that never settles.
+ *
+ * `refunded` returns null on purpose. A refund is not a payment outcome: it is
+ * a separate ledger entry against an existing capture, and fabricating a
+ * `PaymentOutcome` for one would restate the original payment rather than
+ * record the money going back.
+ */
+export function outcomeFromStatus(
+  status: PaymentStatusResult['status'] | NonNullable<WebhookVerification['status']>,
+  reference: string,
+  raw?: unknown,
+): PaymentOutcome | null {
+  switch (status) {
+    case 'succeeded':
+      return { kind: 'succeeded', reference, raw };
+    case 'authorised':
+      return { kind: 'authorised', reference, raw };
+    case 'pending':
+      return { kind: 'pending', reference, raw };
+    case 'cancelled':
+      return {
+        kind: 'failed',
+        code: 'cancelled',
+        message: 'The payment was cancelled',
+        retryable: false,
+        raw,
+      };
+    case 'failed':
+      return {
+        kind: 'failed',
+        code: 'payment_failed',
+        message: 'The payment was not completed',
+        retryable: false,
+        raw,
+      };
+    case 'refunded':
+      return null;
+  }
+}

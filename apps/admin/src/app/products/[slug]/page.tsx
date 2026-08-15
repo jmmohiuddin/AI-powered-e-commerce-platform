@@ -5,6 +5,7 @@ import { formatPrice } from '@voltix/ui';
 import { can, requirePermission } from '../../../lib/auth';
 import { getProductDetail } from '../../../lib/catalogue-queries';
 import { ProductControls, StockAdjuster } from './product-controls';
+import { ProductMedia } from './product-media';
 
 export const dynamic = 'force-dynamic';
 
@@ -109,6 +110,20 @@ export default async function ProductDetailPage({
           </p>
           <p className="kpi__note">manufacturer UAE cover</p>
         </div>
+      </div>
+
+      {/* Above the variant table on purpose. A product with no photograph does
+          not sell however correct its pricing is, so the gap should be the
+          first thing a merchant sees on the page. */}
+      <h2 className="section-title">Images</h2>
+      <div className="card">
+        <ProductMedia
+          productId={product.id}
+          slug={product.slug}
+          images={[...product.images]}
+          canWrite={canWrite}
+          storefrontOrigin={storefront}
+        />
       </div>
 
       <h2 className="section-title">Variants</h2>

@@ -1,6 +1,9 @@
 import Link from 'next/link';
+import { whatsappHref } from '@/lib/contact';
 
 export default function NotFound() {
+  const whatsapp = whatsappHref();
+
   return (
     <div className="container section">
       <div className="empty-state">
@@ -21,9 +24,11 @@ export default function NotFound() {
           <Link className="button button--primary" href="/search">
             Browse all products
           </Link>
-          <a className="button button--whatsapp" href="https://wa.me/971500000000">
-            Ask us on WhatsApp
-          </a>
+          {whatsapp && (
+            <a className="button button--whatsapp" href={whatsapp}>
+              Ask us on WhatsApp
+            </a>
+          )}
         </div>
       </div>
     </div>

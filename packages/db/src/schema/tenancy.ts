@@ -49,6 +49,14 @@ export const tenants = pgTable(
      * invoice that tenant issues.
      */
     legalName: text('legal_name'),
+    /**
+     * The supplier's address as it must appear on a tax invoice. Article 59
+     * requires it alongside the name and TRN, so an invoice cannot be issued
+     * without it — kept as free text because a UAE address has no postal code
+     * and no fixed line structure worth modelling for a document that is only
+     * ever printed.
+     */
+    legalAddress: text('legal_address'),
     /** 15-digit Tax Registration Number issued by the Federal Tax Authority. */
     taxRegistrationNumber: varchar('tax_registration_number', { length: 20 }),
     /** Trade licence number, shown in the footer as a trust signal. */

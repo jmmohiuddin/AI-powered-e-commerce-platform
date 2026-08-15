@@ -2,7 +2,13 @@ import 'server-only';
 import { randomBytes } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { withTenant } from '@voltix/db';
-import { PaymentRegistry, CashOnDeliveryGateway, StripeGateway, TabbyGateway } from '@voltix/payments';
+import {
+  PaymentRegistry,
+  CashOnDeliveryGateway,
+  NetworkInternationalGateway,
+  StripeGateway,
+  TabbyGateway,
+} from '@voltix/payments';
 import type { TenantContext } from '@voltix/commerce';
 import { DEMO_TENANT_ID } from './catalog';
 
@@ -15,7 +21,15 @@ import { DEMO_TENANT_ID } from './catalog';
  * and shared links.
  */
 
-const CART_COOKIE = 'voltix_cart';
+/**
+ * Exported so the privacy notice can name the cookie and state its lifetime
+ * from the same two values that actually set it, rather than describing a
+ * cookie from memory. A privacy page listing a cookie the site does not set —
+ * or missing one it does — is the specific failure that makes such a page
+ * worthless.
+ */
+export const CART_COOKIE = 'voltix_cart';
+export const CART_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 export async function cartSessionToken(): Promise<string> {
   const store = await cookies();
@@ -40,7 +54,7 @@ export async function ensureCartSession(): Promise<string> {
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge: CART_COOKIE_MAX_AGE_SECONDS,
   });
   return token;
 }
@@ -48,9 +62,14 @@ export async function ensureCartSession(): Promise<string> {
 /**
  * The tenant this request belongs to.
  *
- * Resolved from the host in production — one domain per store — and never from
- * anything the client can set. A tenant id that arrives in a query parameter or
- * a request body is not an isolation boundary, it is an invitation.
+ * Currently one tenant, hardcoded. The multi-tenant program is parked, and
+ * describing host-based resolution that does not exist was worse than the gap
+ * itself — the storefront reads as isolated when it is single-tenant.
+ *
+ * When it is picked up: resolve from the request host, one domain per store,
+ * and never from anything the client can set. A tenant id arriving in a query
+ * parameter or a request body is not an isolation boundary, it is an
+ * invitation.
  */
 export function tenantContext(): TenantContext {
   return {
@@ -92,6 +111,25 @@ export function paymentRegistry(): PaymentRegistry {
     );
   }
 
+  /**
+   * Network International (N-Genius).
+   *
+   * The adapter has existed since the payments package was written and was
+   * never registered, so the incumbent UAE acquirer — the one a large share of
+   * established merchants already bank with — was unreachable, and its webhook
+   * route answered 404. `NETWORK_SANDBOX` defaults to sandbox in the adapter,
+   * so only an explicit `false` reaches the live acquirer.
+   */
+  if (process.env.NETWORK_API_KEY && process.env.NETWORK_OUTLET_REF) {
+    built.register(
+      new NetworkInternationalGateway({
+        apiKey: process.env.NETWORK_API_KEY,
+        outletReference: process.env.NETWORK_OUTLET_REF,
+        sandbox: process.env.NETWORK_SANDBOX !== 'false',
+      }),
+    );
+  }
+
   if (process.env.TABBY_SECRET_KEY && process.env.TABBY_MERCHANT_CODE) {
     built.register(
       new TabbyGateway({
@@ -110,6 +148,13 @@ export function paymentRegistry(): PaymentRegistry {
       new CashOnDeliveryGateway({
         maxOrderAmount: Number(process.env.COD_MAX_ORDER_AMOUNT ?? 500_000),
         advancePaymentBps: Number(process.env.COD_ADVANCE_BPS ?? 0),
+        // `||` not `??`: an empty string is what an unset key in a committed
+        // .env looks like, and `Number('')` is 0 — which would silently mean
+        // "no deposit on flagged orders" rather than "same as the standing
+        // policy", the opposite of what leaving it blank should mean.
+        riskAdvancePaymentBps: Number(
+          process.env.COD_RISK_ADVANCE_BPS || process.env.COD_ADVANCE_BPS || 0,
+        ),
         handlingFee: Number(process.env.COD_HANDLING_FEE ?? 0),
         currency: 'AED',
         maxCustomerRiskScore: 70,

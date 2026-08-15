@@ -2,7 +2,7 @@
   "name": "voltix-commerce",
   "private": true,
   "version": "0.1.0",
-  "description": "Voltix Commerce — AI-powered, multi-tenant commerce platform for electronics & mobile retail",
+  "description": "Voltix Commerce — UAE electronics & mobile retail storefront and back office",
   "workspaces": [
     "packages/*",
     "apps/*"

@@ -81,9 +81,16 @@ export default async function OrderDetailPage({
         canRefund={await can('order:refund')}
         canManageReturns={await can('return:manage')}
         // Which provider took the money decides whether "record cash collected"
-        // is meaningful. Derived from the payment ledger rather than the order,
-        // because that is where the truth about the provider lives.
-        isCod={order.transactions.some((t) => t.gateway === 'cod') || order.paymentStatus === 'unpaid'}
+        // is meaningful — so it is asked of the payment intent, the same signal
+        // `recordCodCollection` enforces against.
+        //
+        // `paymentStatus === 'unpaid'` used to stand in for it. That is not a
+        // COD test: a card order whose authorisation is still settling is also
+        // unpaid, and it put a "Record cash collected" button in front of staff
+        // for an order the customer had already paid by card. The domain
+        // refuses the call, so nothing could be miscaptured — but a button that
+        // only ever errors teaches operators to distrust the ones that work.
+        isCod={order.paymentProvider === 'cod'}
         refundableMinor={Math.max(order.paidTotal - order.refundedTotal, 0)}
         currency={order.currency}
       />
@@ -148,6 +155,28 @@ export default async function OrderDetailPage({
               <Total label="Refunded" value={order.refundedTotal} currency={order.currency} />
             )}
           </dl>
+
+          {/*
+            Opens the tax document. The first request issues it and allocates a
+            gapless number; every request after returns that same one. A plain
+            link rather than a button because it is a read, and because the
+            merchant frequently wants it in its own tab beside the order.
+          */}
+          <p style={{ marginTop: 'var(--space-4)' }}>
+            <a
+              className="button button--secondary"
+              href={`/orders/${order.number}/invoice`}
+              target="_blank"
+              rel="noopener"
+            >
+              Tax invoice
+            </a>
+            {order.recipientTrn && (
+              <span className="kpi__note" style={{ marginInlineStart: 'var(--space-3)' }}>
+                Business customer · TRN {order.recipientTrn}
+              </span>
+            )}
+          </p>
         </section>
 
         <aside className="stack-md">

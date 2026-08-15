@@ -17,6 +17,7 @@
 // any module below reads a connection string at import time.
 import '@voltix/config/load-env';
 import { sql } from 'drizzle-orm';
+import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import { closeConnections, dbAdmin } from '../src/client';
 import { uuidv7 } from '../src/id';
 import * as s from '../src/schema';
@@ -45,6 +46,18 @@ async function main() {
       supportedLocales: ['en-AE', 'ar-AE'],
       timezone: 'Asia/Dubai',
       legalName: 'Voltix Electronics Trading L.L.C.',
+      /**
+       * Required to issue a tax invoice, and it was missing.
+       *
+       * `legal_address` arrived with migration 0006 and nothing populated it,
+       * so `buildInvoice` refused every document with SUPPLIER_INCOMPLETE —
+       * while the storefront went on offering a download link and the footer
+       * displayed a TRN. The store both showed its tax identity and claimed to
+       * have none. Article 59 of the VAT Executive Regulations requires the
+       * supplier's address on a full tax invoice, so refusing was right; the
+       * missing datum was the bug.
+       */
+      legalAddress: 'Shop 12, Naif Road, Deira, Dubai, United Arab Emirates',
       // Format-valid placeholder. A real TRN comes from the FTA at registration.
       taxRegistrationNumber: '100123456700003',
       tradeLicenceNumber: 'CN-1234567',
@@ -150,7 +163,7 @@ async function main() {
         defaultWarrantyMonths: b.warranty,
       })
       .onConflictDoNothing();
-    brandIds.set(b.slug, await resolveId(s.brands, 'slug', b.slug, id));
+    brandIds.set(b.slug, await resolveId(s.brands, s.brands.slug, b.slug, id));
   }
 
   const categoryIds = new Map<string, string>();
@@ -185,7 +198,40 @@ async function main() {
         translations: { 'ar-AE': { name: c.nameAr } },
       })
       .onConflictDoNothing();
-    categoryIds.set(c.slug, await resolveId(s.categories, 'slug', c.slug, id));
+    categoryIds.set(c.slug, await resolveId(s.categories, s.categories.slug, c.slug, id));
+  }
+
+  /* ── Attributes ──────────────────────────────────────────────────── */
+
+  /**
+   * The specification vocabulary.
+   *
+   * Attributes are first-class rows rather than free text on the product so
+   * "8 GB RAM" and "8GB RAM" cannot become two different facets. Seeding them
+   * matters for a second reason: without these the specification table on every
+   * product page is empty, which for an electronics store removes the
+   * comparison the shopper came to make.
+   */
+  const attributeIds = new Map<string, string>();
+  for (const a of ATTRIBUTES) {
+    const id = uuidv7();
+    await d
+      .insert(s.attributes)
+      .values({
+        id,
+        tenantId: TENANT_ID,
+        key: a.key,
+        name: a.name,
+        type: a.type,
+        unit: a.unit ?? null,
+        options: a.options ?? [],
+        isFilterable: a.filterable ?? true,
+        isComparable: true,
+        isKeySpec: a.keySpec ?? false,
+        position: a.position,
+      })
+      .onConflictDoNothing();
+    attributeIds.set(a.key, await resolveId(s.attributes, s.attributes.key, a.key, id));
   }
 
   /* ── Products ────────────────────────────────────────────────────── */
@@ -292,6 +338,48 @@ async function main() {
       altText: p.imageAlt,
       position: 0,
     });
+  }
+
+  /* ── Specification values ────────────────────────────────────────── */
+
+  /**
+   * A pass of its own, deliberately, rather than a step inside the loop above.
+   *
+   * That loop skips a product that already exists, which is what keeps the seed
+   * idempotent — but it also means anything added to it later never reaches a
+   * store that was seeded before the addition. Every existing local database and
+   * every CI run has those products already, so specifications attached in there
+   * would be written exactly never, and the table would look empty for reasons
+   * nobody could see. Resolving the product by slug backfills instead, and the
+   * unique index on (product_id, attribute_id) makes a re-run a no-op.
+   */
+  let specValues = 0;
+  for (const [slug, specs] of Object.entries(PRODUCT_SPECS)) {
+    const [product] = await d
+      .select({ id: s.products.id })
+      .from(s.products)
+      .where(sql`${s.products.slug} = ${slug} and ${s.products.tenantId} = ${TENANT_ID}`);
+    if (!product) continue;
+
+    for (const spec of specs) {
+      const attributeId = attributeIds.get(spec.key);
+      if (!attributeId) continue;
+      const [row] = await d
+        .insert(s.productAttributeValues)
+        .values({
+          id: uuidv7(),
+          tenantId: TENANT_ID,
+          productId: product.id,
+          attributeId,
+          // Exactly one of these is set, matching the attribute's declared type.
+          valueText: spec.text ?? null,
+          valueNumber: spec.number ?? null,
+          valueBoolean: spec.boolean ?? null,
+        })
+        .onConflictDoNothing()
+        .returning({ id: s.productAttributeValues.id });
+      if (row) specValues += 1;
+    }
   }
 
   /* ── Customers with UAE addresses ────────────────────────────────── */
@@ -412,6 +500,7 @@ async function main() {
   const productCount = countRows[0]?.count ?? 0;
 
   console.log(`✓ Seeded ${seeded} new products (${productCount} total)`);
+  console.log(`✓ Seeded ${specValues} new specification values across ${ATTRIBUTES.length} attributes`);
   console.log(`  tenant ${TENANT_ID}`);
   console.log('  warehouses: Dubai (Al Quoz), Abu Dhabi (Mussafah)');
   console.log('  prices are VAT-inclusive at 5%, in fils');
@@ -419,15 +508,19 @@ async function main() {
 
 /** Returns the inserted id, or looks up the existing row on conflict. */
 async function resolveId(
-  table: typeof s.brands | typeof s.categories,
-  column: 'slug',
+  table: typeof s.brands | typeof s.categories | typeof s.attributes,
+  // The column itself rather than its name: attributes are unique on `key`
+  // within a tenant where the other two are unique on `slug`, and indexing a
+  // union of tables by a union of column names is not something TypeScript can
+  // narrow.
+  column: AnyPgColumn,
   value: string,
   attemptedId: string,
 ): Promise<string> {
   const rows = await dbAdmin()
     .select({ id: table.id })
     .from(table)
-    .where(sql`${table[column]} = ${value} and ${table.tenantId} = ${TENANT_ID}`);
+    .where(sql`${column} = ${value} and ${table.tenantId} = ${TENANT_ID}`);
   return rows[0]?.id ?? attemptedId;
 }
 
@@ -489,6 +582,185 @@ interface SeedVariant {
   weightGrams?: number;
 }
 
+interface SeedAttribute {
+  key: string;
+  name: string;
+  type: 'text' | 'number' | 'boolean' | 'enum' | 'measurement';
+  /** Rendered after the value. A measurement without one is just a number. */
+  unit?: string;
+  /** Allowed values for `enum`, ordered for facet display. */
+  options?: string[];
+  /** Headline spec — the storefront shows these before the rest. */
+  keySpec?: boolean;
+  filterable?: boolean;
+  /** Display order of the specification table. Spaced so a new attribute can
+   *  be slotted between two others without renumbering the rest. */
+  position: number;
+}
+
+/**
+ * The specification vocabulary for a UAE electronics catalogue.
+ *
+ * `value_number` is an INTEGER column, so anything fractional — a 6.9" display,
+ * Bluetooth 5.3 — is a text attribute rather than a measurement. Storing 6.9 as
+ * a number is not available, and rounding it to 7 would be a lie on a spec
+ * sheet.
+ */
+const ATTRIBUTES: SeedAttribute[] = [
+  { key: 'display', name: 'Display', type: 'text', keySpec: true, position: 10 },
+  { key: 'processor', name: 'Processor', type: 'text', keySpec: true, position: 20 },
+  { key: 'ram', name: 'RAM', type: 'measurement', unit: 'GB', keySpec: true, position: 30 },
+  { key: 'storage', name: 'Storage', type: 'measurement', unit: 'GB', keySpec: true, position: 40 },
+  {
+    key: 'main_camera',
+    name: 'Main camera',
+    type: 'measurement',
+    unit: 'MP',
+    keySpec: true,
+    position: 50,
+  },
+  {
+    key: 'battery_capacity',
+    name: 'Battery',
+    type: 'measurement',
+    unit: 'mAh',
+    keySpec: true,
+    position: 60,
+  },
+  {
+    key: 'network',
+    name: 'Network',
+    type: 'enum',
+    options: ['4G', '5G'],
+    keySpec: true,
+    position: 70,
+  },
+  {
+    key: 'output_power',
+    name: 'Output',
+    type: 'measurement',
+    unit: 'W',
+    keySpec: true,
+    position: 80,
+  },
+  { key: 'ports', name: 'Ports', type: 'number', position: 90, filterable: false },
+  {
+    key: 'charge_technology',
+    name: 'Technology',
+    type: 'enum',
+    options: ['GaN', 'GaN II'],
+    position: 100,
+  },
+  {
+    key: 'sensor_dpi',
+    name: 'Sensor',
+    type: 'measurement',
+    unit: 'DPI',
+    keySpec: true,
+    position: 110,
+  },
+  {
+    key: 'battery_life_days',
+    name: 'Battery life',
+    type: 'measurement',
+    unit: 'days',
+    position: 120,
+  },
+  { key: 'charging_port', name: 'Charging', type: 'enum', options: ['USB-C', 'Micro-USB'], position: 130 },
+  {
+    key: 'battery_buds_hours',
+    name: 'Battery (buds)',
+    type: 'measurement',
+    unit: 'hours',
+    position: 140,
+  },
+  {
+    key: 'battery_total_hours',
+    name: 'Battery (with case)',
+    type: 'measurement',
+    unit: 'hours',
+    keySpec: true,
+    position: 150,
+  },
+  { key: 'bluetooth', name: 'Bluetooth', type: 'text', position: 160, filterable: false },
+  {
+    key: 'noise_cancelling',
+    name: 'Active noise cancelling',
+    type: 'boolean',
+    keySpec: true,
+    position: 170,
+  },
+  { key: 'capacity', name: 'Capacity', type: 'measurement', unit: 'TB', keySpec: true, position: 180 },
+  {
+    key: 'read_speed',
+    name: 'Read speed',
+    type: 'measurement',
+    unit: 'MB/s',
+    keySpec: true,
+    position: 190,
+  },
+  { key: 'interface', name: 'Interface', type: 'text', position: 200, filterable: false },
+  { key: 'water_resistant', name: 'Water resistant', type: 'boolean', position: 210 },
+];
+
+/** Exactly one of `text`, `number` or `boolean`, matching the attribute's type. */
+interface SeedSpec {
+  key: string;
+  text?: string;
+  number?: number;
+  boolean?: boolean;
+}
+
+/**
+ * Specifications per product, keyed by slug.
+ *
+ * Held beside the products rather than inside them so the product literals stay
+ * readable, and so the spread of types — text, number, boolean, enum and
+ * measurement — is visible in one place. Every type is represented, because a
+ * type nothing exercises is a rendering bug waiting for its first real product.
+ */
+const PRODUCT_SPECS: Record<string, SeedSpec[]> = {
+  'samsung-galaxy-s25-ultra': [
+    { key: 'display', text: '6.9" QHD+ AMOLED, 120Hz' },
+    { key: 'processor', text: 'Snapdragon 8 Elite' },
+    { key: 'ram', number: 12 },
+    { key: 'storage', number: 256 },
+    { key: 'main_camera', number: 200 },
+    { key: 'battery_capacity', number: 5000 },
+    { key: 'network', text: '5G' },
+    { key: 'water_resistant', boolean: true },
+  ],
+  'xiaomi-redmi-note-14-pro': [
+    { key: 'display', text: '6.67" AMOLED, 120Hz' },
+    { key: 'ram', number: 8 },
+    { key: 'storage', number: 256 },
+    { key: 'main_camera', number: 200 },
+    { key: 'network', text: '5G' },
+  ],
+  'anker-nano-ii-65w-charger': [
+    { key: 'output_power', number: 65 },
+    { key: 'ports', number: 1 },
+    { key: 'charge_technology', text: 'GaN II' },
+  ],
+  'logitech-mx-master-3s': [
+    { key: 'sensor_dpi', number: 8000 },
+    { key: 'battery_life_days', number: 70 },
+    { key: 'charging_port', text: 'USB-C' },
+  ],
+  'soundcore-liberty-4-nc': [
+    { key: 'battery_buds_hours', number: 10 },
+    { key: 'battery_total_hours', number: 50 },
+    { key: 'bluetooth', text: '5.3' },
+    { key: 'noise_cancelling', boolean: true },
+  ],
+  'samsung-t7-shield-1tb': [
+    { key: 'capacity', number: 1 },
+    { key: 'read_speed', number: 1050 },
+    { key: 'interface', text: 'USB 3.2 Gen 2' },
+    { key: 'water_resistant', boolean: true },
+  ],
+};
+
 interface SeedProduct {
   slug: string;
   title: string;
@@ -525,7 +797,14 @@ const PRODUCTS: SeedProduct[] = [
       '6.9-inch QHD+ display, 1–120Hz adaptive refresh',
       '5,000mAh battery, 45W wired charging',
       'Titanium frame, IP68 water and dust resistance',
-      'UAE warranty, activated on your IMEI at dispatch',
+      // Was "UAE warranty, activated on your IMEI at dispatch". Removed because
+      // nothing writes to `serial_units` — no IMEI is captured at dispatch or
+      // anywhere else. See the note in apps/storefront/src/app/page.tsx for
+      // what would have to be true before it may return. Debt P-03 / C-05.
+      // NOTE: this seeder is `onConflictDoNothing`, so a tenant seeded before
+      // this change keeps the old text in `products.highlights` until the row
+      // is updated. Fixing the source does not fix already-seeded data.
+      'Official UAE warranty, claimed with the dated invoice issued with your order',
     ],
     warrantyMonths: 12,
     ratingAverage: 468,
@@ -534,7 +813,13 @@ const PRODUCTS: SeedProduct[] = [
     imageAlt: 'Samsung Galaxy S25 Ultra in titanium grey',
     answerableFacts: [
       { question: 'Does it support 5G?', answer: 'Yes, the Galaxy S25 Ultra supports 5G networks.' },
-      { question: 'What warranty is included?', answer: '12 months UAE warranty registered to the handset IMEI.' },
+      // Was "…registered to the handset IMEI." Nothing registers an IMEI, and an
+      // answerable fact is the version assistants quote back. Debt P-03 / C-05.
+      {
+        question: 'What warranty is included?',
+        answer:
+          '12 months UAE warranty from the manufacturer. The dated invoice issued with your order carries our TRN and is the proof of purchase the service centre asks for.',
+      },
       { question: 'How large is the battery?', answer: 'The battery is 5,000mAh with 45W wired charging.' },
     ],
     variants: [

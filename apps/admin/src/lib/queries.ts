@@ -262,6 +262,19 @@ export interface OrderDetail extends OrderRow {
   readonly events: readonly OrderEvent[];
   readonly transactions: readonly OrderTransaction[];
   readonly actions: readonly string[];
+  /**
+   * The provider the order was placed with, from its latest payment intent —
+   * 'cod', 'stripe', 'tabby', and so on.
+   *
+   * Not derivable from `transactions`: a COD order has no transaction row until
+   * the courier's cash is recorded, which is precisely the moment before the
+   * operator needs to know it is COD. This is the same signal
+   * `recordCodCollection` enforces against, so the buttons the UI offers match
+   * what the domain will accept.
+   */
+  readonly paymentProvider: string | null;
+  /** The buyer's TRN when they gave one. Its presence makes this a B2B supply. */
+  readonly recipientTrn: string | null;
 }
 
 export interface OrderLine {
@@ -326,8 +339,18 @@ export async function getOrderDetail(
       phone: string | null;
       shipping_address: Record<string, unknown> | null;
       risk_score: number;
+      recipient_trn: string | null;
+      payment_provider: string | null;
     }>(sql`
-      SELECT o.* FROM orders o
+      SELECT o.*, pi.provider AS payment_provider
+      FROM orders o
+      -- Latest intent only. A shopper whose card is declined and who retries as
+      -- cash on delivery leaves two intents behind, and the one that matters is
+      -- the one they actually checked out with.
+      LEFT JOIN LATERAL (
+        SELECT provider FROM payment_intents
+        WHERE order_id = o.id ORDER BY created_at DESC LIMIT 1
+      ) pi ON true
       WHERE o.tenant_id = ${tenantId} AND o.number = ${orderNumber.replace(/^#/, '')}
       LIMIT 1
     `);
@@ -434,6 +457,8 @@ export async function getOrderDetail(
         gateway: t.provider,
         createdAt: toDate(t.created_at) ?? new Date(0),
       })),
+      paymentProvider: order.payment_provider,
+      recipientTrn: order.recipient_trn,
       // Asked of the state machine rather than derived in the template, so the
       // buttons the UI offers are exactly the transitions the domain will
       // accept. A Refund button that throws when clicked is worse than one that

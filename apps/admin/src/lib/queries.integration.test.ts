@@ -129,6 +129,41 @@ suite('admin read model', () => {
     expect(await getOrderDetail(TENANT, 'definitely-not-an-order')).toBeNull();
   });
 
+  it('getOrderDetail reports the provider from the latest payment intent', async () => {
+    // The signal behind the "Record cash collected" button. It has to come from
+    // the payment intent: a COD order has no transaction row until the cash is
+    // recorded, and `payment_status = 'unpaid'` — the stand-in this replaced —
+    // is equally true of a card order whose authorisation is still settling,
+    // which put a cash-collection button in front of staff for an order the
+    // customer had already paid by card.
+    const orderId = uuidv7();
+    const number = `9${Date.now().toString().slice(-4)}`;
+    try {
+      await dbAdmin().execute(sql`
+        INSERT INTO orders (id, tenant_id, number, payment_status, total, subtotal)
+        VALUES (${orderId}, ${TENANT}, ${number}, 'unpaid', 100000, 100000)
+      `);
+      // Two intents: a card attempt, then the COD retry the shopper actually
+      // checked out with. Only the newest one describes how they are paying.
+      for (const [provider, secondsAgo] of [['network', 60], ['cod', 0]] as const) {
+        await dbAdmin().execute(sql`
+          INSERT INTO payment_intents
+            (id, tenant_id, order_id, provider, amount, currency, idempotency_key, created_at)
+          VALUES (${uuidv7()}, ${TENANT}, ${orderId}, ${provider}, 100000, 'AED',
+                  ${`k-${orderId}-${provider}`}, now() - (${secondsAgo} * interval '1 second'))
+        `);
+      }
+
+      const detail = await getOrderDetail(TENANT, number);
+      expect(detail?.paymentProvider).toBe('cod');
+      // Nothing has been captured, so the ledger cannot have carried this.
+      expect(detail?.transactions).toHaveLength(0);
+    } finally {
+      await dbAdmin().execute(sql`DELETE FROM payment_intents WHERE order_id = ${orderId}`);
+      await dbAdmin().execute(sql`DELETE FROM orders WHERE id = ${orderId}`);
+    }
+  });
+
   it('another tenant cannot read this tenant’s orders', async () => {
     // The load-bearing multi-tenancy assertion for the admin. Every query here
     // runs inside withTenant(), so RLS should return nothing for a stranger.

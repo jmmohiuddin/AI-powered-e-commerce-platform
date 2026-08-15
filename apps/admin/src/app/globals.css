@@ -942,3 +942,89 @@ table.data tbody tr:hover {
   font-size: var(--text-xs);
   padding: var(--space-2);
 }
+
+/* ───────────────────────────── Product media ─────────────────────────── */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.media-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.media-upload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.media-upload .field {
+  flex: 1 1 18rem;
+}
+
+.media-upload .muted {
+  flex-basis: 100%;
+  font-size: var(--text-xs);
+}
+
+.media-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.media-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+}
+
+/* The first row is the tile image and the link preview, so it is marked as
+   something other than "row one of a list" — position here is a decision the
+   merchant made, not an accident of upload order. */
+.media-item:first-child {
+  border-color: var(--colour-accent);
+}
+
+.media-item__thumb {
+  flex: 0 0 auto;
+  inline-size: 72px;
+  block-size: 72px;
+  object-fit: contain;
+  background: var(--colour-surface);
+  border-radius: var(--radius-sm);
+}
+
+.media-item__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.media-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.media-item__actions .btn {
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-2);
+}

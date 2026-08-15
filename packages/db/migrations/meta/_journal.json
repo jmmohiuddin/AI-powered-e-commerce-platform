@@ -36,6 +36,27 @@
       "when": 1786013984179,
       "tag": "0004_crazy_anita_blake",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786686116295,
+      "tag": "0005_tricky_odin",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786686753507,
+      "tag": "0006_flowery_nightcrawler",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786765384839,
+      "tag": "0007_majestic_joystick",
+      "breakpoints": true
     }
   ]
 }

@@ -41,10 +41,30 @@ export function slugify(input: string): string {
   return slug;
 }
 
+/**
+ * A product's copy in one non-default locale.
+ *
+ * Mirrors `LocaleOverrides` in the storefront's lib/types.ts, which is what
+ * reads these back. The two are deliberately separate declarations rather than
+ * a shared type: this package must not import from an app.
+ *
+ * UAE Federal Law 15/2020 requires consumer product information in Arabic, so
+ * `ar-AE` is not an optional nicety here — it is the reason this exists.
+ */
+export interface ProductTranslation {
+  readonly title?: string | undefined;
+  readonly subtitle?: string | undefined;
+  readonly description?: string | undefined;
+  readonly highlights?: readonly string[] | undefined;
+}
+
 export interface ProductInput {
   readonly title: string;
   readonly subtitle?: string | undefined;
   readonly description?: string | undefined;
+  readonly highlights?: readonly string[] | undefined;
+  /** Keyed by locale tag: `{ "ar-AE": { title, subtitle, … } }`. */
+  readonly translations?: Readonly<Record<string, ProductTranslation>> | undefined;
   readonly brandId?: string | undefined;
   readonly categoryId?: string | undefined;
   readonly condition?: string | undefined;
@@ -73,6 +93,49 @@ function requireText(value: string | undefined, field: string, max = 200): strin
     });
   }
   return trimmed;
+}
+
+/** Bullet lines, trimmed, with the blanks dropped. A textarea returns one
+ *  string per line and merchants leave trailing newlines. */
+function normaliseHighlights(values: readonly string[] | undefined): string[] {
+  return (values ?? []).map((value) => value.trim()).filter((value) => value.length > 0);
+}
+
+/**
+ * Strips empty fields out of a translation set before it reaches the database.
+ *
+ * This is load-bearing, not tidying. The storefront resolves a translated field
+ * with `overrides.title ?? product.title` — `??` falls back on null/undefined
+ * only, so an empty string is a *value*, and one stored here would blank the
+ * English title for Arabic readers instead of falling back to it. A merchant
+ * who opens the Arabic fields, types nothing and saves must leave no trace.
+ *
+ * A locale left with no fields at all is dropped, so the column holds `{}`
+ * rather than `{"ar-AE": {}}`. Both mean "nothing translated", but only one of
+ * them reads that way to the next person looking at the row.
+ */
+function normaliseTranslations(
+  input: Readonly<Record<string, ProductTranslation>> | undefined,
+): Record<string, ProductTranslation> {
+  const output: Record<string, ProductTranslation> = {};
+
+  for (const [locale, fields] of Object.entries(input ?? {})) {
+    const title = fields.title?.trim();
+    const subtitle = fields.subtitle?.trim();
+    const description = fields.description?.trim();
+    const highlights = normaliseHighlights(fields.highlights);
+
+    const translation: ProductTranslation = {
+      ...(title ? { title } : {}),
+      ...(subtitle ? { subtitle } : {}),
+      ...(description ? { description } : {}),
+      ...(highlights.length > 0 ? { highlights } : {}),
+    };
+
+    if (Object.keys(translation).length > 0) output[locale] = translation;
+  }
+
+  return output;
 }
 
 function requireMinorUnits(value: number | undefined, field: string): number {
@@ -164,11 +227,14 @@ export async function createProduct(
 
   await tx.execute(sql`
     INSERT INTO products
-      (id, tenant_id, store_id, slug, title, subtitle, description, brand_id, category_id,
+      (id, tenant_id, store_id, slug, title, subtitle, description, highlights, translations,
+       brand_id, category_id,
        status, condition, currency, price_from, warranty_months, rating_count,
        created_at, updated_at)
     VALUES (${productId}, ${ctx.tenantId}, ${ctx.storeId ?? null}, ${slug}, ${title},
             ${product.subtitle?.trim() || null}, ${product.description?.trim() || null},
+            ${JSON.stringify(normaliseHighlights(product.highlights))}::jsonb,
+            ${JSON.stringify(normaliseTranslations(product.translations))}::jsonb,
             ${product.brandId ?? null}, ${product.categoryId ?? null},
             'draft', ${(product.condition ?? 'new')}::product_condition, ${ctx.currency},
             ${price}, ${product.warrantyMonths ?? null}, 0, now(), now())
@@ -247,6 +313,11 @@ export async function updateProduct(
       title = ${title},
       subtitle = ${patch.subtitle?.trim() || null},
       description = ${patch.description?.trim() || null},
+      -- Replaced wholesale, like subtitle and description above: the edit form
+      -- submits the full set every time, so an omitted line is a deletion the
+      -- merchant just made rather than a field the caller forgot.
+      highlights = ${JSON.stringify(normaliseHighlights(patch.highlights))}::jsonb,
+      translations = ${JSON.stringify(normaliseTranslations(patch.translations))}::jsonb,
       brand_id = ${patch.brandId ?? null},
       category_id = ${patch.categoryId ?? null},
       condition = ${(patch.condition ?? 'new')}::product_condition,

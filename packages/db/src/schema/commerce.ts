@@ -299,6 +299,18 @@ export const orders = pgTable(
     shippingAddress: jsonb('shipping_address'),
     billingAddress: jsonb('billing_address'),
 
+    /**
+     * The buyer's Tax Registration Number, when they gave one.
+     *
+     * Its presence is what makes a supply B2B, and a B2B supply requires a full
+     * tax invoice carrying this number at any value — without it the business
+     * customer cannot reclaim the input VAT and will reject the document.
+     * Captured at checkout, optional, and stored on the order rather than the
+     * customer because a shopper may buy personally one week and for their
+     * company the next.
+     */
+    recipientTrn: varchar('recipient_trn', { length: 20 }),
+
     appliedDiscounts: jsonb('applied_discounts').notNull().default([]),
     attribution: jsonb('attribution').notNull().default({}),
 

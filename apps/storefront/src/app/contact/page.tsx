@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UAE_VAT_RATE_BPS } from '@voltix/core';
+import { supportEmail, supportPhone, telHref, whatsappHref, whatsappNumber } from '@/lib/contact';
 
 export const metadata: Metadata = {
   title: 'Contact us',
@@ -21,9 +22,11 @@ export const metadata: Metadata = {
  * up and someone owns it.
  */
 export default function ContactPage() {
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '';
-  const phone = process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? '';
-  const email = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? '';
+  const whatsapp = whatsappNumber();
+  const whatsappLink = whatsappHref();
+  const phone = supportPhone();
+  const telephone = telHref();
+  const email = supportEmail();
 
   return (
     <div className="container section" style={{ maxWidth: '680px' }}>
@@ -34,10 +37,10 @@ export default function ContactPage() {
       </p>
 
       <div className="contact-grid">
-        {whatsapp && (
+        {whatsapp && whatsappLink && (
           <a
             className="contact-card"
-            href={`https://wa.me/${whatsapp.replace(/\D/g, '')}`}
+            href={whatsappLink}
             target="_blank"
             // noreferrer alongside noopener: this is an outbound link from a
             // page a customer reaches mid-purchase, and the referrer would
@@ -50,8 +53,8 @@ export default function ContactPage() {
           </a>
         )}
 
-        {phone && (
-          <a className="contact-card" href={`tel:${phone.replace(/\s/g, '')}`}>
+        {phone && telephone && (
+          <a className="contact-card" href={telephone}>
             <strong>Call us</strong>
             <span>{phone}</span>
             <span className="muted">Sunday–Thursday, 9am–6pm Gulf Standard Time</span>

@@ -32,3 +32,15 @@ test-results/
 
 # Vitest JSON report, written by CI.
 vitest-results.json
+
+# Product images written by the local-disk media driver in development.
+# Real deployments use object storage; these are one machine's uploads.
+apps/storefront/public/uploads/
+
+# Playwright MCP page snapshots — per-session tool output, not source.
+.playwright-mcp/
+
+# Ad-hoc screenshots captured while verifying work.
+*.png
+!apps/**/public/**/*.png
+!docs/**/*.png

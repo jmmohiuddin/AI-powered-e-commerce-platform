@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voltix Sync — Wireframing Document v1.0</title>
+<style>
+  :root{
+    --ink:#1c1c1e; --ink2:#5a5a5f; --ink3:#8e8e93;
+    --line:#c9c9cf; --line2:#e2e2e6; --paper:#fff; --bg:#f4f4f5;
+    --fill:#ececed; --accent:#c2410c; --ok:#3f6212; --warn:#a16207;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);
+       -webkit-font-smoothing:antialiased}
+  .page{max-width:1180px;margin:0 auto;padding:0 28px 100px}
+
+  /* ---------- masthead ---------- */
+  header.mast{padding:76px 0 40px;border-bottom:2px solid var(--ink)}
+  .eyebrow{font:600 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;
+           color:var(--accent);margin-bottom:22px}
+  h1{font-size:44px;line-height:1.06;letter-spacing:-.022em;margin:0 0 14px;font-weight:640}
+  .dek{font-size:18px;line-height:1.5;color:var(--ink2);max-width:60ch;margin:0}
+  .meta{display:flex;flex-wrap:wrap;gap:0 44px;margin-top:32px;
+        font:500 12px/1.9 var(--mono);color:var(--ink3)}
+  .meta b{display:block;color:var(--ink);font-weight:600;text-transform:none;font-size:12px}
+
+  /* ---------- structure ---------- */
+  section{padding-top:56px}
+  h2{font-size:13px;font-weight:650;letter-spacing:.13em;text-transform:uppercase;
+     color:var(--accent);margin:0 0 6px;font-family:var(--mono)}
+  h2 + .h2sub{font-size:27px;line-height:1.2;letter-spacing:-.015em;font-weight:640;
+              margin:0 0 20px;max-width:38ch}
+  h3{font-size:19px;font-weight:640;letter-spacing:-.01em;margin:38px 0 4px}
+  p{max-width:74ch;margin:0 0 14px}
+  .lede{color:var(--ink2)}
+  .rule{height:1px;background:var(--line2);margin:44px 0}
+  code{font:500 12.5px var(--mono);background:var(--fill);padding:1px 5px;border-radius:3px}
+
+  /* ---------- key / legend ---------- */
+  .key{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;
+       margin:22px 0 0}
+  .key div{border:1px solid var(--line2);background:var(--paper);padding:12px 14px;border-radius:5px}
+  .key b{display:block;font-size:12.5px;margin-bottom:3px}
+  .key span{font-size:12.5px;color:var(--ink2);line-height:1.45;display:block}
+
+  /* ---------- screen block ---------- */
+  .screen{background:var(--paper);border:1px solid var(--line2);border-radius:8px;
+          margin-top:26px;overflow:hidden}
+  .screen > .head{padding:18px 22px;border-bottom:1px solid var(--line2);
+                  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .tag{font:600 11px/1 var(--mono);letter-spacing:.09em;background:var(--ink);color:#fff;
+       padding:5px 8px;border-radius:3px}
+  .head h4{margin:0;font-size:17px;font-weight:640;letter-spacing:-.01em}
+  .head .who{font:500 11.5px var(--mono);color:var(--ink3);margin-left:auto}
+  .doubt{padding:14px 22px;background:#fbfbfb;border-bottom:1px solid var(--line2);
+         font-size:14px;color:var(--ink2)}
+  .doubt b{color:var(--ink);font-weight:600}
+  .body{display:grid;grid-template-columns:auto 1fr;gap:34px;padding:26px 22px}
+  @media(max-width:880px){.body{grid-template-columns:1fr}}
+  .frames{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+
+  /* ---------- device frames ---------- */
+  .phone{width:290px;border:2px solid var(--ink);border-radius:20px;background:var(--paper);
+         overflow:hidden;position:relative;flex:none}
+  .phone .status{height:22px;background:var(--ink);display:flex;align-items:center;
+                 justify-content:center}
+  .phone .status i{width:52px;height:5px;background:#555;border-radius:3px;display:block}
+  .desk{width:640px;border:2px solid var(--ink);border-radius:8px;background:var(--paper);
+        overflow:hidden;flex:none;max-width:100%}
+  .desk .chrome{height:22px;background:var(--ink);display:flex;align-items:center;gap:5px;
+                padding:0 9px}
+  .desk .chrome i{width:7px;height:7px;border-radius:50%;background:#555;display:block}
+  .caption{font:500 11px var(--mono);color:var(--ink3);margin-top:7px;text-align:center}
+
+  /* ---------- wireframe primitives ---------- */
+  .wf{padding:12px;font-size:12px;line-height:1.4}
+  .wf.tight{padding:0}
+  .bar{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);
+       font-weight:600;font-size:12.5px}
+  .bar .r{margin-left:auto;font-weight:500;color:var(--ink3);font-size:11.5px}
+  .row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid var(--line2)}
+  .row:last-child{border-bottom:0}
+  .row .g{flex:1;min-width:0}
+  .row .r{margin-left:auto;text-align:right;white-space:nowrap}
+  .t1{font-size:12.5px;font-weight:600}
+  .t2{font-size:11px;color:var(--ink3);font-family:var(--mono)}
+  .t3{font-size:11px;color:var(--ink2)}
+  .big{font-size:30px;font-weight:640;letter-spacing:-.02em;line-height:1}
+  .huge{font-size:46px;font-weight:640;letter-spacing:-.025em;line-height:1}
+  .ph{background:repeating-linear-gradient(135deg,#f0f0f1,#f0f0f1 5px,#e6e6e8 5px,#e6e6e8 10px);
+      border:1px solid var(--line);border-radius:3px}
+  .box{border:1px solid var(--line);border-radius:4px;padding:9px 11px}
+  .btn{border:1.5px solid var(--ink);border-radius:5px;padding:10px;text-align:center;
+       font-weight:650;font-size:12.5px}
+  .btn.solid{background:var(--ink);color:#fff}
+  .btn.ghost{border-color:var(--line);color:var(--ink2);font-weight:500}
+  .field{border:1px solid var(--line);border-radius:5px;padding:9px 11px;color:var(--ink3);
+         font-size:12px;display:flex;align-items:center;gap:7px}
+  .field.focus{border-color:var(--ink);border-width:2px;padding:8px 10px;color:var(--ink)}
+  .chip{border:1px solid var(--line);border-radius:20px;padding:4px 10px;font-size:11px;
+        display:inline-block}
+  .stack{display:flex;flex-direction:column;gap:9px}
+  .split{display:flex;gap:9px}
+  .split > *{flex:1}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}
+  .dot.a{background:var(--ok)} .dot.b{background:var(--warn)} .dot.c{background:var(--accent)}
+  .dot.d{background:var(--ink3)}
+  .sec{padding:9px 12px;font:600 9.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;
+       color:var(--ink3);border-bottom:1px solid var(--line2);background:#fafafa}
+  .banner{padding:9px 12px;background:#fdf6ec;border-bottom:1px solid #e8d9be;font-size:11.5px;
+          color:#7a5b1a}
+  .spark{height:26px;background:repeating-linear-gradient(90deg,var(--line2),var(--line2) 2px,transparent 2px,transparent 7px);
+         border-bottom:1px solid var(--line)}
+  .nav{display:flex;border-top:1px solid var(--line);}
+  .nav div{flex:1;text-align:center;padding:9px 2px;font-size:9.5px;color:var(--ink3);
+           border-right:1px solid var(--line2)}
+  .nav div:last-child{border-right:0}
+  .nav div.on{color:var(--ink);font-weight:650}
+  .sidebar{width:150px;border-right:1px solid var(--line);padding:10px 0;flex:none}
+  .sidebar .g{font:600 9px var(--mono);letter-spacing:.12em;color:var(--ink3);padding:9px 12px 4px}
+  .sidebar .i{padding:5px 12px;font-size:11.5px}
+  .sidebar .i.on{font-weight:650;border-left:2.5px solid var(--accent);padding-left:9.5px}
+  .sidebar .i.off{color:#bbb}
+  .flexrow{display:flex}
+  table.wt{width:100%;border-collapse:collapse;font-size:11.5px}
+  table.wt th{text-align:left;font:600 9.5px var(--mono);letter-spacing:.09em;text-transform:uppercase;
+              color:var(--ink3);padding:8px 10px;border-bottom:1px solid var(--line)}
+  table.wt td{padding:8px 10px;border-bottom:1px solid var(--line2)}
+  table.wt td.n{text-align:right;font-family:var(--mono)}
+
+  /* ---------- annotations ---------- */
+  .ann{counter-reset:a}
+  .ann h5{font:600 10px var(--mono);letter-spacing:.13em;text-transform:uppercase;
+          color:var(--ink3);margin:0 0 12px}
+  .ann ol{margin:0;padding:0;list-style:none;counter-reset:n}
+  .ann li{position:relative;padding-left:30px;margin-bottom:13px;font-size:13.5px;
+          line-height:1.5;color:var(--ink2);max-width:62ch}
+  .ann li::before{counter-increment:n;content:counter(n);position:absolute;left:0;top:1px;
+    width:19px;height:19px;border:1.5px solid var(--accent);color:var(--accent);border-radius:50%;
+    font:650 10.5px/17px var(--mono);text-align:center}
+  .ann li b{color:var(--ink);font-weight:640}
+  .m{display:inline-flex;width:16px;height:16px;border:1.5px solid var(--accent);color:var(--accent);
+     border-radius:50%;font:650 9px/13px var(--mono);align-items:center;justify-content:center;
+     vertical-align:1px;flex:none}
+
+  /* ---------- states strip ---------- */
+  .states{padding:0 22px 24px}
+  .states h5{font:600 10px var(--mono);letter-spacing:.13em;text-transform:uppercase;
+             color:var(--ink3);margin:0 0 12px}
+  .stgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(184px,1fr));gap:12px}
+  .st{border:1px solid var(--line2);border-radius:5px;overflow:hidden}
+  .st .lbl{font:600 9.5px var(--mono);letter-spacing:.09em;text-transform:uppercase;
+           padding:7px 9px;background:#fafafa;border-bottom:1px solid var(--line2);color:var(--ink2)}
+  .st .c{padding:11px 9px;font-size:11.5px;line-height:1.45;color:var(--ink2);min-height:74px}
+  .st .c b{color:var(--ink);display:block;font-size:12px;margin-bottom:3px}
+
+  /* ---------- tables in prose ---------- */
+  table.doc{width:100%;border-collapse:collapse;font-size:13.5px;margin:16px 0}
+  table.doc th{text-align:left;font:600 10px var(--mono);letter-spacing:.11em;text-transform:uppercase;
+               color:var(--ink3);padding:9px 12px 9px 0;border-bottom:1.5px solid var(--ink)}
+  table.doc td{padding:11px 12px 11px 0;border-bottom:1px solid var(--line2);vertical-align:top;
+               color:var(--ink2)}
+  table.doc td:first-child{color:var(--ink);font-weight:560;white-space:nowrap}
+
+  /* ---------- flow ---------- */
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:20px 0}
+  .fstep{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:13px 15px;
+         min-width:132px;flex:1}
+  .fstep .n{font:600 9.5px var(--mono);color:var(--accent);letter-spacing:.1em;margin-bottom:5px}
+  .fstep .t{font-size:13px;font-weight:600;margin-bottom:3px}
+  .fstep .s{font-size:11.5px;color:var(--ink3);font-family:var(--mono)}
+  .farrow{display:flex;align-items:center;padding:0 9px;color:var(--line);font-size:17px}
+  @media(max-width:760px){.farrow{transform:rotate(90deg);padding:5px 0;width:100%;justify-content:center}}
+
+  .callout{border:1px solid var(--line2);background:#fffdfb;padding:18px 20px;
+           margin:20px 0;border-radius:6px}
+  .callout .lbl{font:600 10px var(--mono);letter-spacing:.13em;text-transform:uppercase;
+                color:var(--accent);margin-bottom:9px}
+  .callout p{margin:0;font-size:14px;max-width:70ch}
+  .callout p + p{margin-top:9px}
+
+  .checklist{list-style:none;padding:0;margin:16px 0;max-width:74ch}
+  .checklist li{padding:9px 0 9px 30px;border-bottom:1px solid var(--line2);position:relative;
+                font-size:14px;color:var(--ink2)}
+  .checklist li::before{content:"";position:absolute;left:0;top:11px;width:14px;height:14px;
+                        border:1.5px solid var(--line);border-radius:3px}
+
+  footer{margin-top:70px;padding-top:26px;border-top:1px solid var(--line2);
+         font-size:13px;color:var(--ink3);max-width:74ch}
+  @media print{
+    body{background:#fff} .page{max-width:none;padding:0}
+    .screen{break-inside:avoid;page-break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="mast">
+  <div class="eyebrow">Wireframing Document · v1.0</div>
+  <h1>Voltix Sync</h1>
+  <p class="dek">Low-fidelity screen layouts for the multichannel inventory and order sync engine —
+     structure, hierarchy and annotation, ahead of visual design.</p>
+  <div class="meta">
+    <div><b>Date</b>12 August 2026</div>
+    <div><b>Status</b>Draft for review</div>
+    <div><b>Implements</b>PRD v1.0 · PDD v1.0 · TRD v1.0</div>
+    <div><b>Screens</b>12 specified · 4 P0 flows</div>
+  </div>
+</header>
+
+<!-- ============ HOW TO READ ============ -->
+<section>
+  <h2>Section 01</h2>
+  <div class="h2sub">How to read this document</div>
+  <p class="lede">These are wireframes, not designs. They fix <b>what is on each screen, in what
+  order of importance, and how it behaves</b>. They deliberately say nothing about typeface,
+  colour, illustration or brand — those decisions come next, and they come easier once structure
+  is settled.</p>
+  <p class="lede">Every screen carries the <b>doubt</b> it exists to answer, taken from the Product
+  Design Document. A screen that does not answer a doubt should not be built. Numbered markers
+  <span class="m">1</span> on each frame correspond to the annotations beside it.</p>
+
+  <h3>Conventions</h3>
+  <div class="key">
+    <div><b>Hatched block</b><span>Image, chart or content whose exact form is not yet decided.</span></div>
+    <div><b>Solid dark button</b><span>The single primary action. One per screen, no exceptions.</span></div>
+    <div><b>Outlined button</b><span>Secondary. Present but not competing for attention.</span></div>
+    <div><b>Monospaced text</b><span>System-generated: identifiers, quantities, timestamps.</span></div>
+    <div><b>● Coloured dot</b><span>Channel or sync status. Always paired with a word — never colour alone.</span></div>
+    <div><b>Phone frame</b><span>375 px. The default target. Desktop is the enhancement.</span></div>
+  </div>
+
+  <h3>Layout grid</h3>
+  <table class="doc">
+    <tr><th>Breakpoint</th><th>Columns</th><th>Gutter</th><th>Margin</th><th>Behaviour</th></tr>
+    <tr><td>&lt; 480 px</td><td>4</td><td>16</td><td>16</td><td>Single column, bottom nav, tables become cards</td></tr>
+    <tr><td>480–900</td><td>8</td><td>20</td><td>24</td><td>Single column, denser rows</td></tr>
+    <tr><td>900–1280</td><td>12</td><td>24</td><td>32</td><td>Sidebar returns, real tables</td></tr>
+    <tr><td>&gt; 1280</td><td>12</td><td>24</td><td>48</td><td>Two-column detail views</td></tr>
+  </table>
+  <p class="lede">Spacing uses the existing <code>--space-1..8</code> token scale. Minimum touch
+  target 44 px, and 56 px in counter mode. Nothing in these wireframes introduces a new scale.</p>
+</section>
+
+<div class="rule"></div>
+
+<!-- ============ SCREEN INDEX ============ -->
+<section>
+  <h2>Section 02</h2>
+  <div class="h2sub">Screen index</div>
+  <table class="doc">
+    <tr><th>Ref</th><th>Screen</th><th>Primary action</th><th>User</th><th>Priority</th></tr>
+    <tr><td>W-01</td><td>Sync Health</td><td>Confirm everything is fine</td><td>Operator</td><td>P0</td></tr>
+    <tr><td>W-02</td><td>Channel detail</td><td>Diagnose one channel</td><td>Operator</td><td>P0</td></tr>
+    <tr><td>W-03</td><td>Listing map</td><td>Map a SKU to a listing</td><td>Operator</td><td>P0</td></tr>
+    <tr><td>W-04</td><td>Product create / edit</td><td>Publish a product</td><td>Operator</td><td>P0</td></tr>
+    <tr><td>W-05</td><td>Stock adjustment</td><td>Record a receipt</td><td>Operator</td><td>P0</td></tr>
+    <tr><td>W-06</td><td>Stocktake</td><td>Post a variance</td><td>Operator</td><td>P0</td></tr>
+    <tr><td>W-07</td><td>Locations</td><td>Set pool participation</td><td>Operator</td><td>P0</td></tr>
+    <tr><td>W-08</td><td>Counter sale</td><td>Sell an item</td><td>Staff</td><td>P0 · critical</td></tr>
+    <tr><td>W-09</td><td>Availability lookup</td><td>Answer “do we have it?”</td><td>Staff</td><td>P0</td></tr>
+    <tr><td>W-10</td><td>Order queue</td><td>Clear today’s orders</td><td>Both</td><td>P0</td></tr>
+    <tr><td>W-11</td><td>Order detail</td><td>Fulfil an order</td><td>Both</td><td>P0</td></tr>
+    <tr><td>W-12</td><td>Drift &amp; oversell register</td><td>Understand a failure</td><td>Operator</td><td>P0</td></tr>
+  </table>
+</section>
+
+<div class="rule"></div>
+
+<!-- ============ W-01 ============ -->
+<section>
+  <h2>Section 03</h2>
+  <div class="h2sub">Screen wireframes</div>
+
+  <div class="screen">
+    <div class="head"><span class="tag">W-01</span><h4>Sync Health</h4>
+      <span class="who">Operator · phone · landing screen</span></div>
+    <div class="doubt"><b>Doubt:</b> “Is my stock right everywhere, right now?”</div>
+    <div class="body">
+      <div class="frames">
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight">
+              <div style="padding:14px 12px 12px;border-bottom:1px solid var(--line)">
+                <div style="font-size:17px;font-weight:650;letter-spacing:-.01em">All channels in sync</div>
+                <div class="t2" style="margin-top:4px">Last check 14 seconds ago</div>
+              </div>
+              <div class="row"><span class="dot a"></span>
+                <div class="g"><div class="t1">noon</div><div class="t2">1,204 listings · p95 48 s</div></div>
+                <div class="r t2">18 s ago</div></div>
+              <div class="row"><span class="dot a"></span>
+                <div class="g"><div class="t1">Amazon.ae</div><div class="t2">1,180 listings · p95 3 m 10 s</div></div>
+                <div class="r t2">2 min ago</div></div>
+              <div class="row"><span class="dot a"></span>
+                <div class="g"><div class="t1">voltix.ae</div><div class="t2">1,240 listings · instant</div></div>
+                <div class="r t2">live</div></div>
+              <div class="row"><span class="dot a"></span>
+                <div class="g"><div class="t1">Shop counter</div><div class="t2">Last sale 41 min ago</div></div>
+                <div class="r t2">live</div></div>
+              <div class="sec">Held back on purpose</div>
+              <div class="row"><div class="g t3">Withheld by buffer</div><div class="r t1">34 units</div></div>
+              <div class="row"><div class="g t3">Last-unit rule</div><div class="r t1">6 SKUs</div></div>
+              <div class="sec">Report card</div>
+              <div class="row"><div class="g t3">Oversells, 30 days</div><div class="r big">0</div></div>
+              <div class="row"><div class="g t3">Drift corrected today</div><div class="r t1">2</div></div>
+              <div class="nav"><div class="on">Sync</div><div>Orders</div><div>Stock</div><div>More</div></div>
+            </div>
+          </div>
+          <div class="caption">375 px · healthy state</div>
+        </div>
+      </div>
+      <div class="ann">
+        <h5>Annotations</h5>
+        <ol>
+          <li><b>The headline is a sentence, not a gauge.</b> “All channels in sync”, or
+            “noon is 12 minutes behind”. A phrase can be read while walking; a dial has to be
+            interpreted, and interpretation is slower than reading.</li>
+          <li><b>Each row shows last <i>confirmed</i> write, not last attempt.</b> “18 s ago”
+            means a channel acknowledged it applied our number. An attempted write that was never
+            confirmed is not progress and must not read like it.</li>
+          <li><b>p95 is on the row, permanently.</b> The product’s whole positioning rests on this
+            figure being measured and published, which is why the word “real-time” appears nowhere
+            in the interface.</li>
+          <li><b>“Held back on purpose” is a section, not a footnote.</b> Buffer and last-unit
+            suppression are deliberate conservatism; if hidden, a listing showing fewer units than
+            the warehouse holds looks like a bug. Tapping lists the SKUs and the reason for each.</li>
+          <li><b>Oversells over 30 days stays on screen at zero.</b> Especially at zero — it is the
+            product’s report card and the answer to the doubt in one number.</li>
+          <li><b>No green wash on the healthy state.</b> Colour is spent sparingly so that red
+            still means something when it appears.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="states">
+      <h5>Required states</h5>
+      <div class="stgrid">
+        <div class="st"><div class="lbl">Loading</div><div class="c">Skeleton rows preserving
+          layout. <b>Not a spinner</b> — a spinner on the trust screen reads as “we don’t know”.</div></div>
+        <div class="st"><div class="lbl">Channel behind</div><div class="c"><b>noon is 12 minutes behind</b>
+          Only that row takes warning treatment. Headline names the channel.</div></div>
+        <div class="st"><div class="lbl">Paused by you</div><div class="c"><b>Paused 12 min ago</b>
+          8 changes queued. Resume is the primary action.</div></div>
+        <div class="st"><div class="lbl">Breaker open</div><div class="c"><b>noon is not responding</b>
+          14 changes queued, nothing lost. Retrying in 2 min.</div></div>
+        <div class="st"><div class="lbl">Drift over threshold</div><div class="c">Red headline with
+          the count. Links straight to W-12.</div></div>
+        <div class="st"><div class="lbl">First run</div><div class="c"><b>No channels connected</b>
+          Single action: Connect noon.</div></div>
+        <div class="st"><div class="lbl">Stale page</div><div class="c">Whole page dims.
+          “Showing data from 4 minutes ago — reconnecting.”</div></div>
+        <div class="st"><div class="lbl">Offline</div><div class="c">Banner above headline. Values
+          muted, ages shown absolute.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-02 ============ -->
+  <div class="screen">
+    <div class="head"><span class="tag">W-02</span><h4>Channel detail</h4>
+      <span class="who">Operator · phone</span></div>
+    <div class="doubt"><b>Doubt:</b> “What exactly is wrong with this one channel?”</div>
+    <div class="body">
+      <div class="frames">
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight">
+              <div class="bar">‹ noon <span class="r">Pause</span></div>
+              <div class="row"><div class="g"><div class="t1">Connected · FBP · 1 warehouse</div>
+                <div class="t2">Last confirmed write 18 s ago</div></div></div>
+              <div class="sec">Latency, last 24 h</div>
+              <div class="row"><div class="g t3">p50</div><div class="r t1">22 s</div></div>
+              <div class="row"><div class="g t3">p95</div><div class="r t1">48 s</div></div>
+              <div class="row" style="background:#fffaf7"><div class="g t3">p99</div>
+                <div class="r"><span class="t1">71 s</span>
+                <span class="t2" style="margin-left:6px">buffer basis</span></div></div>
+              <div class="spark"></div>
+              <div class="sec">Today</div>
+              <div class="row"><div class="g t3">Writes</div><div class="r t1">412 ok · 0 failed</div></div>
+              <div class="row"><div class="g t3">Queue depth</div><div class="r t1">0</div></div>
+              <div class="row"><div class="g t3">Drift corrected</div><div class="r t1">1</div></div>
+              <div class="sec">Recent activity</div>
+              <div class="row"><div class="t2" style="width:44px">18 s</div>
+                <div class="g t2">SKU-4471</div><div class="r t1">12 → 11 ✓</div></div>
+              <div class="row"><div class="t2" style="width:44px">4 m</div>
+                <div class="g t2">SKU-2210</div><div class="r t1">3 → 2 ✓</div></div>
+              <div class="row"><div class="t2" style="width:44px">6 m</div>
+                <div class="g t2">SKU-9982</div><div class="r t1">0 → 4 ✓</div></div>
+              <div class="row"><div class="g t3" style="text-align:center">View all activity</div></div>
+              <div class="row"><div class="g t3">Settings · Credentials · Logs</div></div>
+            </div>
+          </div>
+          <div class="caption">375 px · connected</div>
+        </div>
+      </div>
+      <div class="ann">
+        <h5>Annotations</h5>
+        <ol>
+          <li><b>“buffer basis” on the p99 row is the most important label in the product.</b> It
+            closes the loop between a measured number and the units being withheld, and it removes
+            most of the “why is my listing showing less than I have?” confusion before it starts.</li>
+          <li><b>The activity feed is the trust instrument.</b> Watching real quantities change,
+            in real time, with confirmation ticks, is the fastest route to believing a sync engine
+            works. Deliberately verbose in the first weeks; it can be quietened later.</li>
+          <li><b>Pause sits top-right, always reachable.</b> The kill switch is not buried in
+            settings. It must be findable in a panic, one-handed.</li>
+          <li><b>Sparkline has no axis.</b> Shape over time is the signal; precise values live in
+            the rows above it.</li>
+          <li><b>Fulfilment model is stated on the header row.</b> FBP versus FBPI changes what
+            this channel does with stock, and a wrong assumption here is expensive.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-03 ============ -->
+  <div class="screen">
+    <div class="head"><span class="tag">W-03</span><h4>Listing map</h4>
+      <span class="who">Operator · desktop primary, phone secondary</span></div>
+    <div class="doubt"><b>Doubt:</b> “Is this product actually connected to that marketplace listing?”</div>
+    <div class="body" style="grid-template-columns:1fr">
+      <div class="frames">
+        <div>
+          <div class="desk">
+            <div class="chrome"><i></i><i></i><i></i></div>
+            <div class="flexrow">
+              <div class="sidebar">
+                <div class="g">Sync</div>
+                <div class="i">Health</div><div class="i">Channels</div>
+                <div class="i on">Listings</div><div class="i">Drift</div>
+                <div class="g">Sell</div>
+                <div class="i">Dashboard</div><div class="i">Products</div><div class="i">Customers</div>
+                <div class="g">Fulfil</div>
+                <div class="i">Orders</div><div class="i">Shipments</div><div class="i">Returns</div>
+                <div class="g">Stock</div>
+                <div class="i">Inventory</div><div class="i">Locations</div><div class="i">Stocktake</div>
+                <div class="i off">Purchase orders</div><div class="i off">Suppliers</div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div class="bar">Listings <span class="r">Search ⌕ &nbsp; Filter ▾</span></div>
+                <div style="padding:9px 12px;border-bottom:1px solid var(--line2);display:flex;gap:7px">
+                  <span class="chip" style="border-color:var(--ink);font-weight:600">Unmapped 3</span>
+                  <span class="chip">Drift 1</span><span class="chip">Held back 6</span>
+                  <span class="chip">Never confirmed 0</span>
+                </div>
+                <table class="wt">
+                  <tr><th>SKU</th><th>Product</th><th style="text-align:right">Avail</th>
+                      <th style="text-align:right">noon</th><th style="text-align:right">Amazon.ae</th>
+                      <th style="text-align:right">voltix.ae</th></tr>
+                  <tr><td class="t2">SKU-4471</td><td>iPhone 15 128 GB Black</td><td class="n">11</td>
+                      <td class="n">11 ✓</td><td class="n">11 ✓</td><td class="n">11 ✓</td></tr>
+                  <tr><td class="t2">SKU-2210</td><td>Galaxy Buds 3 Pro</td><td class="n">2</td>
+                      <td class="n">2 ✓</td><td class="n" style="color:var(--warn)">0 ⓘ</td><td class="n">2 ✓</td></tr>
+                  <tr><td class="t2">SKU-9982</td><td>Anker 65 W GaN charger</td><td class="n">4</td>
+                      <td class="n" style="color:var(--ink3)">— ⊘</td><td class="n">4 ✓</td><td class="n">4 ✓</td></tr>
+                  <tr><td class="t2">SKU-1130</td><td>Sony WH-1000XM6</td><td class="n">0</td>
+                      <td class="n">0 ✓</td><td class="n">0 ✓</td><td class="n">0 ✓</td></tr>
+                  <tr><td class="t2">SKU-3390</td><td>AirPods Pro 2</td><td class="n">7</td>
+                      <td class="n">5 ✓</td><td class="n">5 ✓</td><td class="n">7 ✓</td></tr>
+                  <tr><td class="t2">SKU-8804</td><td>Logitech MX Master 4</td><td class="n">14</td>
+                      <td class="n" style="color:var(--accent)">9 ⚠</td><td class="n">12 ✓</td><td class="n">14 ✓</td></tr>
+                </table>
+                <div style="padding:9px 12px;font-size:11px;color:var(--ink3);border-top:1px solid var(--line2)">
+                  ✓ confirmed &nbsp;·&nbsp; ⓘ held back &nbsp;·&nbsp; ⊘ not listed &nbsp;·&nbsp; ⚠ drift
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="caption">1280 px · full navigation shown for reference</div>
+        </div>
+      </div>
+      <div class="ann" style="margin-top:24px">
+        <h5>Annotations</h5>
+        <ol>
+          <li><b>Four glyphs in total:</b> confirmed, held back, not listed, drift. Each additional
+            symbol costs legibility, and this table gets scanned rather than read.</li>
+          <li><b>Read SKU-2210:</b> two available, noon shows two, Amazon shows zero with a
+            held-back marker. Tapping it explains: “Last-unit rule — 2 units left, published to
+            noon only (higher priority).” A deliberate decision, legible as one.</li>
+          <li><b>Unmapped is the default filter after any bulk import.</b> An unmapped SKU is
+            silent and dangerous; it is the one condition that hides rather than announces itself.</li>
+          <li><b>Bulk mapping is a review list, never auto-applied.</b> Suggestions come from GTIN
+            and SKU equality, and each row is accepted or rejected. A wrong mapping publishes one
+            product’s stock to another product’s listing — the worst failure this product can produce.</li>
+          <li><b>Unbuilt sections stay greyed in the sidebar</b> rather than disappearing.
+            An inherited decision from the existing admin, and a good one: it communicates roadmap
+            without shipping dead links.</li>
+          <li><b>Below 900 px this table becomes cards, not a horizontal scroll.</b> A sideways
+            table on a phone hides exactly the column you need and gives no sign it exists.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-05 ============ -->
+  <div class="screen">
+    <div class="head"><span class="tag">W-05</span><h4>Stock adjustment</h4>
+      <span class="who">Operator · phone · high frequency</span></div>
+    <div class="doubt"><b>Doubt:</b> “Will this change actually go everywhere?”</div>
+    <div class="body">
+      <div class="frames">
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight">
+              <div class="bar">‹ Adjust stock</div>
+              <div class="row"><div class="g"><div class="t1">iPhone 15 128 GB Black</div>
+                <div class="t2">SKU-4471</div></div></div>
+              <div class="row"><div class="g t3">On hand now</div><div class="r t1">11</div></div>
+              <div style="padding:11px 12px;border-bottom:1px solid var(--line2)">
+                <div class="field">Warehouse — Dubai <span style="margin-left:auto">▾</span></div>
+              </div>
+              <div style="padding:18px 12px;text-align:center;border-bottom:1px solid var(--line2)">
+                <div style="display:flex;align-items:center;justify-content:center;gap:20px">
+                  <div class="box" style="width:46px;height:46px;line-height:26px;font-size:19px">−</div>
+                  <div class="huge">+5</div>
+                  <div class="box" style="width:46px;height:46px;line-height:26px;font-size:19px">+</div>
+                </div>
+                <div class="t3" style="margin-top:14px">New on hand <b style="font-size:15px">16</b></div>
+              </div>
+              <div style="padding:11px 12px;border-bottom:1px solid var(--line2)" class="stack">
+                <div class="field">Reason — Goods receipt <span style="margin-left:auto">▾</span></div>
+                <div class="field">Note (optional)</div>
+              </div>
+              <div class="sec">Will publish to</div>
+              <div class="row"><div class="g t3">noon</div>
+                <div class="r"><span class="t1">11 → 14</span><span class="t2" style="margin-left:6px">buffer 2</span></div></div>
+              <div class="row"><div class="g t3">Amazon.ae</div>
+                <div class="r"><span class="t1">11 → 14</span><span class="t2" style="margin-left:6px">buffer 2</span></div></div>
+              <div class="row"><div class="g t3">voltix.ae</div><div class="r t1">11 → 16</div></div>
+              <div style="padding:12px"><div class="btn solid">Adjust stock</div></div>
+            </div>
+          </div>
+          <div class="caption">375 px · before submit</div>
+        </div>
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight">
+              <div class="bar">‹ Adjust stock</div>
+              <div style="padding:26px 14px;text-align:center;border-bottom:1px solid var(--line2)">
+                <div style="font-size:26px">✓</div>
+                <div class="t1" style="font-size:15px;margin-top:8px">Stock updated</div>
+                <div class="t3" style="margin-top:5px">Publishing to 3 channels</div>
+              </div>
+              <div class="row"><div class="g t3">noon</div><div class="r t1">14 ✓</div></div>
+              <div class="row"><div class="g t3">Amazon.ae</div>
+                <div class="r t2">sending…</div></div>
+              <div class="row"><div class="g t3">voltix.ae</div><div class="r t1">16 ✓</div></div>
+              <div style="padding:12px"><div class="btn ghost">Done</div></div>
+            </div>
+          </div>
+          <div class="caption">375 px · confirming, live</div>
+        </div>
+      </div>
+      <div class="ann">
+        <h5>Annotations</h5>
+        <ol>
+          <li><b>“Will publish to” is the most valuable component in the system.</b> It shows the
+            consequence of an action before the action is taken, per channel, with the buffer
+            visible. It answers the doubt pre-emptively and teaches the buffer concept without a
+            help article.</li>
+          <li><b>The stepper is oversized and centred.</b> Adjustment happens in a stockroom, often
+            one-handed, often while holding a box.</li>
+          <li><b>Reason code is mandatory.</b> It writes to the append-only movement ledger and is
+            what makes a variance investigable three weeks later. Options are short and concrete:
+            goods receipt, damage, loss, found, return to supplier, correction, stocktake.</li>
+          <li><b>Confirmation ticks appear one channel at a time, live.</b> Those few seconds are
+            the product proving itself. Do not optimise the animation away — it is the moment the
+            merchant stops checking manually.</li>
+          <li><b>Amazon lags noon visibly, and that is correct.</b> The interface should not
+            pretend two channels with different propagation characteristics behave identically.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-07 ============ -->
+  <div class="screen">
+    <div class="head"><span class="tag">W-07</span><h4>Locations</h4>
+      <span class="who">Operator · desktop · low frequency, high consequence</span></div>
+    <div class="doubt"><b>Doubt:</b> “Which stock is actually sellable online?”</div>
+    <div class="body" style="grid-template-columns:1fr">
+      <div class="frames">
+        <div>
+          <div class="desk" style="width:560px">
+            <div class="chrome"><i></i><i></i><i></i></div>
+            <div class="wf tight">
+              <div class="bar">Locations <span class="r">+ Add location</span></div>
+              <div class="row"><div class="g"><div class="t1">Warehouse — Dubai</div>
+                <div class="t2">WAREHOUSE · 1,204 SKUs · 3,318 units</div></div>
+                <div class="r"><span class="t1">In shared pool</span>
+                <span class="t3" style="margin-left:8px">● Yes</span></div></div>
+              <div class="row"><div class="g"><div class="t1">Shop floor — Deira</div>
+                <div class="t2">SHOP_FLOOR · display and demo stock</div></div>
+                <div class="r"><span class="t1">In shared pool</span>
+                <span class="t3" style="margin-left:8px">○ No</span></div></div>
+              <div class="row" style="background:#fafafa"><div class="g">
+                <div class="t1" style="color:var(--ink2)">noon fulfilment centre</div>
+                <div class="t2">NOON_FC · 412 units held by noon</div></div>
+                <div class="r"><span class="t3">⊘ Locked</span></div></div>
+              <div style="padding:0 12px 10px 12px;font-size:11.5px;color:var(--ink3);
+                          border-bottom:1px solid var(--line2)">
+                noon owns this stock and counts it separately. It can never enter the shared pool.</div>
+              <div class="row" style="background:#fafafa"><div class="g">
+                <div class="t1" style="color:var(--ink2)">Amazon FBA</div>
+                <div class="t2">AMAZON_FBA · 0 units</div></div>
+                <div class="r"><span class="t3">⊘ Locked</span></div></div>
+              <div style="padding:0 12px 12px 12px;font-size:11.5px;color:var(--ink3)">
+                Amazon owns this stock and counts it separately. It can never enter the shared pool.</div>
+            </div>
+          </div>
+          <div class="caption">Desktop · 4 locations</div>
+        </div>
+      </div>
+      <div class="ann" style="margin-top:24px">
+        <h5>Annotations</h5>
+        <ol>
+          <li><b>Marketplace locations have no toggle at all.</b> Not a toggle defaulted off — no
+            control, plus a sentence explaining why. A setting that can be flipped will eventually
+            be flipped, and flipping this one causes systematic overselling on every channel.</li>
+          <li><b>The interface lock is backed by a database check constraint</b> (TRD §4.2).
+            Defence in depth, because this is the highest-severity failure in the risk register.</li>
+          <li><b>Shop floor defaults to excluded,</b> with the rationale stated on screen rather
+            than only in a document. Per-SKU override lives on the product screen.</li>
+          <li><b>Unit counts are shown for locked locations too.</b> The merchant still needs to
+            know how much stock sits at noon — he just cannot sell it anywhere else.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-08 ============ -->
+  <div class="screen">
+    <div class="head"><span class="tag">W-08</span><h4>Counter sale</h4>
+      <span class="who">Staff · phone or tablet · the critical flow</span></div>
+    <div class="doubt"><b>Doubt:</b> “Can I just sell this thing?” &nbsp;·&nbsp;
+      <b>Budget: under 20 seconds, median, one-handed, customer watching.</b></div>
+    <div class="body" style="grid-template-columns:1fr">
+      <div class="frames">
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight" style="min-height:392px;display:flex;flex-direction:column">
+              <div style="padding:12px"><div class="field focus">⌕ &nbsp;Scan or type</div></div>
+              <div style="flex:1;display:flex;align-items:center;justify-content:center;
+                          color:var(--ink3);font-size:12px;text-align:center;padding:0 24px">
+                Scan a barcode<br>or type a name or SKU</div>
+              <div class="nav"><div class="on">Sell</div><div>Look up</div><div>Today</div></div>
+            </div>
+          </div>
+          <div class="caption">1 · Idle, input focused</div>
+        </div>
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight" style="min-height:392px;display:flex;flex-direction:column">
+              <div style="padding:12px"><div class="field">⌕ &nbsp;SKU-4471</div></div>
+              <div style="padding:16px 14px;flex:1">
+                <div style="font-size:16px;font-weight:640;line-height:1.25">iPhone 15 128 GB Black</div>
+                <div class="t2" style="margin-top:4px">SKU-4471</div>
+                <div style="font-size:22px;font-weight:640;margin-top:14px">AED 2,899</div>
+                <div class="t3" style="margin-top:3px">11 in stock</div>
+                <div style="display:flex;align-items:center;gap:18px;margin-top:20px">
+                  <div class="box" style="width:52px;height:52px;line-height:32px;font-size:20px;
+                       text-align:center">−</div>
+                  <div class="big">1</div>
+                  <div class="box" style="width:52px;height:52px;line-height:32px;font-size:20px;
+                       text-align:center">+</div>
+                </div>
+                <div class="split" style="margin-top:20px">
+                  <div class="btn" style="padding:13px">Cash</div>
+                  <div class="btn ghost" style="padding:13px">Card</div>
+                  <div class="btn ghost" style="padding:13px">Link</div>
+                </div>
+              </div>
+              <div style="padding:12px"><div class="btn solid" style="padding:15px">Complete sale</div></div>
+            </div>
+          </div>
+          <div class="caption">2 · Item selected</div>
+        </div>
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight" style="min-height:392px;display:flex;flex-direction:column">
+              <div class="bar">Scan IMEI <span class="r">1 of 1</span></div>
+              <div style="padding:14px"><div class="field focus">⌕ &nbsp;Scan the IMEI barcode</div></div>
+              <div style="flex:1;padding:0 14px">
+                <div class="ph" style="height:88px;display:flex;align-items:center;
+                     justify-content:center;color:var(--ink3);font-size:11px">IMEI label illustration</div>
+                <div class="t3" style="margin-top:12px">Required for warranty and traceability.
+                  This step cannot be skipped.</div>
+              </div>
+              <div style="padding:12px"><div class="btn ghost">Cancel sale</div></div>
+            </div>
+          </div>
+          <div class="caption">3 · Serialised items only</div>
+        </div>
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight" style="min-height:392px;display:flex;flex-direction:column;
+                 align-items:center;justify-content:center;text-align:center;padding:24px">
+              <div style="font-size:38px">✓</div>
+              <div style="font-size:19px;font-weight:650;margin-top:10px">Sold</div>
+              <div style="margin-top:20px;font-size:13.5px;font-weight:600">iPhone 15 128 GB Black</div>
+              <div class="t3" style="margin-top:4px">AED 2,899 · Cash</div>
+              <div class="t3" style="margin-top:22px">10 left · syncing to 3 channels</div>
+            </div>
+          </div>
+          <div class="caption">4 · Success, auto-dismiss at 2 s</div>
+        </div>
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight" style="min-height:392px;display:flex;flex-direction:column">
+              <div class="banner">Offline — 3 sales will sync when you reconnect.
+                Stock numbers may be out of date.</div>
+              <div style="padding:12px"><div class="field focus">⌕ &nbsp;Scan or type</div></div>
+              <div style="flex:1;display:flex;align-items:center;justify-content:center;
+                          color:var(--ink3);font-size:12px;text-align:center;padding:0 24px">
+                Selling still works.<br>Everything posts when you are back online.</div>
+              <div class="nav"><div class="on">Sell</div><div>Look up</div><div>Today</div></div>
+            </div>
+          </div>
+          <div class="caption">5 · Offline</div>
+        </div>
+      </div>
+
+      <div style="margin-top:26px">
+        <h5 style="font:600 10px var(--mono);letter-spacing:.13em;text-transform:uppercase;
+                   color:var(--ink3);margin:0 0 12px">The 20-second budget, allocated</h5>
+        <table class="doc">
+          <tr><th>Step</th><th>Budget</th><th>How it is met</th></tr>
+          <tr><td>Open the app</td><td>2 s</td><td>Persistent session, no login per sale, input focused on load</td></tr>
+          <tr><td>Find the item</td><td>6 s</td><td>Scan is the primary path; typed search matches SKU, name and barcode after 2 characters, top result selectable with Enter</td></tr>
+          <tr><td>Confirm quantity</td><td>1 s</td><td>Defaults to 1 — most electronics sales are single-unit</td></tr>
+          <tr><td>Payment method</td><td>2 s</td><td>Three large targets, no sub-menu</td></tr>
+          <tr><td>Complete</td><td>2 s</td><td>One button, thumb-reachable, no confirmation dialog</td></tr>
+          <tr><td>System response</td><td>1 s</td><td>Immediate success state; channel sync happens after</td></tr>
+          <tr><td><b>Total</b></td><td><b>14 s</b></td><td><b>Six seconds of headroom for reality</b> — the IMEI step spends four of them</td></tr>
+        </table>
+      </div>
+
+      <div class="ann" style="margin-top:24px">
+        <h5>Annotations</h5>
+        <ol>
+          <li><b>Excluded from v1, each because it breaks the budget:</b> customer capture,
+            discounts, multi-line baskets, split payment, printed receipts. Multi-line is the most
+            likely to be requested and the most dangerous to add — it turns a single-decision screen
+            into a basket-management screen. If it becomes necessary it belongs in a separate mode,
+            entered deliberately.</li>
+          <li><b>A sale at zero stock is allowed, not blocked.</b> A physical item in a customer’s
+            hand outranks a database row. It completes with a flagged negative adjustment and
+            appears in the drift register. Staff who are blocked once stop using the tool entirely,
+            and then every other screen in this document becomes a well-designed liar.</li>
+          <li><b>“Syncing to 3 channels” on the success screen is written for the owner,</b> who
+            will look over a shoulder in the first fortnight. Four words, and it is the whole
+            product.</li>
+          <li><b>The offline banner states the accuracy caveat plainly.</b> Selling continues;
+            pretending the number is live when it is not would be worse than the outage.</li>
+          <li><b>Touch targets are 56 px in this mode,</b> not 44. The user is standing, hurried,
+            and may be holding a product in the other hand.</li>
+          <li><b>The whole flow is completable by scanner alone</b> — scan, Enter, Enter. A barcode
+            scanner is a keyboard, which makes the existing unverified <code>focus-visible</code>
+            styling a blocker for this screen, not a nice-to-have.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-09 ============ -->
+  <div class="screen">
+    <div class="head"><span class="tag">W-09</span><h4>Availability lookup</h4>
+      <span class="who">Staff · phone · customer waiting</span></div>
+    <div class="doubt"><b>Doubt:</b> “Do we have it, and where?”</div>
+    <div class="body">
+      <div class="frames">
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight">
+              <div style="padding:12px"><div class="field focus">⌕ &nbsp;airpods pro</div></div>
+              <div class="row"><div class="g"><div class="t1">AirPods Pro 2nd gen</div>
+                <div class="t2">SKU-3390</div></div></div>
+              <div style="padding:20px 12px;text-align:center;border-bottom:1px solid var(--line2)">
+                <div class="t3">Available</div><div class="huge" style="margin-top:5px">7</div></div>
+              <div class="row"><div class="g t3">Warehouse — Dubai</div><div class="r t1">7</div></div>
+              <div class="row"><div class="g"><div class="t3">Shop floor — Deira</div>
+                <div class="t2">display, not sold online</div></div><div class="r t1">1</div></div>
+              <div class="row"><div class="g t3">Reserved</div><div class="r t1">0</div></div>
+              <div class="sec">On the channels</div>
+              <div class="row"><div class="g t3">noon shows</div><div class="r t1">5</div></div>
+              <div class="row"><div class="g t3">Amazon.ae shows</div><div class="r t1">5</div></div>
+              <div class="row"><div class="g t2">2 held back by buffer</div>
+                <div class="r t2">ⓘ</div></div>
+              <div class="row"><div class="g t3">Price</div><div class="r t1">AED 899</div></div>
+            </div>
+          </div>
+          <div class="caption">375 px</div>
+        </div>
+      </div>
+      <div class="ann">
+        <h5>Annotations</h5>
+        <ol>
+          <li><b>Available is the largest element on the screen,</b> because it is the only thing
+            the customer’s question requires. Everything under it exists to pre-empt the follow-up.</li>
+          <li><b>“noon shows 5” answers a question staff currently cannot answer at all.</b>
+            A customer holding a phone with a marketplace listing open is a routine situation in
+            a Dubai electronics shop.</li>
+          <li><b>Shop-floor stock is labelled as display,</b> so nobody promises a demo unit.</li>
+          <li><b>This screen carries no actions.</b> Adding “sell this” would create a second,
+            slower route to W-08 and split the staff habit across two flows.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-10 ============ -->
+  <div class="screen">
+    <div class="head"><span class="tag">W-10</span><h4>Order queue</h4>
+      <span class="who">Operator and staff · phone primary</span></div>
+    <div class="doubt"><b>Doubt:</b> “What do I need to ship today?”</div>
+    <div class="body">
+      <div class="frames">
+        <div>
+          <div class="phone">
+            <div class="status"><i></i></div>
+            <div class="wf tight">
+              <div class="bar">Orders <span class="r">All ▾ &nbsp; Needs action ▾</span></div>
+              <div class="row"><span class="dot c"></span>
+                <div class="g"><div class="t1">noon · N-4471821</div>
+                  <div class="t2">2 items · ship by 14:00</div></div>
+                <div class="r"><div class="t1" style="color:var(--accent)">3 h left</div></div></div>
+              <div class="row"><span class="dot d"></span>
+                <div class="g"><div class="t1">Amazon · 405-113-9982</div>
+                  <div class="t2">1 item · ship by 18:00</div></div>
+                <div class="r"><div class="t1">7 h left</div></div></div>
+              <div class="row"><span class="dot d"></span>
+                <div class="g"><div class="t1">voltix.ae · VX-10442</div>
+                  <div class="t2">3 items · COD · Dubai Marina</div></div>
+                <div class="r"><div class="t2">today</div></div></div>
+              <div class="row"><span class="dot a"></span>
+                <div class="g"><div class="t1">Counter · C-0881</div>
+                  <div class="t2">1 item · collected</div></div>
+                <div class="r"><div class="t2">41 min ago</div></div></div>
+              <div class="sec">Earlier</div>
+              <div class="row"><span class="dot d"></span>
+                <div class="g"><div class="t1">noon · N-4471790</div>
+                  <div class="t2">1 item · shipped</div></div>
+                <div class="r"><div class="t2">yesterday</div></div></div>
+              <div class="nav"><div>Sync</div><div class="on">Orders</div><div>Stock</div><div>More</div></div>
+            </div>
+          </div>
+          <div class="caption">375 px · sorted by SLA urgency</div>
+        </div>
+      </div>
+      <div class="ann">
+        <h5>Annotations</h5>
+        <ol>
+          <li><b>Sorted by marketplace ship-by clock, not by order time.</b> A noon order with
+            three hours left outranks an older Amazon order with seven, because missing a
+            marketplace window damages an account-health metric — the real risk. The list encodes
+            that priority so nobody has to remember it.</li>
+          <li><b>The SLA clock is the only red on the screen under normal conditions.</b> That is
+            what makes it work. A warning that appears every day trains people to ignore the one
+            that matters.</li>
+          <li><b>Channel is a coloured dot plus a word.</b> Marketplace logos are trademarked,
+            inconsistent in dark mode, and unreadable at this size.</li>
+          <li><b>Counter sales appear in the same list.</b> One queue, four channels — the
+            unification is the point, and hiding shop sales would undermine it.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-12 ============ -->
+  <div class="screen">
+    <div class="head"><span class="tag">W-12</span><h4>Drift &amp; oversell register</h4>
+      <span class="who">Operator · desktop primary</span></div>
+    <div class="doubt"><b>Doubt:</b> “It went wrong once. Will it go wrong again?”</div>
+    <div class="body" style="grid-template-columns:1fr">
+      <div class="frames">
+        <div>
+          <div class="desk" style="width:600px">
+            <div class="chrome"><i></i><i></i><i></i></div>
+            <div class="wf tight">
+              <div class="bar">Drift &amp; oversells <span class="r">Last 30 days ▾</span></div>
+              <div style="display:flex;border-bottom:1px solid var(--line2)">
+                <div style="flex:1;padding:14px;border-right:1px solid var(--line2)">
+                  <div class="t3">Oversells</div><div class="big" style="margin-top:4px">0</div></div>
+                <div style="flex:1;padding:14px;border-right:1px solid var(--line2)">
+                  <div class="t3">Drift events</div><div class="big" style="margin-top:4px">7</div></div>
+                <div style="flex:1;padding:14px">
+                  <div class="t3">Median time to correct</div>
+                  <div class="big" style="margin-top:4px">31 s</div></div>
+              </div>
+              <div class="sec">Events</div>
+              <div class="row"><div class="g" style="font-size:12px;line-height:1.5">
+                <b>14:22</b> — noon showed <b>3</b> units for SKU-2210; we expected <b>2</b>.
+                Detected by hot-SKU reconciliation. Corrected in 31 seconds.
+                <span class="t2">Cause: order webhook arrived out of order.</span></div></div>
+              <div class="row"><div class="g" style="font-size:12px;line-height:1.5">
+                <b>09:41</b> — Amazon.ae showed <b>0</b> units for SKU-8804; we expected <b>12</b>.
+                Detected by write confirmation. Corrected in 18 seconds.
+                <span class="t2">Cause: listing suppressed by a compliance block, now resolved.</span></div></div>
+              <div class="row"><div class="g" style="font-size:12px;line-height:1.5">
+                <b>Yesterday 17:05</b> — noon showed <b>1</b> unit for SKU-9982; we expected <b>4</b>.
+                Detected by full reconciliation. Corrected in 4 minutes.
+                <span class="t2">Cause: write throttled and retried.</span></div></div>
+              <div style="padding:14px;text-align:center;border-top:1px solid var(--line2)"
+                   class="t3">No oversells in 30 days. Last one was 12 July.</div>
+            </div>
+          </div>
+          <div class="caption">Desktop · the usual state</div>
+        </div>
+      </div>
+      <div class="ann" style="margin-top:24px">
+        <h5>Annotations</h5>
+        <ol>
+          <li><b>Each record reads as a sentence.</b> Timestamp, channel, SKU, expected, actual,
+            detection method, correction time and probable cause, written so it can be understood
+            without training.</li>
+          <li><b>An oversell record additionally names the money:</b> the referral fee times price
+            for noon, plus the account-health impact for Amazon. Naming the cost turns a technical
+            event into a business fact.</li>
+          <li><b>The register exists as evidence.</b> Its readers are deciding whether the system
+            can be trusted enough to stop double-checking by hand, so every entry is written to
+            support or undermine that judgement honestly.</li>
+          <li><b>The empty state carries the best news the product has.</b> “No drift in 30 days”
+            should be given the same weight on screen as a failure would be.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ============ FLOWS ============ -->
+<section>
+  <h2>Section 04</h2>
+  <div class="h2sub">Flows</div>
+
+  <h3>Counter sale — the 20-second path</h3>
+  <div class="flow">
+    <div class="fstep"><div class="n">01</div><div class="t">Scan</div><div class="s">2 s · focused</div></div>
+    <div class="farrow">→</div>
+    <div class="fstep"><div class="n">02</div><div class="t">Confirm item</div><div class="s">6 s</div></div>
+    <div class="farrow">→</div>
+    <div class="fstep"><div class="n">03</div><div class="t">Quantity</div><div class="s">1 s · default 1</div></div>
+    <div class="farrow">→</div>
+    <div class="fstep"><div class="n">04</div><div class="t">Payment</div><div class="s">2 s</div></div>
+    <div class="farrow">→</div>
+    <div class="fstep"><div class="n">05</div><div class="t">Complete</div><div class="s">2 s</div></div>
+    <div class="farrow">→</div>
+    <div class="fstep"><div class="n">06</div><div class="t">Sold</div><div class="s">1 s · auto-dismiss</div></div>
+  </div>
+  <p class="lede">Serialised items insert an IMEI scan between 04 and 05, spending four of the six
+  seconds of headroom. Offline capture queues at 05 and posts on reconnect.</p>
+
+  <h3>What happens after any stock change</h3>
+  <div class="flow">
+    <div class="fstep"><div class="n">A</div><div class="t">Change commits</div>
+      <div class="s">order · sale · receipt</div></div>
+    <div class="farrow">→</div>
+    <div class="fstep"><div class="n">B</div><div class="t">Marked dirty</div>
+      <div class="s">same transaction</div></div>
+    <div class="farrow">→</div>
+    <div class="fstep"><div class="n">C</div><div class="t">Coalesced</div>
+      <div class="s">latest value only</div></div>
+    <div class="farrow">→</div>
+    <div class="fstep"><div class="n">D</div><div class="t">Published</div>
+      <div class="s">minus buffer</div></div>
+    <div class="farrow">→</div>
+    <div class="fstep"><div class="n">E</div><div class="t">Confirmed</div>
+      <div class="s">channel acknowledges</div></div>
+  </div>
+  <p class="lede">The interface reflects <b>A</b> immediately and shows <b>D→E</b> as pending until
+  acknowledged. These two must look different, or the merchant learns to distrust the fast one.</p>
+</section>
+
+<div class="rule"></div>
+
+<!-- ============ COMPONENTS ============ -->
+<section>
+  <h2>Section 05</h2>
+  <div class="h2sub">Component sheet</div>
+  <p class="lede">Eleven new components. Everything else reuses what exists in
+  <code>packages/ui</code>. No new spacing, radius or type scale is introduced.</p>
+  <table class="doc">
+    <tr><th>Component</th><th>Appears in</th><th>Notes</th></tr>
+    <tr><td>ChannelRow</td><td>W-01, W-03</td><td>Dot, name, sub-line, right-aligned freshness. The most-repeated unit in the product</td></tr>
+    <tr><td>LatencyStat</td><td>W-01, W-02</td><td>Value plus optional “buffer basis” label</td></tr>
+    <tr><td>Explainer</td><td>Everywhere a computed number appears</td><td>Inline disclosure, never a tooltip — tooltips are unreachable by touch</td></tr>
+    <tr><td>FreshnessStamp</td><td>Every channel-derived value</td><td>Four tiers; over 60 minutes the <i>value</i> mutes, not just the timestamp</td></tr>
+    <tr><td>DegradedBanner</td><td>Global</td><td>Always three clauses: what is wrong, what it means for you, what is happening about it</td></tr>
+    <tr><td>QuantityStepper</td><td>W-05, W-08</td><td>56 px targets in counter mode</td></tr>
+    <tr><td>ScanField</td><td>W-06, W-08, W-09</td><td>Autofocus, scanner-as-keyboard, Enter selects the top result</td></tr>
+    <tr><td>PublishPreview</td><td>W-04, W-05</td><td>Per-channel before → after with buffer shown</td></tr>
+    <tr><td>ActivityFeed</td><td>W-02</td><td>Newest first, 150 ms slide insertion</td></tr>
+    <tr><td>TableToCards</td><td>Every table under 900 px</td><td>Never horizontal scroll</td></tr>
+    <tr><td>Skeleton</td><td>Every async surface</td><td>Closes the audit’s loading gap — no admin screen has one today</td></tr>
+  </table>
+
+  <h3>Motion</h3>
+  <p class="lede">Motion has exactly one job here: showing that something is propagating. The
+  channel confirmation tick is a 200 ms fade-and-scale and is the only moment of delight in the
+  product. Activity-feed insertion is a 150 ms slide. Counter success is 250 ms then auto-dismiss.
+  Everything else is static. All of it respects <code>prefers-reduced-motion</code>, degrading to
+  instant state changes with no loss of information.</p>
+</section>
+
+<div class="rule"></div>
+
+<!-- ============ HANDOFF ============ -->
+<section>
+  <h2>Section 06</h2>
+  <div class="h2sub">Before visual design begins</div>
+
+  <div class="callout">
+    <div class="lbl">Blocking</div>
+    <p><b>Three blocking questions, all on the counter flow.</b> Every one changes the wireframe,
+    so answer them before drawing anything at high fidelity.</p>
+    <p><b>DQ-01</b> — Is the counter a shared device with a shared login, or per-staff? Determines
+    whether a sale is attributable, and whether a login step fits inside the 20-second budget.<br>
+    <b>DQ-02</b> — Which scanner hardware? A keyboard-wedge device and a camera-based scan are
+    different components with different layouts.<br>
+    <b>DQ-03</b> — Confirm that a sale at zero stock completes with a flag rather than being
+    blocked. These wireframes assume it does.</p>
+  </div>
+
+  <h3>Per-screen checklist</h3>
+  <ul class="checklist">
+    <li>All eight states specified: loading, empty, partial, error, offline, degraded, stale, success</li>
+    <li>Usable at 375 px, one-handed, primary action inside the thumb zone</li>
+    <li>Exactly one primary action</li>
+    <li>Every computed number has an Explainer</li>
+    <li>Every channel-derived value has a FreshnessStamp</li>
+    <li>Nothing renders as <code>0</code> where the truth is unknown — use an em dash</li>
+    <li>Colour is never the sole carrier of meaning; glyph and word accompany every status</li>
+    <li>Completable by keyboard alone, with visible focus</li>
+    <li>Mirrored and checked in RTL — these wireframes are all LTR</li>
+    <li>Copy avoids “real-time”, states what was queued rather than lost, and says what happens next</li>
+    <li>Skeleton preserves final layout with no shift on load</li>
+  </ul>
+
+  <h3>Not wireframed in v1</h3>
+  <p class="lede">W-04 product create/edit, W-06 stocktake and W-11 order detail are specified in
+  the Product Design Document but drawn only as structure notes here, because each is a
+  conventional form or detail view that follows patterns already present in the admin. They should
+  be wireframed alongside visual design rather than ahead of it. Payout reconciliation is P1 and
+  intentionally excluded.</p>
+</section>
+
+<footer>
+  Voltix Sync · Wireframing Document v1.0 · 12 August 2026. Structure and hierarchy only —
+  typeface, colour and brand are decided next. Where this document and the Product Design Document
+  disagree, the PDD governs.
+</footer>
+
+</div>
+</body>
+</html>

@@ -45,6 +45,13 @@ const baseSchema = z.object({
   S3_ACCESS_KEY_ID: z.string().optional(),
   S3_SECRET_ACCESS_KEY: z.string().optional(),
   CDN_BASE_URL: z.string().optional(),
+  /**
+   * Local-disk media driver, used only when S3 is not configured and never in
+   * production — see packages/media/src/storage.ts. Both have sane defaults, so
+   * a fresh clone can upload a product image with no object store running.
+   */
+  MEDIA_LOCAL_DIR: z.string().optional(),
+  MEDIA_LOCAL_BASE_URL: z.string().optional(),
 
   // --- Market ---------------------------------------------------------
   // Regional behaviour is configuration, not a compile-time constant. VAT
@@ -87,6 +94,16 @@ const baseSchema = z.object({
   COD_HANDLING_FEE: z.coerce.number().int().nonnegative().default(0),
 
   RESEND_API_KEY: z.string().optional(),
+  /**
+   * Signing secret for Resend's delivery webhooks (`whsec_…`), from the webhook
+   * detail page. Separate from the API key and not derivable from it.
+   *
+   * Optional, because a store can send mail without accepting bounce
+   * notifications. Its absence is not silent: the webhook route refuses to
+   * accept anything at all without it rather than trusting an unverified body,
+   * and says so in the log.
+   */
+  RESEND_WEBHOOK_SECRET: z.string().optional(),
   EMAIL_FROM: z.string().default('Voltix <orders@example.com>'),
   SMTP_URL: z.string().optional(),
 
@@ -132,6 +149,32 @@ const schema = baseSchema.superRefine((env, ctx) => {
       code: 'custom',
       path: ['AUTH_SECRET'],
       message: 'Refusing to boot production with the placeholder auth secret',
+    });
+  }
+
+  // No mail provider means the notification registry falls back to the log
+  // transport: every order confirmation is printed to a serverless log, the
+  // outbox row is marked 'sent', and the customer is told nothing. Nothing on
+  // any screen looks wrong, which is exactly why this has to fail at boot —
+  // `capabilities().email` already reports true on RESEND_API_KEY alone, so an
+  // unconfigured store would otherwise advertise a channel it cannot use.
+  if (!env.RESEND_API_KEY && !env.SMTP_URL) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['RESEND_API_KEY'],
+      message:
+        'No email transport configured — set RESEND_API_KEY or SMTP_URL, or order ' +
+        'confirmations are written to the outbox and never delivered',
+    });
+  }
+
+  // A localhost mail server in production is the pre-filled development value
+  // from .env.example surviving a copy-paste. Every send fails at connect.
+  if (env.SMTP_URL && /(localhost|127\.0\.0\.1)/.test(env.SMTP_URL) && !env.RESEND_API_KEY) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['SMTP_URL'],
+      message: 'SMTP_URL points at localhost in production — this is the Mailpit default from .env.example',
     });
   }
 

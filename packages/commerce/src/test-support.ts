@@ -113,6 +113,15 @@ export interface Fixture {
  * counts and order numbers — values a neighbouring test would perturb. Setup
  * runs as the owner (creating a tenant is inherently a cross-tenant act); every
  * assertion afterwards runs as the restricted role.
+ *
+ * THE SLUG SUFFIX IS THE ID'S TAIL, NOT ITS HEAD. It used to be `slice(0, 8)`,
+ * which on a UUIDv7 is the top 32 bits of a 48-bit millisecond timestamp — a
+ * value that only changes about once a minute. Two fixtures sharing a label
+ * within the same window therefore produced the *same slug* and the second one
+ * died on `tenants_slug_key`. It surfaced as an intermittent duplicate-key
+ * failure that passed on re-run and was repeatedly written off as cross-talk
+ * between concurrent suites. The last 12 characters are random bits, so the
+ * suffix now varies for the reason it always appeared to.
  */
 export async function createFixture(label: string): Promise<Fixture> {
   const owner = ownerDb();
@@ -124,7 +133,7 @@ export async function createFixture(label: string): Promise<Fixture> {
     INSERT INTO tenants (id, slug, name, plan, status, country_code, default_currency,
                          default_locale, timezone, vat_rate_bps, prices_include_vat,
                          created_at, updated_at)
-    VALUES (${tenantId}, ${`test-${label}-${tenantId.slice(0, 8)}`}, ${`Test ${label}`},
+    VALUES (${tenantId}, ${`test-${label}-${tenantId.slice(-12)}`}, ${`Test ${label}`},
             'growth', 'active', 'AE', 'AED', 'en-AE', 'Asia/Dubai', 500, true, now(), now())
   `);
   await owner.execute(sql`
@@ -204,6 +213,10 @@ export async function createFixture(label: string): Promise<Fixture> {
       await owner.execute(sql`DELETE FROM order_events WHERE tenant_id = ${tenantId}`);
       await owner.execute(sql`DELETE FROM payment_intents WHERE tenant_id = ${tenantId}`);
       await owner.execute(sql`DELETE FROM discount_redemptions WHERE tenant_id = ${tenantId}`);
+      // Invoices are RESTRICT on the order for the same reason returns are on
+      // the line: a tax document must not be orphaned by deleting what it
+      // describes. Only a whole-tenant teardown removes one, and it goes first.
+      await owner.execute(sql`DELETE FROM invoices WHERE tenant_id = ${tenantId}`);
       await owner.execute(sql`DELETE FROM orders WHERE tenant_id = ${tenantId}`);
       await owner.execute(sql`DELETE FROM cart_items WHERE tenant_id = ${tenantId}`);
       await owner.execute(sql`DELETE FROM carts WHERE tenant_id = ${tenantId}`);

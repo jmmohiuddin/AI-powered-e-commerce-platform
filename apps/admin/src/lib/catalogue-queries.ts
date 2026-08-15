@@ -194,11 +194,33 @@ export interface ProductVariantRow {
   readonly marginBps: number | null;
 }
 
+export interface ProductImageRow {
+  readonly id: string;
+  readonly url: string;
+  readonly altText: string | null;
+  readonly width: number | null;
+  readonly height: number | null;
+  readonly position: number;
+}
+
+/** One locale's copy, as stored in `products.translations`. */
+export interface ProductTranslationRow {
+  readonly title?: string;
+  readonly subtitle?: string;
+  readonly description?: string;
+  readonly highlights?: readonly string[];
+}
+
 export interface ProductDetail extends ProductRow {
   readonly subtitle: string | null;
   readonly description: string | null;
+  readonly highlights: readonly string[];
+  /** Keyed by locale tag. `ar-AE` is the one the edit form exposes. */
+  readonly translations: Readonly<Record<string, ProductTranslationRow>>;
   readonly warrantyMonths: number | null;
   readonly variants: readonly ProductVariantRow[];
+  /** In `position` order — the first is the storefront tile image. */
+  readonly images: readonly ProductImageRow[];
 }
 
 export async function getProductDetail(
@@ -213,9 +235,11 @@ export async function getProductDetail(
     const extra = await tx.execute<{
       subtitle: string | null;
       description: string | null;
+      highlights: unknown;
+      translations: unknown;
       warranty_months: number | null;
     }>(sql`
-      SELECT subtitle, description, warranty_months FROM products
+      SELECT subtitle, description, highlights, translations, warranty_months FROM products
       WHERE tenant_id = ${tenantId} AND id = ${summary.id} LIMIT 1
     `);
 
@@ -242,12 +266,42 @@ export async function getProductDetail(
       ORDER BY v.position, v.sku
     `);
 
+    const images = await tx.execute<{
+      id: string;
+      url: string;
+      alt_text: string | null;
+      width: number | null;
+      height: number | null;
+      position: number;
+    }>(sql`
+      SELECT id, url, alt_text, width, height, position FROM media
+      WHERE tenant_id = ${tenantId} AND product_id = ${summary.id} AND kind = 'image'
+      ORDER BY position, created_at
+    `);
+
     const row = extra.rows[0];
     return {
       ...summary,
       subtitle: row?.subtitle ?? null,
       description: row?.description ?? null,
+      // jsonb arrives as parsed JSON, but the column is only defaulted to `[]`
+      // and `{}` — a row written before those defaults, or by hand, can hold
+      // null or the wrong shape, and a form that crashes on it is worse than
+      // one that starts empty.
+      highlights: Array.isArray(row?.highlights) ? (row.highlights as string[]) : [],
+      translations:
+        row?.translations && typeof row.translations === 'object' && !Array.isArray(row.translations)
+          ? (row.translations as Record<string, ProductTranslationRow>)
+          : {},
       warrantyMonths: row?.warranty_months ?? null,
+      images: images.rows.map((image) => ({
+        id: image.id,
+        url: image.url,
+        altText: image.alt_text,
+        width: image.width,
+        height: image.height,
+        position: Number(image.position),
+      })),
       variants: variants.rows.map((v) => {
         const price = Number(v.price);
         const hasCost = v.cost_price !== null;

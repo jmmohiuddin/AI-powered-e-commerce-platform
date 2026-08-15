@@ -2,7 +2,9 @@ import { sql } from 'drizzle-orm';
 import { uuidv7, type Database } from '@voltix/db';
 import { sweepExpiredReservations } from './reservations';
 import { handleNotificationJob } from './notifications';
+import { applyEmailProviderEvent } from './email-events';
 import { classifyInventoryHealth, refreshForecasts } from './analytics-jobs';
+import { settlePaymentWebhookEvent } from './webhooks';
 import type { Tx } from './types';
 
 /**
@@ -26,11 +28,13 @@ import type { Tx } from './types';
 
 export type JobKind =
   | 'reservations.sweep'
+  | 'payments.webhook'
   | 'payments.reconcile'
   | 'carts.detect_abandoned'
   | 'forecast.refresh'
   | 'inventory.classify'
-  | 'notifications.send';
+  | 'notifications.send'
+  | 'notifications.email_event';
 
 export interface Job {
   readonly id: string;
@@ -41,20 +45,39 @@ export interface Job {
   readonly maxAttempts: number;
 }
 
-export async function enqueue(
+export interface EnqueueInput {
+  kind: JobKind;
+  tenantId?: string | null;
+  payload?: Record<string, unknown>;
+  runAt?: Date;
+  maxAttempts?: number;
+  /** Present ⇒ at most one job ever exists with this key. */
+  dedupeKey?: string;
+}
+
+export async function enqueue(tx: Tx, job: EnqueueInput): Promise<string> {
+  return (await enqueueOnce(tx, job)).id;
+}
+
+/**
+ * Enqueues, and says whether the dedupe key had already claimed a job.
+ *
+ * The same INSERT as `enqueue`, with the one fact `enqueue` throws away: the
+ * unique index on `dedupe_key` makes this an idempotency check as well as a
+ * scheduling primitive, and a webhook ingress needs the answer — "I have seen
+ * this delivery before" is what lets it return 200 to a redelivery without
+ * doing the work a second time.
+ *
+ * `created` is false for a redelivery, which is ordinary provider traffic
+ * rather than an error. The id is only meaningful when `created` is true; on a
+ * conflict no row was written and the caller has nothing to point at.
+ */
+export async function enqueueOnce(
   tx: Tx,
-  job: {
-    kind: JobKind;
-    tenantId?: string | null;
-    payload?: Record<string, unknown>;
-    runAt?: Date;
-    maxAttempts?: number;
-    /** Present ⇒ at most one pending job with this key. */
-    dedupeKey?: string;
-  },
-): Promise<string> {
+  job: EnqueueInput,
+): Promise<{ id: string; created: boolean }> {
   const id = uuidv7();
-  await tx.execute(sql`
+  const inserted = await tx.execute<{ id: string }>(sql`
     INSERT INTO jobs (id, tenant_id, kind, payload, status, run_at, max_attempts,
                       dedupe_key, created_at, updated_at)
     VALUES (${id}, ${job.tenantId ?? null}, ${job.kind},
@@ -62,8 +85,9 @@ export async function enqueue(
             ${(job.runAt ?? new Date()).toISOString()}, ${job.maxAttempts ?? 5},
             ${job.dedupeKey ?? null}, now(), now())
     ON CONFLICT (dedupe_key) DO NOTHING
+    RETURNING id
   `);
-  return id;
+  return { id, created: inserted.rows.length > 0 };
 }
 
 /**
@@ -211,6 +235,21 @@ const detectAbandonedCarts: JobHandler = async (tx) => {
 };
 
 /**
+ * Turns a received payment webhook into money and stock.
+ *
+ * The whole of the request handler's job was to write the event down and queue
+ * this — so this is where a card or BNPL order actually becomes paid, stock
+ * leaves the shelf, and the confirmation goes out. It runs one event per
+ * transaction and throws on anything it cannot explain, which hands the retry
+ * decision to the backoff above rather than inventing a local one.
+ */
+const applyPaymentWebhook: JobHandler = async (tx, job) => {
+  const eventId = String(job.payload.eventId ?? '');
+  if (!eventId) throw new Error('payments.webhook job carries no eventId');
+  await settlePaymentWebhookEvent(tx, eventId, job.attempts);
+};
+
+/**
  * Finds payment intents that never reached a terminal state.
  *
  * Webhooks get missed — the question is only whether the system notices. An
@@ -242,13 +281,39 @@ const reconcilePayments: JobHandler = async (tx) => {
   if (stuck.rows.length > 0) console.log(`  flagged ${stuck.rows.length} unreconciled payment(s)`);
 };
 
+/**
+ * Applies a delivery outcome the email provider reported after the fact.
+ *
+ * Same division of labour as the payment webhook: the route wrote the event
+ * down and returned 200, and this is where a bounce actually becomes a failed
+ * message on the admin's screen or a complaint becomes withdrawn marketing
+ * consent. See ./email-events.
+ */
+const applyEmailEvent: JobHandler = async (tx, job) => {
+  await applyEmailProviderEvent(tx, job.tenantId, {
+    eventType: String(job.payload.eventType ?? ''),
+    providerMessageId: String(job.payload.providerMessageId ?? ''),
+    ...(typeof job.payload.bounceType === 'string' ? { bounceType: job.payload.bounceType } : {}),
+    ...(typeof job.payload.bounceSubType === 'string'
+      ? { bounceSubType: job.payload.bounceSubType }
+      : {}),
+    ...(typeof job.payload.bounceMessage === 'string'
+      ? { bounceMessage: job.payload.bounceMessage }
+      : {}),
+  });
+};
+
 export const HANDLERS: Record<JobKind, JobHandler> = {
   'reservations.sweep': sweepReservations,
   'carts.detect_abandoned': detectAbandonedCarts,
+  // Enqueued by the webhook route (see ./webhooks), one job per verified event.
+  'payments.webhook': applyPaymentWebhook,
   'payments.reconcile': reconcilePayments,
   // Renders the message and writes the outbox row (see ./notifications). The
   // actual send is a separate step run by the worker outside any transaction.
   'notifications.send': handleNotificationJob,
+  // Enqueued by the email provider's webhook route, one job per delivery.
+  'notifications.email_event': applyEmailEvent,
   // The nightly analytics pipeline. `inventory.classify` reads the same
   // forecast `forecast.refresh` writes, so it is scheduled after it.
   'forecast.refresh': (tx) => refreshForecasts(tx),

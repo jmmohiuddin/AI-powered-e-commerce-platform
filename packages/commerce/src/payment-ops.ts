@@ -42,11 +42,21 @@ interface OrderPaymentSnapshot {
   readonly providerReference: string | null;
 }
 
-/** Locks the order row and returns the payment-relevant facts. */
+/**
+ * Locks the order row and returns the payment-relevant facts.
+ *
+ * `preferProvider` exists because an order can carry more than one intent. A
+ * cash-on-delivery order with a deposit has two — a card leg and a cash leg —
+ * created in the same transaction, which means they share a `created_at` to
+ * the microsecond and "the latest intent" is whatever Postgres happens to
+ * return. Recording a courier's cash against the card intent is not a cosmetic
+ * mix-up; it is a refund later pointed at the wrong provider.
+ */
 async function snapshotForUpdate(
   tx: Tx,
   tenantId: string,
   orderId: string,
+  preferProvider?: string,
 ): Promise<OrderPaymentSnapshot> {
   const rows = await tx.execute<{
     id: string;
@@ -68,7 +78,14 @@ async function snapshotForUpdate(
     FROM orders o
     LEFT JOIN LATERAL (
       SELECT id, provider, provider_reference FROM payment_intents
-      WHERE order_id = o.id ORDER BY created_at DESC LIMIT 1
+      WHERE order_id = o.id
+      -- Preferred provider first, then newest. The id tiebreak matters:
+      -- both intents are written inside one transaction, and now() is the
+      -- transaction's clock rather than the statement's, so created_at alone
+      -- cannot order them.
+      ORDER BY (provider::text = ${preferProvider ?? null}) DESC NULLS LAST,
+               created_at DESC, id DESC
+      LIMIT 1
     ) pi ON true
     WHERE o.tenant_id = ${tenantId} AND o.id = ${orderId}
     FOR UPDATE OF o
@@ -111,7 +128,9 @@ export async function recordCodCollection(
   actor: ActorContext,
   orderId: string,
 ): Promise<void> {
-  const order = await snapshotForUpdate(tx, ctx.tenantId, orderId);
+  // The cash leg specifically. An order with a deposit also carries a card
+  // intent, and the courier's money belongs against neither of them by accident.
+  const order = await snapshotForUpdate(tx, ctx.tenantId, orderId, 'cod');
 
   if (order.status === 'cancelled') {
     throw new DomainError('CONFLICT', 'Order is cancelled', {
@@ -226,11 +245,15 @@ export async function refundOrder(
   // The capture this refund reverses — the gateway needs its reference, and
   // the ledger links child to parent so a statement can show which payment a
   // refund belongs to.
-  const captures = await tx.execute<{ id: string; provider_reference: string | null }>(sql`
-    SELECT id, provider_reference FROM transactions
+  const captures = await tx.execute<{
+    id: string;
+    provider_reference: string | null;
+    payment_intent_id: string | null;
+  }>(sql`
+    SELECT id, provider_reference, payment_intent_id FROM transactions
     WHERE tenant_id = ${ctx.tenantId} AND order_id = ${orderId}
       AND kind IN ('capture', 'sale') AND status = 'succeeded'
-    ORDER BY created_at DESC LIMIT 1
+    ORDER BY created_at DESC, id DESC LIMIT 1
   `);
   const capture = captures.rows[0];
   if (!capture) {
@@ -276,7 +299,11 @@ export async function refundOrder(
       (id, tenant_id, order_id, payment_intent_id, parent_transaction_id,
        provider, provider_reference, kind, status, amount, currency, reason,
        processed_at, created_at, updated_at)
-    VALUES (${refundId}, ${ctx.tenantId}, ${orderId}, ${order.intentId}, ${capture.id},
+    -- The capture's own intent, not the order's newest. On a split order those
+    -- differ, and a refund filed against the cash leg of a card payment is a
+    -- reconciliation that never balances.
+    VALUES (${refundId}, ${ctx.tenantId}, ${orderId},
+            ${capture.payment_intent_id ?? order.intentId}, ${capture.id},
             ${gateway?.id ?? order.provider ?? 'manual'}, ${providerReference},
             'refund', ${status}, ${amount}, ${order.currency}, ${reason},
             ${status === 'succeeded' ? sql`now()` : null}, now(), now())

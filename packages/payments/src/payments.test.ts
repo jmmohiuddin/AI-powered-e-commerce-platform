@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { money } from '@voltix/core';
 import { CashOnDeliveryGateway } from './adapters/cod';
 import { StripeGateway } from './adapters/stripe';
-import { shouldCommitStock, supportsPayment, type PaymentGateway } from './gateway';
+import {
+  outcomeFromStatus,
+  shouldCommitStock,
+  supportsPayment,
+  type PaymentGateway,
+} from './gateway';
 import { PaymentRegistry } from './registry';
 import { CircuitBreaker, isRetryable, withRetry } from './retry';
 import { GatewayError } from './gateway';
@@ -94,6 +99,50 @@ describe('capability gating', () => {
     expect(supportsPayment(gateway, money(500, AED))).toBe(false);
     expect(supportsPayment(gateway, money(5000, AED))).toBe(true);
     expect(supportsPayment(gateway, money(50_000, AED))).toBe(false);
+  });
+});
+
+/**
+ * The mapping both inbound paths share.
+ *
+ * Every one of these is a decision about money, and getting one wrong is not a
+ * cosmetic bug: `authorised` reading as `succeeded` ships a parcel against a
+ * hold that may never settle, and `cancelled` failing to read as a failure
+ * leaves stock reserved for an order nobody is paying for.
+ */
+describe('status → outcome', () => {
+  it('keeps an authorisation distinct from a capture', () => {
+    expect(outcomeFromStatus('authorised', 'ref')).toMatchObject({ kind: 'authorised' });
+    expect(outcomeFromStatus('succeeded', 'ref')).toMatchObject({ kind: 'succeeded' });
+  });
+
+  it('commits stock for both, because the order is going ahead either way', () => {
+    expect(shouldCommitStock(outcomeFromStatus('authorised', 'ref')!)).toBe(true);
+    expect(shouldCommitStock(outcomeFromStatus('succeeded', 'ref')!)).toBe(true);
+  });
+
+  it('treats a cancellation as a failure, not as something still in flight', () => {
+    const outcome = outcomeFromStatus('cancelled', 'ref');
+    expect(outcome).toMatchObject({ kind: 'failed', code: 'cancelled' });
+    expect(shouldCommitStock(outcome!)).toBe(false);
+  });
+
+  it('leaves a pending payment holding its reservation', () => {
+    const outcome = outcomeFromStatus('pending', 'ref');
+    expect(outcome).toMatchObject({ kind: 'pending' });
+    expect(shouldCommitStock(outcome!)).toBe(false);
+  });
+
+  // A refund is a separate ledger entry against an existing capture. Mapping it
+  // to any payment outcome would restate the original payment instead.
+  it('refuses to express a refund as a payment outcome', () => {
+    expect(outcomeFromStatus('refunded', 'ref')).toBeNull();
+  });
+
+  it('carries the gateway payload through for forensics', () => {
+    expect(outcomeFromStatus('succeeded', 'ref', { id: 'pi_1' })).toMatchObject({
+      raw: { id: 'pi_1' },
+    });
   });
 });
 

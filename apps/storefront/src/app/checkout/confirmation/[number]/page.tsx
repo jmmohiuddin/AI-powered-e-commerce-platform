@@ -88,8 +88,17 @@ export default async function ConfirmationPage({
           </Link>
         </div>
 
+        {/*
+          The promise this page has always made, now kept on the page itself.
+          The link carries the same phone that got the shopper here, because the
+          invoice route enforces the same two factors — an invoice shows the
+          delivery address, every line, and a business buyer's TRN.
+        */}
         <p className="vat-note" style={{ marginTop: 'var(--space-5)' }}>
-          A tax invoice showing the VAT breakdown and our TRN will be sent with your order.
+          <a href={`/checkout/confirmation/${order.number}/invoice?phone=${encodeURIComponent(normalised)}`}>
+            Download your tax invoice
+          </a>{' '}
+          — it shows the VAT breakdown and our TRN. A copy is sent with your order.
         </p>
       </div>
     </div>

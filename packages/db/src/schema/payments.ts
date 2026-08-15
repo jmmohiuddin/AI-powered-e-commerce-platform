@@ -32,6 +32,16 @@ import { customers, orders } from './commerce';
  * transactions win.
  */
 
+/**
+ * Must stay in step with `PaymentProviderId` in @voltix/payments.
+ *
+ * The two drifted once, and the failure was not subtle: `TabbyGateway` was
+ * registered, offered at checkout, and every BNPL order died on
+ * `invalid input value for enum payment_provider: "tabby"` at the
+ * payment_intents insert — after stock had been reserved. A provider the
+ * application can select but the database will not store is a checkout that
+ * fails at the last step, which is the most expensive place for it to fail.
+ */
 export const paymentProvider = pgEnum('payment_provider', [
   'cod',
   'paytabs',
@@ -43,6 +53,8 @@ export const paymentProvider = pgEnum('payment_provider', [
   'store_credit',
   'gift_card',
   'manual',
+  'tabby',
+  'tamara',
 ]);
 
 export const paymentIntentStatus = pgEnum('payment_intent_status', [

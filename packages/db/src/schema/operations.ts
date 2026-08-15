@@ -213,5 +213,33 @@ export const notifications = pgTable(
     uniqueIndex('notifications_dedupe_key').on(t.dedupeKey),
     index('notifications_reference_idx').on(t.referenceType, t.referenceId),
     index('notifications_tenant_idx').on(t.tenantId, t.status),
+    /**
+     * The delivery-webhook lookup: find the message a bounce is about.
+     *
+     * `provider_message_id` is the only handle an asynchronous delivery event
+     * has on the row it concerns — the provider knows its own id and nothing
+     * else about us — so the bounce worker resolves every event through it (see
+     * packages/commerce/src/email-events.ts). Without this index that is a
+     * sequential scan of the entire outbox per bounce, on a table that only
+     * ever grows.
+     *
+     * COLUMN ORDER IS THE WHOLE POINT, and it is the opposite of the way this
+     * index reads. `provider_message_id` leads. The worker's lookup filters on
+     * the message id and the tenant and never on `provider` — it has no reason
+     * to, the id is already near-unique — and a btree can only be used from its
+     * leading column inward. Indexed as `(provider, provider_message_id)` the
+     * planner cannot use it for that query at all and falls back to a
+     * sequential scan, which is the exact cost this index exists to remove.
+     * Verified with EXPLAIN rather than assumed: leading with `provider` gives
+     * `Seq Scan`, leading with `provider_message_id` gives `Index Scan`.
+     *
+     * `provider` is kept as the trailing column because two transports can mint
+     * the same id string, so the pair is what is genuinely unique — but it
+     * earns its place only after the selective column, not before it.
+     *
+     * Not a unique index: a row that was never sent has NULL here, and a
+     * provider is entitled to reuse an id once its own retention has passed.
+     */
+    index('notifications_provider_message_idx').on(t.providerMessageId, t.provider),
   ],
 );

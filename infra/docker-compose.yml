@@ -73,6 +73,21 @@ services:
     volumes:
       - minio-data:/data
 
+  # Creates the media bucket and exits. Without it the first product-image
+  # upload on a fresh clone fails with NoSuchBucket, which reads like a
+  # credentials problem and is not one. Idempotent, so it is safe on every up.
+  minio-init:
+    image: minio/mc:latest
+    container_name: voltix-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 voltix voltix_dev_password; do sleep 1; done;
+      mc mb --ignore-existing local/voltix-media;
+      mc anonymous set download local/voltix-media;
+      "
+
   mailpit:
     # Catches all outbound email in development. Never forwards anything.
     image: axllent/mailpit:latest

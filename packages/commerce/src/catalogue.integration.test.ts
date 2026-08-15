@@ -200,6 +200,108 @@ suite('catalogue writes', () => {
     expect(Number(stock.rows[0]!.on_hand)).toBe(7);
   });
 
+  /**
+   * ARABIC PRODUCT COPY — UAE Federal Law 15/2020.
+   *
+   * Consumer product information must be available in Arabic, so the write path
+   * for `products.translations` is a compliance surface rather than a feature.
+   * What is under test is the storage contract the storefront's `localise()`
+   * depends on: per-field overrides, and no empty strings.
+   */
+  it('stores Arabic copy alongside the English fields', async () => {
+    const f = await fixture('cat-arabic');
+    const created = await asTenant(f, (tx) =>
+      createProduct(
+        tx,
+        f.ctx,
+        ACTOR,
+        {
+          ...PRODUCT,
+          description: 'A 24,000mAh power bank with 140W output.',
+          highlights: ['140W USB-C output', '24,000mAh capacity'],
+          translations: {
+            'ar-AE': {
+              title: 'أنكر ٧٣٧ باور بانك',
+              description: 'باور بانك بسعة ٢٤٠٠٠ مللي أمبير وقدرة ١٤٠ واط.',
+              highlights: ['منفذ USB-C بقوة ١٤٠ واط', 'سعة ٢٤٠٠٠ مللي أمبير'],
+            },
+          },
+        },
+        VARIANT,
+      ),
+    );
+
+    const row = await ownerDb().execute<{ highlights: unknown; translations: unknown }>(
+      sql`SELECT highlights, translations FROM products WHERE id = ${created.id}`,
+    );
+    const translations = row.rows[0]!.translations as Record<string, Record<string, unknown>>;
+
+    expect(row.rows[0]!.highlights).toEqual(['140W USB-C output', '24,000mAh capacity']);
+    expect(translations['ar-AE']!.title).toBe('أنكر ٧٣٧ باور بانك');
+    expect(translations['ar-AE']!.highlights).toEqual([
+      'منفذ USB-C بقوة ١٤٠ واط',
+      'سعة ٢٤٠٠٠ مللي أمبير',
+    ]);
+  });
+
+  /**
+   * The property that makes per-field fallback work.
+   *
+   * `localise()` resolves with `??`, which falls back on null/undefined only —
+   * an empty string stored here would blank the English title for an Arabic
+   * reader instead of falling back to it. A merchant who translates the title
+   * and leaves the description alone must leave no description key at all.
+   */
+  it('keeps a partial translation partial, and stores no empty strings', async () => {
+    const f = await fixture('cat-arabic-partial');
+    const created = await asTenant(f, (tx) =>
+      createProduct(tx, f.ctx, ACTOR, PRODUCT, VARIANT),
+    );
+
+    await asTenant(f, (tx) =>
+      updateProduct(tx, f.ctx, ACTOR, created.id, {
+        title: 'Anker 737 Power Bank',
+        description: 'English description stays.',
+        highlights: ['English highlight'],
+        translations: {
+          // Title translated; everything else left blank by the merchant.
+          'ar-AE': { title: 'أنكر ٧٣٧', subtitle: '', description: '   ', highlights: ['', '  '] },
+        },
+      }),
+    );
+
+    const row = await ownerDb().execute<{ translations: unknown }>(
+      sql`SELECT translations FROM products WHERE id = ${created.id}`,
+    );
+    const arabic = (row.rows[0]!.translations as Record<string, Record<string, unknown>>)['ar-AE']!;
+
+    expect(arabic).toEqual({ title: 'أنكر ٧٣٧' });
+    expect('description' in arabic).toBe(false);
+    expect('subtitle' in arabic).toBe(false);
+    expect('highlights' in arabic).toBe(false);
+  });
+
+  /** A locale with nothing in it is dropped, so the column reads as untranslated
+   *  rather than holding `{"ar-AE": {}}` — the same state, worse to read. */
+  it('drops a locale whose fields are all blank', async () => {
+    const f = await fixture('cat-arabic-empty');
+    const created = await asTenant(f, (tx) =>
+      createProduct(tx, f.ctx, ACTOR, PRODUCT, VARIANT),
+    );
+
+    await asTenant(f, (tx) =>
+      updateProduct(tx, f.ctx, ACTOR, created.id, {
+        title: 'Anker 737 Power Bank',
+        translations: { 'ar-AE': { title: '', subtitle: '', description: '', highlights: [] } },
+      }),
+    );
+
+    const row = await ownerDb().execute<{ translations: unknown }>(
+      sql`SELECT translations FROM products WHERE id = ${created.id}`,
+    );
+    expect(row.rows[0]!.translations).toEqual({});
+  });
+
   it('adjusts stock, records the reason, and refuses to go negative', async () => {
     const f = await fixture('cat-stock');
     const created = await asTenant(f, (tx) =>

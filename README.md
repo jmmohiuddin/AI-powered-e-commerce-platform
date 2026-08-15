@@ -1,11 +1,14 @@
 # Voltix Commerce
 
-An AI-assisted, multi-tenant commerce platform for electronics and mobile retail in the **United
-Arab Emirates**.
+A commerce platform for electronics and mobile retail in the **United Arab Emirates** — an online
+store for one merchant, built on foundations that could serve many without a rewrite: every table
+is tenant-scoped and enforced by row-level security, and every payment gateway sits behind one port.
 
-Built as a foundation for a single merchant that can grow into a SaaS serving many, without a
-rewrite: every table is tenant-scoped, every payment gateway sits behind one port, and every AI
-call is metered per tenant from day one.
+Two things worth knowing before reading further, because both have been claimed loosely elsewhere.
+**No language model runs in this product.** The search ranking, demand forecasting and risk scoring
+are deterministic algorithms, and they are described as such below. And while the schema and
+policies are genuinely multi-tenant, it is **deployed for exactly one tenant** and the SaaS
+programme is parked — so the isolation is tested but unexercised in production.
 
 ---
 
@@ -16,11 +19,11 @@ order management and customer notifications all work end to end.** That is state
 than buried, because "production-ready enterprise platform" is a claim that takes a team months to
 earn and a paragraph to falsely assert.
 
-**Implemented, typechecked, and covered by 243 passing tests** (unit + integration against real Postgres)**:**
+**Implemented, typechecked, and covered by 461 passing tests** (unit + integration against real Postgres)**:**
 
 | Area | What works |
 |---|---|
-| Database | 70 tables, 66 with row-level security, plus money-integrity constraints. Runs on Postgres 17 (Docker) or 18 (Neon) with pgvector; migrations generated, applied and idempotently re-runnable. The app connects as a **restricted role** — a superuser silently bypasses every policy, so isolation is verified by test, not assumed |
+| Database | 71 tables, 67 with row-level security, plus money-integrity constraints. Runs on Postgres 17 (Docker) or 18 (Neon) with pgvector; migrations generated, applied and idempotently re-runnable. The app connects as a **restricted role** — a superuser silently bypasses every policy, so isolation is verified by test, not assumed |
 | Checkout | Cart → server-authoritative pricing → row-locked stock reservation → order → payment → commit or release. Idempotent, transactional, gap-free order numbering |
 | Job runner | Postgres-backed queue with `SKIP LOCKED`, exponential backoff and dead-lettering. Reservation sweep, abandoned-cart detection, payment reconciliation |
 | UAE market rules | 5% VAT extracted from inclusive prices, TRN validation, emirate/Makani addressing with no postal code, Sat–Sun weekend delivery estimates, `+9715…` phone normalisation |
@@ -28,18 +31,23 @@ earn and a paragraph to falsely assert.
 | Money | Integer minor units, GCC three-decimal currencies handled, largest-remainder allocation fuzz-tested to never lose or invent a fils |
 | Order lifecycle | Three-axis state machine (lifecycle / payment / fulfilment) with guarded transitions |
 | Inventory | Availability, multi-warehouse allocation, reservation TTLs, oversell prevention |
-| Payments | Gateway port + adapters for Stripe, Network International (N-Genius), Tabby BNPL and Cash on Delivery. Circuit breakers, idempotency, signed-webhook verification |
-| AI platform | Metered Anthropic gateway with per-tenant budgets, prompt caching and structured output; 7-task registry; hybrid-search fusion; statistical demand forecasting; explainable card-and-COD risk scoring |
+| Payments | Gateway port + adapters for Stripe, Network International (N-Genius), Tabby BNPL and Cash on Delivery. Circuit breakers, idempotency, and signed webhooks that are actually **received** — `/api/webhooks/[provider]` verifies the raw body, dedupes on a database constraint and settles in a job, so a redirect payment can reach a terminal state. COD supports a risk-gated advance deposit, split across two payment intents |
+| Decisioning | Hybrid-search fusion (RRF with query classification), statistical demand forecasting (Croston / seasonal-naive / Holt, selected by series shape), and explainable card-and-COD risk scoring wired into checkout. **All deterministic — no language model is invoked anywhere in the running product.** `packages/ai` also contains an Anthropic client and a 7-task registry; both are complete, tested and **currently have no call sites**. They are scaffolding for later, not a shipped capability |
 | RBAC | 8 seeded roles, wildcard permissions, MFA required of any role that can move money |
 | Staff auth | Argon2id passwords, opaque DB-backed sessions (instant revocation), per-account and per-IP lockout, TOTP two-factor verified against RFC 6238 vectors, AES-GCM-encrypted secrets, one-time recovery codes. `npm run db:create-user` creates the first owner |
-| Storefront | Next.js 16 — homepage, faceted search, product detail with Product + FAQ structured data, Tabby instalment display, WhatsApp ordering, guest order tracking, delivery/returns/contact pages. English and Arabic with full RTL |
+| Storefront | Next.js 16 — homepage, indexable category pages with crawlable pagination, faceted search, product detail with image gallery and Product + FAQ structured data, Tabby instalment display, WhatsApp ordering, cart, checkout with redirect-gateway return handling, guest order tracking, downloadable tax invoice, delivery/returns/contact pages, sitemap and robots. English and Arabic with full RTL |
+| Storefront security | Nonce-based Content-Security-Policy enforced by default (verified against a production build, not just `next dev`), rate limiting on order lookup and search — fail-closed and fail-open respectively — and a demo catalogue that cannot be served in production |
+| Analytics | `checkout_started` / `checkout_failed` (with reason and step) / `cod_refused` / `order_placed` (with emirate, which cannot be backfilled), plus `product_viewed`, `search_performed` and a zero-result search log. Written outside the order transaction, so a reporting failure can never cost a sale |
+| Tax documents | Full and simplified UAE invoices selected by the AED 10,000 threshold, sequential gap-free numbering, supplier and recipient TRN, per-line VAT. A document is never labelled a tax invoice unless it legally is one |
 | Admin | Login + MFA enrolment, dashboard/orders/inventory driven by real database reads, order detail with state-machine-gated actions (confirm / fulfil / cancel with stock return), PII behind its own permission, message outbox with human approval of marketing drafts |
 | Payments (admin) | Record cash-on-delivery collection and issue full or partial refunds through the gateway that took the payment. Every movement is a ledger row and the payment status is recomputed from it — never written directly. Over-refunding is blocked in the domain and again by a database CHECK; a failed gateway refund rolls back whole |
 | Notifications | Transactional outbox written atomically with the order, dispatched outside transactions over SMTP (Mailpit in dev) and WhatsApp Cloud API. Bilingual templates; COD wording never claims payment; marketing held as drafts until approved; consent enforced per channel |
 
-**Specified in `docs/` but not yet built:** customer accounts, review submission, the campaign
-builder, courier integration, partial per-line shipments, and the customer-facing shopping
-assistant UI. `docs/07-roadmap.md` sequences these.
+**Specified in `docs/` but not yet built:** customer accounts (guest checkout is a deliberate
+decision, and wishlist and review submission are deferred behind it), the campaign builder,
+courier integration and shipments, partial per-line fulfilment, serial/IMEI capture, Arabic
+product *content* as opposed to Arabic UI, and the customer-facing shopping assistant.
+`docs/07-roadmap.md` sequences these.
 
 **Nothing here has run against real money.** No gateway adapter has been tested against a live
 merchant account, and no load test has been run. Those are the largest remaining risks.

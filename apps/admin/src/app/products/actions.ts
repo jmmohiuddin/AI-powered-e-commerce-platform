@@ -44,6 +44,38 @@ function toMinorUnits(raw: FormDataEntryValue | null, field: string): number | u
   return Math.round(value * 100);
 }
 
+/**
+ * The locale the form's Arabic column writes to, and the shape it writes.
+ *
+ * Arabic product information is required by UAE Federal Law 15/2020. The form
+ * posts flat `…Ar` fields rather than a nested structure because that is what
+ * an HTML form can express; assembling the locale record is this layer's job.
+ *
+ * Empty fields are NOT filtered here — the domain layer does that, so an API
+ * client posting the same blanks gets the same treatment as the form.
+ */
+const ARABIC = 'ar-AE';
+
+/** A textarea of bullets, one per line. Split on newlines only: a highlight
+ *  legitimately contains commas ("6.9-inch display, 120Hz"). */
+function toLines(raw: FormDataEntryValue | null): string[] {
+  return String(raw ?? '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+}
+
+function translationsFrom(formData: FormData) {
+  return {
+    [ARABIC]: {
+      title: String(formData.get('titleAr') ?? ''),
+      subtitle: String(formData.get('subtitleAr') ?? ''),
+      description: String(formData.get('descriptionAr') ?? ''),
+      highlights: toLines(formData.get('highlightsAr')),
+    },
+  };
+}
+
 function toResult(error: unknown): ActionResult {
   if (error instanceof DomainError) {
     return { ok: false, error: error.publicMessage ?? error.message };
@@ -73,6 +105,8 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
           title: String(formData.get('title') ?? ''),
           subtitle: String(formData.get('subtitle') ?? '') || undefined,
           description: String(formData.get('description') ?? '') || undefined,
+          highlights: toLines(formData.get('highlights')),
+          translations: translationsFrom(formData),
           brandId: String(formData.get('brandId') ?? '') || undefined,
           categoryId: String(formData.get('categoryId') ?? '') || undefined,
           condition: String(formData.get('condition') ?? 'new'),
@@ -117,6 +151,8 @@ export async function updateProductAction(
         title: String(formData.get('title') ?? ''),
         subtitle: String(formData.get('subtitle') ?? '') || undefined,
         description: String(formData.get('description') ?? '') || undefined,
+        highlights: toLines(formData.get('highlights')),
+        translations: translationsFrom(formData),
         brandId: String(formData.get('brandId') ?? '') || undefined,
         categoryId: String(formData.get('categoryId') ?? '') || undefined,
         condition: String(formData.get('condition') ?? 'new'),

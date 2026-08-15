@@ -13,8 +13,10 @@
     "worker": "tsx scripts/worker.ts"
   },
   "dependencies": {
+    "@voltix/ai": "*",
     "@voltix/core": "*",
     "@voltix/db": "*",
+    "@voltix/invoicing": "*",
     "@voltix/notifications": "*",
     "@voltix/payments": "*",
     "drizzle-orm": "^0.45.2"

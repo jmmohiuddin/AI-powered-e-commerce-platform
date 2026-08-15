@@ -1,14 +1,48 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { formatCount, formatPrice, formatRating } from '@voltix/ui';
 import { BuyBox } from '@/components/buy-box';
 import { ProductCard, availabilityLabels } from '@/components/product-card';
+import { ProductGallery } from '@/components/product-gallery';
 import { getProduct, relatedProducts, totalAvailable } from '@/lib/catalog';
-import { localise } from '@/lib/types';
-import { resolveLocale, translator } from '@/lib/locale';
+import { imagesOf, localise, PLACEHOLDER_IMAGE, specsOf, type ProductView } from '@/lib/types';
+import { directionOf, resolveLocale, translator } from '@/lib/locale';
+import { trackAfterRender } from '@/lib/analytics';
+import { pageVisitor } from '@/lib/visitor';
 
 type Params = Promise<{ slug: string }>;
+
+/**
+ * A uuid, and not a slug wearing one.
+ *
+ * The catalogue falls back to a hard-coded demo set outside production, and
+ * those products carry slug-shaped ids. `analytics_events.product_id` is a uuid
+ * column, so passing one through would throw inside the writer — swallowed, but
+ * once per view, and it would fill the logs with a failure that is not a
+ * failure. The same guard already governs `relatedProducts` in lib/catalog.
+ */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Product photographs as absolute URLs, for Open Graph.
+ *
+ * The placeholder is excluded rather than shared: a preview card showing "no
+ * image available" is worse than a preview card with no image, which at least
+ * falls back to the site-level default.
+ */
+function openGraphImages(product: ProductView) {
+  const origin = (process.env.STOREFRONT_URL || 'http://localhost:3000').replace(/\/$/, '');
+  return imagesOf(product)
+    .filter((image) => image.url !== PLACEHOLDER_IMAGE)
+    .slice(0, 4)
+    .map((image) => ({
+      url: image.url.startsWith('http') ? image.url : `${origin}${image.url}`,
+      alt: image.alt,
+      ...(image.width && image.height ? { width: image.width, height: image.height } : {}),
+    }));
+}
 
 /**
  * Product detail page.
@@ -43,6 +77,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       title: product.title,
       description: product.subtitle ?? product.description.slice(0, 200),
       type: 'website',
+      /**
+       * Now that products have real photographs, share them. A link pasted into
+       * WhatsApp — which is how a large share of this market sends a product to
+       * a friend — previews as a bare title without this, and a preview with no
+       * picture is the one that does not get tapped.
+       *
+       * Absolute, because Open Graph consumers do not resolve relative URLs.
+       */
+      images: openGraphImages(product),
     },
   };
 }
@@ -51,14 +94,60 @@ export default async function ProductPage({ params }: { params: Params }) {
   const { slug } = await params;
   const locale = await resolveLocale();
   const t = translator(locale);
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   const raw = await getProduct(slug);
   if (!raw) notFound();
 
   const product = localise(raw, locale);
+  const specs = specsOf(product);
   const rating = formatRating(product.ratingAverage, locale);
   const related = await relatedProducts(raw);
   const available = totalAvailable(product);
+
+  /**
+   * THE TOP OF THE FUNNEL.
+   *
+   * Written after the response rather than during it, and only for a request
+   * that is plausibly a person — see lib/analytics.ts for the first and
+   * lib/visitor.ts for the second. Both conditions are refusals to record
+   * rather than attempts to enrich: a view that cannot be attributed to a
+   * shopping session is not counted, because a `product_viewed` whose session
+   * id never appears on a `checkout_started` contributes nothing to a funnel
+   * and quietly inflates its denominator.
+   *
+   * That cookie only exists after a shopper's first cart action, so this counts
+   * views by browsers that already have a basket — NOT visits by strangers, and
+   * NOT a usable denominator for a view-to-cart conversion rate. The full
+   * reasoning, and what these rows can and cannot answer, is on
+   * `AnalyticsEventType` in packages/commerce/src/analytics.ts.
+   *
+   * The variant recorded is the default one — the price and SKU this render
+   * actually put in front of the shopper. Which variant they went on to select
+   * is client state, and the event that knows it is `checkout_started`.
+   *
+   * Facts only, no personal data: the brand, category and stock state of what
+   * was shown, plus the language it was shown in. "Views of products that were
+   * out of stock" is a merchandising defect somebody can act on, which is the
+   * bar every event here is held to.
+   */
+  const visitor = await pageVisitor();
+  if (!visitor.automated && visitor.sessionId && UUID.test(raw.id)) {
+    const variantId = raw.variants[0]?.id;
+    trackAfterRender(`product_viewed:${raw.id}`, {
+      type: 'product_viewed',
+      sessionId: visitor.sessionId,
+      productId: raw.id,
+      ...(variantId && UUID.test(variantId) ? { variantId } : {}),
+      properties: {
+        slug: raw.slug,
+        brand: raw.brand,
+        category: raw.categorySlug,
+        inStock: available > 0,
+        locale,
+      },
+    });
+  }
 
   /**
    * Structured data serves two audiences that want different things:
@@ -117,8 +206,13 @@ export default async function ProductPage({ params }: { params: Params }) {
 
   return (
     <>
+      {/* Next nonces its own bootstrap scripts but not ones the application
+          writes itself, so this block is the single violation keeping the CSP
+          in report-only mode. The nonce comes from the request headers the
+          proxy stamped — see proxy.ts. */}
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
@@ -136,7 +230,12 @@ export default async function ProductPage({ params }: { params: Params }) {
 
       <div className="container pdp">
         <div className="pdp__media">
-          <ProductHero title={product.title} alt={product.imageAlt} seed={product.id} />
+          <ProductGallery
+            images={imagesOf(product)}
+            locale={locale}
+            direction={directionOf(locale)}
+            strings={{ gallery: t('product.gallery'), imageOf: t('product.imageOf') }}
+          />
         </div>
 
         <div>
@@ -158,7 +257,6 @@ export default async function ProductPage({ params }: { params: Params }) {
             variants={product.variants}
             currency={product.currency}
             productTitle={product.title}
-            whatsappNumber="971500000000"
             vatRateBps={VAT_RATE_BPS}
             locale={locale}
             availability={availabilityLabels(t)}
@@ -189,17 +287,27 @@ export default async function ProductPage({ params }: { params: Params }) {
             </p>
           </section>
 
-          {Object.keys(product.specs).length > 0 && (
+          {/* Key specs lead, then the rest in the merchant's order — `specsOf`
+              owns that arrangement so the demo catalogue and a database product
+              render the same way.
+
+              The section is gated on having something to put in it: an empty
+              table under a "Specifications" heading reads as a broken page
+              rather than as a product nobody has specified yet. Warranty counts
+              towards that — it is a specification a shopper compares on, and it
+              used to disappear whenever the attribute rows were missing, which
+              against a real database was always. */}
+          {(specs.length > 0 || product.warrantyMonths) && (
             <section style={{ marginTop: 'var(--space-6)' }}>
               <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-3)' }}>
                 {t('product.specifications')}
               </h2>
               <table className="spec-table">
                 <tbody>
-                  {Object.entries(product.specs).map(([key, value]) => (
-                    <tr key={key}>
-                      <th scope="row">{key}</th>
-                      <td>{value}</td>
+                  {specs.map((spec) => (
+                    <tr key={spec.key}>
+                      <th scope="row">{spec.label}</th>
+                      <td>{spec.value}</td>
                     </tr>
                   ))}
                   {product.warrantyMonths && (
@@ -252,23 +360,27 @@ export default async function ProductPage({ params }: { params: Params }) {
         <div className="section__head">
           <h2>{t('product.deliveryPayment')}</h2>
         </div>
+        {/*
+          THE IMEI CLAIM WAS REMOVED FROM THE WARRANTY CARD. DO NOT PUT IT BACK.
+
+          It read "{n} months, with the IMEI recorded against your order." No
+          code writes to `serial_units`, so no IMEI is recorded against any
+          order — see the fuller note in app/page.tsx for the three things that
+          would have to become true first, and for why gating on
+          `variants.isSerialised` would not make the sentence true. Debt P-03,
+          requirement C-05.
+
+          The warranty *length* is real, so it stays: it comes from
+          `products.warrantyMonths`, defaulted from `brands.defaultWarrantyMonths`.
+        */}
         <div className="product-grid">
           {[
+            { title: t('product.dpDeliveryTitle'), body: t('product.dpDeliveryBody') },
+            { title: t('product.dpPaymentTitle'), body: t('product.dpPaymentBody') },
+            { title: t('product.dpCodTitle'), body: t('product.dpCodBody') },
             {
-              title: 'Same-day in Dubai',
-              body: 'Order before 2pm for same-day delivery in Dubai, next day to Abu Dhabi and Sharjah.',
-            },
-            {
-              title: 'Card, Apple Pay or Tabby',
-              body: 'Pay in full, or split into four interest-free payments with Tabby.',
-            },
-            {
-              title: 'Cash on delivery',
-              body: 'Available across all seven emirates. Check the box before you pay.',
-            },
-            {
-              title: 'Official UAE warranty',
-              body: `${product.warrantyMonths ?? 12} months, with the IMEI recorded against your order.`,
+              title: t('product.dpWarrantyTitle'),
+              body: t('product.dpWarrantyBody', { n: product.warrantyMonths ?? 12 }),
             },
           ].map((item) => (
             <div key={item.title} className="product-card" style={{ padding: 'var(--space-5)' }}>
@@ -284,27 +396,5 @@ export default async function ProductPage({ params }: { params: Params }) {
         </p>
       </section>
     </>
-  );
-}
-
-function ProductHero({ title, alt, seed }: { title: string; alt: string; seed: string }) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  const hue = hash % 360;
-  const id = seed.replace(/[^a-zA-Z0-9-]/g, '');
-
-  return (
-    <svg viewBox="0 0 200 200" role="img" aria-label={alt}>
-      <title>{title}</title>
-      <defs>
-        <linearGradient id={`hero-${id}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={`hsl(${hue} 62% 62%)`} />
-          <stop offset="100%" stopColor={`hsl(${(hue + 40) % 360} 58% 44%)`} />
-        </linearGradient>
-      </defs>
-      <rect x="52" y="16" width="96" height="168" rx="18" fill={`url(#hero-${id})`} />
-      <rect x="62" y="30" width="76" height="126" rx="8" fill="rgba(255,255,255,0.92)" />
-      <circle cx="100" cy="170" r="7" fill="rgba(255,255,255,0.85)" />
-    </svg>
   );
 }

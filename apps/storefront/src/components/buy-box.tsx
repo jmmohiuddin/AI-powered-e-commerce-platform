@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { addToCart } from '@/app/actions';
+import { whatsappHref } from '@/lib/contact';
 import { formatCount, formatPrice, splitVatInclusive } from '@voltix/ui';
 import { AvailabilityBadge, type AvailabilityLabels } from './availability-badge';
 import type { ProductVariantView } from '@/lib/types';
@@ -37,7 +38,6 @@ export function BuyBox({
   variants,
   currency,
   productTitle,
-  whatsappNumber,
   vatRateBps,
   locale,
   strings,
@@ -46,7 +46,6 @@ export function BuyBox({
   variants: readonly ProductVariantView[];
   currency: string;
   productTitle: string;
-  whatsappNumber: string;
   vatRateBps: number;
   locale: Locale;
   /**
@@ -77,9 +76,11 @@ export function BuyBox({
   // step because most abandon before reaching it.
   const instalment = Math.round(selected.price / 4);
 
-  const whatsappHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+  // Read from configuration rather than taken as a prop: the number is the same
+  // for every product, and a prop is one more place a placeholder can be typed.
+  const whatsapp = whatsappHref(
     `Hi, I'd like to order ${quantity} × ${productTitle} (${selected.title}, ${selected.sku}).`,
-  )}`;
+  );
 
   return (
     <div className="buy-box">
@@ -198,9 +199,11 @@ export function BuyBox({
         {pending ? '…' : inStock ? strings.addToCart : strings.outOfStock}
       </button>
 
-      <a className="button button--whatsapp button--block" href={whatsappHref}>
-        {strings.whatsapp}
-      </a>
+      {whatsapp && (
+        <a className="button button--whatsapp button--block" href={whatsapp}>
+          {strings.whatsapp}
+        </a>
+      )}
 
       <ul className="trust-list">
         <li>{strings.trustCod}</li>

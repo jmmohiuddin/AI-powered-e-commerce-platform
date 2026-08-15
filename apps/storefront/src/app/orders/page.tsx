@@ -4,7 +4,8 @@ import { lookupOrder } from '@voltix/commerce';
 import { formatPrice } from '@voltix/ui';
 import { EMIRATES, normaliseUaePhone } from '@voltix/core';
 import { inTenant, tenantContext } from '@/lib/session';
-import { resolveLocale } from '@/lib/locale';
+import { clientIdentifier, limitOrderLookup } from '@/lib/rate-limit';
+import { resolveLocale, translator } from '@/lib/locale';
 
 export const metadata: Metadata = {
   title: 'Track your order',
@@ -39,13 +40,28 @@ export default async function TrackOrderPage({
 }) {
   const { number, phone } = await searchParams;
   const locale = await resolveLocale();
+  const t = translator(locale);
   const ctx = tenantContext();
 
   const submitted = Boolean(number && phone);
   const normalised = phone ? normaliseUaePhone(phone) : null;
 
+  /**
+   * Throttled before the query, not after.
+   *
+   * Two factors raise the cost of enumeration but do not cap it: the phone is
+   * often knowable and the order number is sequential, so an unlimited attempt
+   * budget turns this page into a confirmation oracle for "did this person
+   * order from here". The limit is what makes the second factor mean something.
+   *
+   * Counted per attempt rather than per failure. Counting only misses lets an
+   * attacker who has found one valid pair keep probing for free, and the
+   * legitimate use of this page is one or two lookups.
+   */
+  const throttled = submitted ? !(await limitOrderLookup(await clientIdentifier())).allowed : false;
+
   const order =
-    submitted && normalised
+    submitted && normalised && !throttled
       ? await inTenant((tx) => lookupOrder(tx, ctx, number!, normalised)).catch(() => null)
       : null;
 
@@ -94,7 +110,16 @@ export default async function TrackOrderPage({
         </button>
       </form>
 
-      {submitted && !order && (
+      {throttled && (
+        <div className="notice notice--warn" role="status">
+          <strong>{t('limit.title')}</strong>
+          <p>{t('limit.orders')}</p>
+        </div>
+      )}
+
+      {/* Silent on whether the order exists. Saying "too many attempts" only
+          after a hit would answer the question the limit exists to refuse. */}
+      {submitted && !throttled && !order && (
         <div className="notice notice--warn" role="status">
           <strong>We could not find that order.</strong>
           <p>

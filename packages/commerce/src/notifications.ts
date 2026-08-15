@@ -108,10 +108,22 @@ export async function handleNotificationJob(tx: Tx, job: Job): Promise<void> {
           currency: order.currency,
           emirate: emirateName(emirateCode),
           deliveryDays,
-          // COD is the case that must read as unpaid. The provider is the
-          // reliable signal; payment_status alone is ambiguous while a card
-          // authorisation is still settling.
-          isCod: order.provider === 'cod' || order.payment_status === 'unpaid',
+          // COD is the case that must read as unpaid, and the payment intent's
+          // provider is the reliable signal for it — checkout always writes one,
+          // so a COD order always has provider 'cod'.
+          //
+          // `payment_status` alone is not a COD test: it is 'unpaid' both for a
+          // COD order and for a card order whose authorisation is still
+          // settling, and treating the second as the first told a customer who
+          // had already paid by card to hand cash to the driver. Anything
+          // neither COD nor settled says an amount is due without claiming how
+          // it will be collected.
+          payment:
+            order.provider === 'cod'
+              ? 'cod'
+              : order.payment_status === 'unpaid' || order.payment_status === 'failed'
+                ? 'awaiting'
+                : 'paid',
           itemCount: Number(order.item_count),
           // Prefill the number only — never the phone. A tracking link that
           // carries the customer's phone in the query string would put it in

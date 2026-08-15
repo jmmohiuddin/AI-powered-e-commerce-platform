@@ -1,6 +1,13 @@
 import { classifyQuery, reciprocalRankFusion } from '@voltix/ai';
 import * as repository from './repository';
-import type { CategoryView, ProductView, SearchFilters, SearchResult } from './types';
+import type {
+  CategoryDetail,
+  CategoryView,
+  ProductView,
+  SearchFilters,
+  SearchResult,
+} from './types';
+import { DEFAULT_PAGE_SIZE } from './types';
 
 export * from './types';
 
@@ -16,21 +23,24 @@ export * from './types';
  *     have provisioned a database, run migrations and seeded data is a platform
  *     nobody evaluates.
  *
- * The fallback is for local evaluation only. `packages/config` refuses to boot
- * production without a real `DATABASE_URL`, so it cannot reach a live store by
- * accident.
+ * The fallback is for local evaluation only, and that is enforced here rather
+ * than assumed: every path that would return demo data goes through
+ * `demoOrEmpty` or `onDatabaseError`, both of which refuse under
+ * `NODE_ENV=production`. Relying on `packages/config` rejecting a missing
+ * `DATABASE_URL` was not enough — the leak that mattered was a database that
+ * connected fine and returned no rows.
  */
 
 const USE_DATABASE = Boolean(process.env.DATABASE_URL);
 
-/** Seeded tenant. Production resolves this from the request host in middleware. */
+/** Seeded tenant. Every request currently resolves to it — see lib/session.ts. */
 export const DEMO_TENANT_ID = '01920000-0000-7000-8000-000000000001';
 
 export async function listProducts(tenantId = DEMO_TENANT_ID): Promise<ProductView[]> {
-  if (!USE_DATABASE) return DEMO_PRODUCTS;
+  if (!USE_DATABASE) return demoOrEmpty(DEMO_PRODUCTS, []);
   try {
     const rows = await repository.listProducts(tenantId);
-    return rows.length > 0 ? rows : DEMO_PRODUCTS;
+    return rows.length > 0 ? rows : demoOrEmpty(DEMO_PRODUCTS, []);
   } catch (error) {
     return onDatabaseError(error, DEMO_PRODUCTS);
   }
@@ -40,7 +50,10 @@ export async function getProduct(
   slug: string,
   tenantId = DEMO_TENANT_ID,
 ): Promise<ProductView | undefined> {
-  const fallback = DEMO_PRODUCTS.find((p) => p.slug === slug);
+  const fallback = demoOrEmpty(
+    DEMO_PRODUCTS.find((p) => p.slug === slug),
+    undefined,
+  );
   if (!USE_DATABASE) return fallback;
   try {
     return (await repository.getProductBySlug(tenantId, slug)) ?? fallback;
@@ -50,12 +63,62 @@ export async function getProduct(
 }
 
 export async function listCategories(tenantId = DEMO_TENANT_ID): Promise<CategoryView[]> {
-  if (!USE_DATABASE) return demoCategories();
+  if (!USE_DATABASE) return demoOrEmpty(demoCategories(), []);
   try {
     const rows = await repository.listCategories(tenantId);
-    return rows.length > 0 ? rows : demoCategories();
+    return rows.length > 0 ? rows : demoOrEmpty(demoCategories(), []);
   } catch (error) {
     return onDatabaseError(error, demoCategories());
+  }
+}
+
+export async function getCategory(
+  path: string,
+  tenantId = DEMO_TENANT_ID,
+): Promise<CategoryDetail | undefined> {
+  const fallback = demoOrEmpty(demoCategory(path), undefined);
+  if (!USE_DATABASE) return fallback;
+  try {
+    return (await repository.getCategoryByPath(tenantId, path)) ?? fallback;
+  } catch (error) {
+    return onDatabaseError(error, fallback);
+  }
+}
+
+/**
+ * Sitemap inputs.
+ *
+ * Returns paths and slugs only — the sitemap needs URLs, not hydrated products,
+ * and hydrating a whole catalogue to print its slugs would make the sitemap the
+ * most expensive route in the app.
+ */
+export async function listCategoryPaths(tenantId = DEMO_TENANT_ID): Promise<string[]> {
+  const fallback = demoOrEmpty(
+    demoCategories().map((c) => c.path),
+    [],
+  );
+  if (!USE_DATABASE) return fallback;
+  try {
+    const rows = await repository.listCategoryPaths(tenantId);
+    return rows.length > 0 ? rows.map((r) => r.path) : fallback;
+  } catch (error) {
+    return onDatabaseError(error, fallback);
+  }
+}
+
+export async function listProductSlugs(
+  tenantId = DEMO_TENANT_ID,
+): Promise<Array<{ slug: string; updatedAt: Date | null }>> {
+  const fallback = demoOrEmpty(
+    DEMO_PRODUCTS.map((p) => ({ slug: p.slug, updatedAt: null })),
+    [] as Array<{ slug: string; updatedAt: Date | null }>,
+  );
+  if (!USE_DATABASE) return fallback;
+  try {
+    const rows = await repository.listProductSlugs(tenantId);
+    return rows.length > 0 ? rows : fallback;
+  } catch (error) {
+    return onDatabaseError(error, fallback);
   }
 }
 
@@ -63,7 +126,7 @@ export async function searchProducts(
   filters: SearchFilters,
   tenantId = DEMO_TENANT_ID,
 ): Promise<SearchResult> {
-  if (!USE_DATABASE) return demoSearch(filters);
+  if (!USE_DATABASE) return demoOrEmpty(demoSearch(filters), emptySearch());
   try {
     return await repository.searchProducts(tenantId, filters);
   } catch (error) {
@@ -81,7 +144,7 @@ export async function relatedProducts(
   // uuid. Passing it to the database path is a type error Postgres catches at
   // runtime rather than TypeScript catching at build — so the boundary is
   // guarded here, where the two shapes actually meet.
-  if (!USE_DATABASE || !UUID.test(product.id)) return demoRelated(product);
+  if (!USE_DATABASE || !UUID.test(product.id)) return demoOrEmpty(demoRelated(product), []);
   try {
     return await repository.relatedProducts(tenantId, product);
   } catch (error) {
@@ -104,6 +167,38 @@ function onDatabaseError<T>(error: unknown, fallback: T): T {
   if (process.env.NODE_ENV === 'production') throw error;
   console.warn('[catalog] database unavailable, serving demo data:', (error as Error).message);
   return fallback;
+}
+
+/**
+ * The same rule, for the case where nothing threw.
+ *
+ * A database that is reachable and simply has no rows for this tenant is not an
+ * error, so `onDatabaseError` never sees it — and that is the path a
+ * misconfigured store actually takes. Falling back there served six fabricated
+ * products from a live storefront: convincing enough to browse, with variant
+ * ids that are slugs rather than uuids, so the shopper only discovers the
+ * fiction when add-to-cart rejects them.
+ *
+ * An empty catalogue in production renders as an empty catalogue. That is
+ * embarrassing for about as long as it takes to seed the tenant, which is the
+ * correct amount of pressure.
+ */
+function demoOrEmpty<T>(demo: T, empty: T): T {
+  return process.env.NODE_ENV === 'production' ? empty : demo;
+}
+
+/** The shape `searchProducts` returns when there is nothing to return. */
+function emptySearch(): SearchResult {
+  return {
+    products: [],
+    total: 0,
+    intent: 'browse',
+    strategy: 'lexical',
+    facets: { brands: [], categories: [], priceRange: { min: 0, max: 0 } },
+    page: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+    pageCount: 1,
+  };
 }
 
 /* ─────────────────────── Demo catalogue (UAE) ───────────────────────── */
@@ -129,7 +224,12 @@ const DEMO_PRODUCTS: ProductView[] = [
       '6.9-inch QHD+ display, 1–120Hz adaptive refresh',
       '5,000mAh battery, 45W wired charging',
       'Titanium frame, IP68 water and dust resistance',
-      'UAE warranty, activated on your IMEI at dispatch',
+      // Was "UAE warranty, activated on your IMEI at dispatch". Removed because
+      // nothing writes to `serial_units`, so no IMEI is captured at dispatch or
+      // anywhere else — see the note in app/page.tsx. Debt P-03 / C-05.
+      // The same two strings live in packages/db/scripts/seed.ts, which is what
+      // a database-backed storefront actually renders; both were changed.
+      'Official UAE warranty, claimed with the dated invoice issued with your order',
     ],
     specs: {
       Display: '6.9" QHD+ AMOLED, 120Hz',
@@ -185,8 +285,13 @@ const DEMO_PRODUCTS: ProductView[] = [
     answerableFacts: [
       { question: 'Does it support 5G?', answer: 'Yes, the Galaxy S25 Ultra supports 5G networks.' },
       {
+        // Was "…registered to the handset IMEI." No IMEI is registered anywhere;
+        // `serial_units` has no writer. This is an answer-engine fact, so it is
+        // the version quoted back by assistants and search summaries — a false
+        // one propagates further than a false line of page copy. Debt P-03 / C-05.
         question: 'What warranty is included?',
-        answer: '12 months UAE warranty registered to the handset IMEI.',
+        answer:
+          '12 months UAE warranty from the manufacturer. The dated invoice issued with your order carries our TRN and is the proof of purchase the service centre asks for.',
       },
     ],
   },
@@ -406,6 +511,14 @@ const DEMO_PRODUCTS: ProductView[] = [
   },
 ];
 
+/**
+ * The demo taxonomy is deliberately flat — every category is a root.
+ *
+ * The schema supports arbitrary depth and the routes handle it, but inventing a
+ * two-level hierarchy here would mean the demo exercised a shape no seeded store
+ * has. `path` is still populated so the category routes work identically
+ * against demo data and Postgres.
+ */
 function demoCategories(): CategoryView[] {
   const counts = new Map<string, { name: string; count: number }>();
   for (const product of DEMO_PRODUCTS) {
@@ -413,7 +526,29 @@ function demoCategories(): CategoryView[] {
     if (existing) existing.count += 1;
     else counts.set(product.categorySlug, { name: product.category, count: 1 });
   }
-  return [...counts.entries()].map(([slug, v]) => ({ slug, ...v }));
+  return [...counts.entries()].map(([slug, v]) => ({
+    slug,
+    ...v,
+    path: `/${slug}`,
+    depth: 0,
+    translations: DEMO_CATEGORY_TRANSLATIONS[slug],
+  }));
+}
+
+/** Mirrors the seeded `categories.translations`, so RTL is exercised offline too. */
+const DEMO_CATEGORY_TRANSLATIONS: Record<string, { 'ar-AE': { name: string } } | undefined> = {
+  smartphones: { 'ar-AE': { name: 'الهواتف الذكية' } },
+  'chargers-cables': { 'ar-AE': { name: 'الشواحن والكابلات' } },
+  'computer-accessories': { 'ar-AE': { name: 'ملحقات الكمبيوتر' } },
+  audio: { 'ar-AE': { name: 'الصوتيات' } },
+  storage: { 'ar-AE': { name: 'وحدات التخزين' } },
+};
+
+function demoCategory(path: string): CategoryDetail | undefined {
+  const all = demoCategories();
+  const found = all.find((c) => c.path === path);
+  if (!found) return undefined;
+  return { ...found, ancestors: [], children: [] };
 }
 
 /** Mirrors the production retrieval shape so page code cannot tell them apart. */
@@ -421,6 +556,10 @@ function demoSearch(filters: SearchFilters): SearchResult {
   const query = filters.query?.trim() ?? '';
   let candidates = DEMO_PRODUCTS;
   let intent = 'browse';
+  // The demo path really does run both legs — it scores descriptions, tags and
+  // specs separately from titles and SKUs — so unlike the SQL path it can
+  // honestly report a fused ranking. Set below, once we know both produced hits.
+  let strategy: SearchResult['strategy'] = 'lexical';
 
   if (query) {
     const classified = classifyQuery(query);
@@ -447,6 +586,9 @@ function demoSearch(filters: SearchFilters): SearchResult {
       .filter((r) => r.score > 0)
       .sort((a, b) => b.score - a.score);
 
+    strategy =
+      semantic.length === 0 ? 'lexical' : lexical.length === 0 ? 'semantic' : 'hybrid';
+
     const fused = reciprocalRankFusion([
       { label: 'lexical', results: lexical, weight: classified.lexicalWeight },
       { label: 'semantic', results: semantic, weight: classified.semanticWeight },
@@ -459,6 +601,13 @@ function demoSearch(filters: SearchFilters): SearchResult {
 
   let filtered = [...candidates];
   if (filters.category) filtered = filtered.filter((p) => p.categorySlug === filters.category);
+  if (filters.categoryPath) {
+    // Prefix match, matching the SQL: `/audio` must not swallow `/audiobooks`.
+    const prefix = filters.categoryPath;
+    filtered = filtered.filter(
+      (p) => `/${p.categorySlug}` === prefix || `/${p.categorySlug}`.startsWith(`${prefix}/`),
+    );
+  }
   if (filters.brand) filtered = filtered.filter((p) => p.brand === filters.brand);
   if (filters.minPrice != null) filtered = filtered.filter((p) => p.price >= filters.minPrice!);
   if (filters.maxPrice != null) filtered = filtered.filter((p) => p.price <= filters.maxPrice!);
@@ -482,10 +631,22 @@ function demoSearch(filters: SearchFilters): SearchResult {
   }
   const prices = filtered.map((p) => p.price);
 
+  // Facets are counted over the full match, then the page is sliced — the same
+  // order the SQL path uses, so a demo run cannot mask a paging bug.
+  const total = filtered.length;
+  const pageSize = Math.min(Math.max(Math.trunc(filters.pageSize ?? DEFAULT_PAGE_SIZE) || 1, 1), 60);
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const page = Math.min(Math.max(Math.trunc(filters.page ?? 1) || 1, 1), pageCount);
+  const pageItems = filtered.slice((page - 1) * pageSize, page * pageSize);
+
   return {
-    products: filtered,
-    total: filtered.length,
+    products: pageItems,
+    total,
+    page,
+    pageSize,
+    pageCount,
     intent,
+    strategy,
     facets: {
       brands: [...brandCounts.entries()]
         .map(([value, count]) => ({ value, count }))

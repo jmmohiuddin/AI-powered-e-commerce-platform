@@ -40,6 +40,10 @@
       "@voltix/ai/*": ["packages/ai/src/*"],
       "@voltix/ui": ["packages/ui/src/index.ts"],
       "@voltix/ui/*": ["packages/ui/src/*"],
+      "@voltix/media": ["packages/media/src/index.ts"],
+      "@voltix/media/*": ["packages/media/src/*"],
+      "@voltix/invoicing": ["packages/invoicing/src/index.ts"],
+      "@voltix/invoicing/*": ["packages/invoicing/src/*"],
       "@voltix/config": ["packages/config/src/index.ts"]
     }
   },

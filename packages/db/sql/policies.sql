@@ -85,7 +85,7 @@ DECLARE
     'serial_units', 'suppliers', 'supplier_products', 'purchase_orders',
     'purchase_order_items',
     'customers', 'addresses', 'carts', 'cart_items', 'orders', 'order_items',
-    'order_events', 'shipments', 'shipment_items', 'returns', 'return_items',
+    'order_events', 'invoices', 'shipments', 'shipment_items', 'returns', 'return_items',
     'payment_method_configs', 'payment_intents', 'transactions',
     'payment_webhook_events', 'store_credit_entries', 'gift_cards',
     'gift_card_transactions', 'instalment_plans',
@@ -160,6 +160,13 @@ REVOKE UPDATE, DELETE ON public.stock_movements      FROM voltix_app;
 REVOKE UPDATE, DELETE ON public.transactions         FROM voltix_app;
 REVOKE UPDATE, DELETE ON public.loyalty_transactions FROM voltix_app;
 REVOKE UPDATE, DELETE ON public.store_credit_entries FROM voltix_app;
+
+-- An issued tax invoice can be voided but never deleted. A missing invoice
+-- number is a gap in a sequence the Federal Tax Authority expects to be
+-- continuous, and "the row was removed" is not an explanation an auditor
+-- accepts. UPDATE is deliberately left granted: voiding writes `voided_at`,
+-- which is how a document is withdrawn without breaking the sequence.
+REVOKE DELETE ON public.invoices FROM voltix_app;
 
 -- ---------------------------------------------------------------------------
 -- Credential tables are invisible to the application role entirely.

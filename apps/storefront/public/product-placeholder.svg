@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120" role="img" aria-hidden="true">
+  <!-- Deliberately reads as "no photograph yet" rather than as product artwork:
+       a placeholder that looks designed is a placeholder nobody replaces. -->
+  <rect width="160" height="120" fill="#f2f2f0" />
+  <g fill="none" stroke="#b9b7b2" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="46.5" y="36.5" width="67" height="52" rx="5" />
+    <path d="M46.5 74.5 61 60l13 12 12-14 21.5 20" />
+  </g>
+  <circle cx="94" cy="52" r="5.5" fill="#b9b7b2" />
+</svg>

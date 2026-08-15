@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { discountPercent, formatCount, formatPrice, formatRating } from '@voltix/ui';
 import { summarise } from '@voltix/core';
 import { AvailabilityBadge, type AvailabilityLabels } from './availability-badge';
-import { localise, type ProductView } from '@/lib/types';
+import { ProductImage } from './product-image';
+import { imagesOf, localise, PLACEHOLDER_IMAGE, type ProductView } from '@/lib/types';
 import type { Locale, Translate } from '@/lib/locale';
 
 /**
@@ -35,6 +36,7 @@ export function ProductCard({
   const view = localise(product, locale);
   const discount = discountPercent(view.price, view.compareAtPrice);
   const rating = formatRating(view.ratingAverage, locale);
+  const [image] = imagesOf(view);
 
   const availability = summarise(
     view.variants.map((variant) => ({
@@ -54,7 +56,20 @@ export function ProductCard({
           {discount != null && (
             <span className="product-card__badge">−{formatCount(discount, locale)}%</span>
           )}
-          <ProductGlyph seed={view.id} alt={view.imageAlt} />
+          {image && (
+            <ProductImage
+              image={image}
+              /**
+               * Derived from the real grid, not guessed. `.product-grid` is
+               * `auto-fill, minmax(min(100%, 220px), 1fr)` inside a 1280px
+               * container, so the column count steps at these viewport widths
+               * and the tile is *widest* on a narrow phone where it is the only
+               * column — which is exactly where over-fetching costs the most.
+               */
+              sizes="(max-width: 499px) 90vw, (max-width: 707px) 42vw, (max-width: 967px) 28vw, (max-width: 1203px) 21vw, 210px"
+              decorative={image.url === PLACEHOLDER_IMAGE}
+            />
+          )}
         </div>
       </Link>
 
@@ -108,33 +123,4 @@ export function availabilityLabels(t: Translate): AvailabilityLabels {
     backorder: t('stock.backorder'),
     only: t('stock.only', { n: '{n}' }),
   };
-}
-
-/**
- * Placeholder product artwork.
- *
- * Real deployments serve optimised images from the CDN through next/image.
- * This generates a deterministic geometric glyph per product id so the demo has
- * distinguishable, correctly-sized artwork without shipping binary assets or
- * hot-linking someone else's product photography.
- */
-function ProductGlyph({ seed, alt }: { seed: string; alt: string }) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  const hue = hash % 360;
-  const id = seed.replace(/[^a-zA-Z0-9-]/g, '');
-
-  return (
-    <svg viewBox="0 0 120 120" role="img" aria-label={alt}>
-      <defs>
-        <linearGradient id={`g-${id}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={`hsl(${hue} 62% 62%)`} />
-          <stop offset="100%" stopColor={`hsl(${(hue + 40) % 360} 58% 46%)`} />
-        </linearGradient>
-      </defs>
-      <rect x="26" y="12" width="68" height="96" rx="12" fill={`url(#g-${id})`} />
-      <rect x="34" y="22" width="52" height="70" rx="5" fill="rgba(255,255,255,0.9)" />
-      <circle cx="60" cy="100" r="4.5" fill="rgba(255,255,255,0.85)" />
-    </svg>
-  );
 }

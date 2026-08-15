@@ -14,11 +14,34 @@ export interface ProductFormValues {
   title: string;
   subtitle: string | null;
   description: string | null;
+  highlights: readonly string[];
+  /** `products.translations`, keyed by locale. Only `ar-AE` is edited here. */
+  translations: Readonly<Record<string, ProductTranslationValues>>;
   brandId: string | null;
   categoryId: string | null;
   condition: string;
   warrantyMonths: number | null;
 }
+
+export interface ProductTranslationValues {
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  highlights?: readonly string[];
+}
+
+/**
+ * The locale the Arabic column writes to.
+ *
+ * UAE Federal Law 15/2020 requires consumer product information in Arabic, so
+ * this pair of columns is a legal obligation rather than a nice-to-have. One
+ * locale is hardcoded because one is what the law names and what the storefront
+ * offers; a locale picker here would be a second thing to get wrong.
+ */
+const ARABIC = 'ar-AE';
+
+/** A textarea holds one bullet per line; the column holds an array. */
+const linesToText = (lines: readonly string[] | undefined) => (lines ?? []).join('\n');
 
 /**
  * One form for both create and edit.
@@ -41,6 +64,8 @@ export function ProductForm({
 }) {
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<ActionResult | null>(null);
+  // Absent on create, and absent on any product nobody has translated yet.
+  const arabic: ProductTranslationValues = values?.translations?.[ARABIC] ?? {};
 
   const onSubmit = (formData: FormData) => {
     startTransition(async () => {
@@ -70,37 +95,130 @@ export function ProductForm({
       <section className="card stack-md">
         <h2 className="section-title section-title--flush">Details</h2>
 
-        <label className="field">
-          <span>Title *</span>
-          <input
-            name="title"
-            required
-            maxLength={200}
-            defaultValue={values?.title ?? ''}
-            placeholder="Samsung Galaxy S25 Ultra"
-            autoFocus={mode === 'create'}
-          />
-        </label>
+        {/*
+          ARABIC BESIDE ENGLISH, NOT BEHIND A TAB.
 
-        <label className="field">
-          <span>Subtitle</span>
-          <input
-            name="subtitle"
-            maxLength={200}
-            defaultValue={values?.subtitle ?? ''}
-            placeholder='6.9" QHD+ · 200MP · Snapdragon 8 Elite'
-          />
-        </label>
+          UAE Federal Law 15/2020 requires consumer product information in
+          Arabic, which makes the Arabic column part of finishing a product
+          rather than an optional extra. A separate "Translations" tab is a tab
+          nobody opens, and the catalogue stays English-only while looking
+          complete on the screen the merchant actually uses.
 
-        <label className="field">
-          <span>Description</span>
-          <textarea
-            name="description"
-            rows={4}
-            defaultValue={values?.description ?? ''}
-            placeholder="What it is, who it suits, and what is in the box."
-          />
-        </label>
+          Every Arabic control sets `dir="rtl"` on ITSELF. Direction is
+          inherited, so putting it on the row or the section would flip the
+          English field beside it — the caret jumps to the right and punctuation
+          lands at the wrong end of the line. `lang="ar"` goes with it so
+          spellcheck and font fallback pick the right language.
+
+          The labels stay English on purpose: the admin is an English-only
+          surface, and only the product CONTENT is bilingual.
+        */}
+        <div className="field-row">
+          <label className="field">
+            <span>Title *</span>
+            <input
+              name="title"
+              required
+              maxLength={200}
+              defaultValue={values?.title ?? ''}
+              placeholder="Samsung Galaxy S25 Ultra"
+              autoFocus={mode === 'create'}
+            />
+          </label>
+
+          <label className="field">
+            <span>Title (Arabic)</span>
+            <input
+              name="titleAr"
+              dir="rtl"
+              lang="ar"
+              maxLength={200}
+              defaultValue={arabic.title ?? ''}
+              placeholder="سامسونج جالاكسي S25 ألترا"
+            />
+          </label>
+        </div>
+
+        <div className="field-row">
+          <label className="field">
+            <span>Subtitle</span>
+            <input
+              name="subtitle"
+              maxLength={200}
+              defaultValue={values?.subtitle ?? ''}
+              placeholder='6.9" QHD+ · 200MP · Snapdragon 8 Elite'
+            />
+          </label>
+
+          <label className="field">
+            <span>Subtitle (Arabic)</span>
+            <input
+              name="subtitleAr"
+              dir="rtl"
+              lang="ar"
+              maxLength={200}
+              defaultValue={arabic.subtitle ?? ''}
+              placeholder="شاشة ٦.٩ بوصة · ٢٠٠ ميجابكسل"
+            />
+          </label>
+        </div>
+
+        <div className="field-row">
+          <label className="field">
+            <span>Description</span>
+            <textarea
+              name="description"
+              rows={4}
+              defaultValue={values?.description ?? ''}
+              placeholder="What it is, who it suits, and what is in the box."
+            />
+          </label>
+
+          <label className="field">
+            <span>Description (Arabic)</span>
+            <textarea
+              name="descriptionAr"
+              dir="rtl"
+              lang="ar"
+              rows={4}
+              defaultValue={arabic.description ?? ''}
+              placeholder="ما هو المنتج، ولمن يناسب، وما الذي تحتويه العلبة."
+            />
+          </label>
+        </div>
+
+        {/* One bullet per line, in both columns. A repeatable row control would
+            be a nicer editor and a worse match for how these are pasted in from
+            a supplier's sheet. */}
+        <div className="field-row">
+          <label className="field">
+            <span>Highlights (one per line)</span>
+            <textarea
+              name="highlights"
+              rows={5}
+              defaultValue={linesToText(values?.highlights)}
+              placeholder={'200MP main camera\n5,000mAh battery\nUAE warranty'}
+            />
+          </label>
+
+          <label className="field">
+            <span>Highlights (Arabic, one per line)</span>
+            <textarea
+              name="highlightsAr"
+              dir="rtl"
+              lang="ar"
+              rows={5}
+              defaultValue={linesToText(arabic.highlights)}
+              placeholder={'كاميرا ٢٠٠ ميجابكسل\nبطارية ٥٠٠٠ مللي أمبير\nضمان الإمارات'}
+            />
+          </label>
+        </div>
+
+        <p className="muted">
+          Arabic is a legal requirement for consumer product information in the UAE. Anything left
+          blank falls back to the English text field by field, so a product with an Arabic title and
+          no Arabic description shows the Arabic title.
+        </p>
 
         <div className="field-row">
           <label className="field">
@@ -213,6 +331,20 @@ export function ProductForm({
               <input name="onHand" type="number" min="0" defaultValue="0" inputMode="numeric" />
             </label>
           </div>
+        </section>
+      )}
+
+      {mode === 'create' && (
+        <section className="card stack-md">
+          <h2 className="section-title section-title--flush">Images</h2>
+          {/* Images attach to a product id, which does not exist until this
+              form is submitted. Saying so beats an upload control that silently
+              does nothing, or one that uploads to a product that then fails
+              validation and leaves the files orphaned. */}
+          <p className="muted">
+            Add photographs on the next screen, once the draft exists. Until a product has one, the
+            storefront shows a placeholder in its place.
+          </p>
         </section>
       )}
 

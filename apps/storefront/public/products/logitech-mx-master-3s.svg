@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img">
+  <title>Logitech MX Master 3S mouse</title>
+  <rect width="160" height="160" fill="#f0eff4"/>
+  <path d="M60 66c0-16 9-28 20-28s20 12 20 28v26c0 16-9 28-20 28s-20-12-20-28z" fill="#4a5568"/>
+  <path d="M80 38v30" stroke="#f7fafc" stroke-width="3"/>
+  <rect x="76" y="46" width="8" height="14" rx="4" fill="#f7fafc"/>
+</svg>

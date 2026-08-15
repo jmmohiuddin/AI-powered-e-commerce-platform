@@ -35,6 +35,14 @@ export default defineConfig({
       thresholds: { lines: 70, functions: 70, branches: 60, statements: 70 },
     },
   },
+  // The apps set `jsx: "preserve"` in tsconfig, because Next runs its own JSX
+  // transform. The bundler honours that and hands Vite un-transformed JSX, so
+  // any test importing a component fails to parse. Compiling it here lets a
+  // test render a real component rather than assert against its source text.
+  // `oxc` and not `esbuild`: Vitest 4 transforms with oxc and ignores the
+  // esbuild options entirely, with a warning that is easy to read past.
+  oxc: { jsx: { runtime: 'automatic' } },
+
   resolve: {
     alias: {
       '@voltix/config/load-env': r('./packages/config/src/load-env.ts'),
@@ -45,9 +53,11 @@ export default defineConfig({
       '@voltix/commerce': r('./packages/commerce/src/index.ts'),
       '@voltix/payments': r('./packages/payments/src/index.ts'),
       '@voltix/ai': r('./packages/ai/src/index.ts'),
+      '@voltix/invoicing': r('./packages/invoicing/src/index.ts'),
       '@voltix/notifications': r('./packages/notifications/src/index.ts'),
       '@voltix/auth': r('./packages/auth/src/index.ts'),
       '@voltix/ui': r('./packages/ui/src/index.ts'),
+      '@voltix/media': r('./packages/media/src/index.ts'),
       // The admin's read model imports 'server-only', which throws when loaded
       // outside a React Server Component. Stubbing it lets the SQL be exercised
       // directly; the real guard still applies in the build, where it matters.

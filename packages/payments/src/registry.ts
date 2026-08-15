@@ -12,6 +12,8 @@ export interface CheckoutContext {
   readonly customerRiskScore?: number;
   readonly phoneVerified?: boolean;
   readonly previousRefusedDeliveries?: number;
+  /** The risk model's `require_advance_payment` decision for this order. */
+  readonly riskRequiresAdvance?: boolean;
   readonly channel?: string;
 }
 
@@ -33,17 +35,38 @@ export interface UnavailableMethod {
   readonly reason: string;
 }
 
-interface EligibilityAware {
-  eligibility(input: {
-    orderTotal: Money;
-    customerRiskScore?: number;
-    phoneVerified?: boolean;
-    previousRefusedDeliveries?: number;
-  }): { allowed: boolean; reason?: string; advanceRequired: Money };
+export interface EligibilityInput {
+  orderTotal: Money;
+  customerRiskScore?: number;
+  phoneVerified?: boolean;
+  previousRefusedDeliveries?: number;
+  /** The risk model asked for a deposit, whatever the standing policy says. */
+  riskRequiresAdvance?: boolean;
+}
+
+export interface EligibilityVerdict {
+  allowed: boolean;
+  reason?: string;
+  advanceRequired: Money;
+}
+
+export interface EligibilityAware {
+  eligibility(input: EligibilityInput): EligibilityVerdict;
   handlingFee(currency: string): Money;
 }
 
-function hasEligibility(gateway: PaymentGateway): gateway is PaymentGateway & EligibilityAware {
+/**
+ * Exported because the *checkout* has to ask this question, not just the
+ * method picker.
+ *
+ * A gate that only runs while assembling the payment options is a gate that a
+ * replayed form post walks straight past — and cash-on-delivery eligibility is
+ * the control the whole COD refusal problem rests on. The page uses it to
+ * explain itself; `completeCheckout` uses it to enforce.
+ */
+export function hasEligibility(
+  gateway: PaymentGateway,
+): gateway is PaymentGateway & EligibilityAware {
   return typeof (gateway as Partial<EligibilityAware>).eligibility === 'function';
 }
 
@@ -165,6 +188,9 @@ export class PaymentRegistry {
           ...(context.phoneVerified != null ? { phoneVerified: context.phoneVerified } : {}),
           ...(context.previousRefusedDeliveries != null
             ? { previousRefusedDeliveries: context.previousRefusedDeliveries }
+            : {}),
+          ...(context.riskRequiresAdvance != null
+            ? { riskRequiresAdvance: context.riskRequiresAdvance }
             : {}),
         });
         if (!verdict.allowed) {

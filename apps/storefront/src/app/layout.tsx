@@ -3,9 +3,14 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { listCategories } from '@/lib/catalog';
+import { supportPhone, telHref, whatsappHref } from '@/lib/contact';
+import { legalCopy } from '@/lib/legal';
+import { merchantIdentity } from '@/lib/merchant';
+import { localiseCategory } from '@/lib/types';
 import {
   DEFAULT_LOCALE,
   LOCALE_COOKIE,
+  LOCALE_COOKIE_MAX_AGE_SECONDS,
   directionOf,
   resolveLocale,
   translator,
@@ -59,7 +64,7 @@ async function switchLocale(formData: FormData) {
   const store = await cookies();
   store.set(LOCALE_COOKIE, next, {
     path: '/',
-    maxAge: 60 * 60 * 24 * 365,
+    maxAge: LOCALE_COOKIE_MAX_AGE_SECONDS,
     sameSite: 'lax',
     httpOnly: false,
   });
@@ -70,8 +75,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = await resolveLocale();
   const dir = directionOf(locale);
   const t = translator(locale);
-  const categories = await listCategories();
+  const legal = legalCopy(locale);
+  // Two independent reads, issued together rather than in series — the footer
+  // needs both and neither depends on the other.
+  const [categories, merchant] = await Promise.all([listCategories(), merchantIdentity()]);
   const other: Locale = locale === 'ar-AE' ? 'en-AE' : 'ar-AE';
+  const phone = supportPhone();
+  const telephone = telHref();
+  const whatsapp = whatsappHref();
 
   return (
     <html lang={locale} dir={dir}>
@@ -123,11 +134,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <nav className="nav-bar" aria-label={t('nav.categories')}>
           <div className="container">
             <ul>
-              {categories.map((category) => (
-                <li key={category.slug}>
-                  <Link href={`/search?category=${category.slug}`}>{category.name}</Link>
-                </li>
-              ))}
+              {/* Top level only. A nav listing every leaf of a deep taxonomy is
+                  a nav nobody reads; drill-down belongs on the category page. */}
+              {categories
+                .filter((category) => category.depth === 0)
+                .map((category) => (
+                  <li key={category.slug}>
+                    <Link href={`/category${category.path}`}>
+                      {localiseCategory(category, locale).name}
+                    </Link>
+                  </li>
+                ))}
               <li>
                 <Link href="/search?sort=price_asc">{t('nav.deals')}</Link>
               </li>
@@ -143,11 +160,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <div>
                 <h3>{t('footer.shop')}</h3>
                 <ul>
-                  {categories.map((c) => (
-                    <li key={c.slug}>
-                      <Link href={`/search?category=${c.slug}`}>{c.name}</Link>
-                    </li>
-                  ))}
+                  {categories
+                    .filter((c) => c.depth === 0)
+                    .map((c) => (
+                      <li key={c.slug}>
+                        <Link href={`/category${c.path}`}>
+                          {localiseCategory(c, locale).name}
+                        </Link>
+                      </li>
+                    ))}
                 </ul>
               </div>
               <div>
@@ -165,6 +186,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <li>
                     <Link href="/contact">Contact us</Link>
                   </li>
+                  {/* The two legal pages. Reachable from every page rather than
+                      only from checkout: a shopper deciding whether to hand over
+                      an address is making that decision on a product page. */}
+                  <li>
+                    <Link href="/privacy">{legal.seeAlsoPrivacy}</Link>
+                  </li>
+                  <li>
+                    <Link href="/terms">{legal.seeAlsoTerms}</Link>
+                  </li>
                 </ul>
               </div>
               <div>
@@ -179,24 +209,49 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <div>
                 <h3>{t('footer.contact')}</h3>
                 <ul>
-                  <li>
-                    {/* Click-to-call and WhatsApp are ordinary purchase paths in
-                        this market, not support links. */}
-                    <a href="tel:+97145550000" dir="ltr">
-                      +971 4 555 0000
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://wa.me/971500000000">WhatsApp us</a>
-                  </li>
+                  {phone && telephone && (
+                    <li>
+                      {/* Click-to-call and WhatsApp are ordinary purchase paths in
+                          this market, not support links. */}
+                      <a href={telephone} dir="ltr">
+                        {phone}
+                      </a>
+                    </li>
+                  )}
+                  {whatsapp && (
+                    <li>
+                      <a href={whatsapp}>WhatsApp us</a>
+                    </li>
+                  )}
                   <li>Open 10am–10pm, Monday to Sunday</li>
                 </ul>
               </div>
             </div>
+            {/*
+              THE LICENSING DISCLOSURE, READ FROM THE TENANT ROW.
+
+              This line used to carry the legal name, TRN and trade licence as
+              literal text. The same TRN is printed on every tax invoice from
+              `tenants.tax_registration_number`, so the footer was a second copy
+              of a legally significant number with nothing keeping the two in
+              agreement — and on any tenant other than the seeded demo it was
+              simply another merchant's details.
+
+              Each part is omitted when the column is null rather than replaced
+              with a placeholder: an invented trade licence number on a live
+              storefront is a false statement to a regulator. See lib/merchant.ts.
+            */}
             <p className="site-footer__legal">
-              Voltix Electronics Trading L.L.C. · TRN 100123456700003 · Trade Licence CN-1234567 ·
-              All prices include 5% VAT. Demo storefront — product data is sample data for
-              evaluation, not a live catalogue.
+              {merchant.legalName && <>{merchant.legalName} · </>}
+              {merchant.taxRegistrationNumber && (
+                <>TRN <span dir="ltr">{merchant.taxRegistrationNumber}</span> · </>
+              )}
+              {merchant.tradeLicenceNumber && (
+                <>Trade Licence <span dir="ltr">{merchant.tradeLicenceNumber}</span> · </>
+              )}
+              {t('vat.inclusive')} · <Link href="/privacy">{legal.seeAlsoPrivacy}</Link> ·{' '}
+              <Link href="/terms">{legal.seeAlsoTerms}</Link> · Demo storefront — product data is
+              sample data for evaluation, not a live catalogue.
             </p>
           </div>
         </footer>

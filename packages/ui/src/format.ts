@@ -22,17 +22,42 @@ const MINOR_UNITS: Record<string, number> = {
 export type SupportedLocale = 'en-AE' | 'ar-AE';
 
 /**
+ * Pins a locale to Western digits (0-9).
+ *
+ * Project decision: Western digits throughout, **including in Arabic**. It is
+ * UAE commercial practice, and it keeps every identifier a customer might read
+ * back — an order number, a price, a date — unambiguous across the two
+ * languages the store serves.
+ *
+ * This is not defensive noise. `ar-AE` happens to resolve to the `latn`
+ * numbering system already, but `ar`, `ar-EG` and `ar-SA` resolve to `arab` and
+ * would render "٤٬١٩٩ د.إ." — so without pinning, whether a shopper sees 4,199
+ * or ٤٬١٩٩ depends on which locale tag reaches the formatter rather than on any
+ * decision anyone made.
+ */
+function westernDigits(locale: string): string {
+  // A caller who pinned a numbering system deliberately keeps it; otherwise
+  // extend an existing `-u-` extension rather than opening a second one, which
+  // would produce an invalid tag.
+  if (/-u-(.*-)?nu-/.test(locale)) return locale;
+  return locale.includes('-u-') ? `${locale}-nu-latn` : `${locale}-u-nu-latn`;
+}
+
+/**
  * Formats a price for display.
  *
  * Always routed through `Intl` rather than string concatenation, because the
  * difference between the two locales this store serves is not a symbol swap:
  *
  *   en-AE → "AED 4,199"
- *   ar-AE → "٤٬١٩٩ د.إ."
+ *   ar-AE → "‏4,199 د.إ.‏"
  *
- * Eastern Arabic numerals, a different thousands separator, a different decimal
- * separator, and the symbol on the other side. Hand-rolled formatting gets
- * every one of those wrong, and a shopper reading Arabic notices immediately.
+ * A different thousands separator, a different decimal separator, the symbol on
+ * the other side, and the bidi marks that keep the amount from merging into the
+ * Arabic around it. Hand-rolled formatting gets every one of those wrong, and a
+ * shopper reading Arabic notices immediately.
+ *
+ * The digits, and only the digits, are pinned — see `westernDigits`.
  *
  * Fractions are shown only when they exist. UAE electronics pricing is
  * overwhelmingly in whole dirhams, and "AED 4,199.00" on every tile in a grid
@@ -47,7 +72,7 @@ export function formatPrice(
   const hasFraction = minorUnits % 10 ** exponent !== 0;
 
   try {
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat(westernDigits(locale), {
       style: 'currency',
       currency,
       minimumFractionDigits: hasFraction ? exponent : 0,
@@ -80,14 +105,14 @@ export function discountPercent(price: number, compareAt?: number | null): numbe
   return Math.round(((compareAt - price) / compareAt) * 100);
 }
 
-/** 437 → "4.4", localised so ar-AE renders Eastern Arabic numerals. */
+/** 437 → "4.4", with the locale's decimal separator and Western digits. */
 export function formatRating(
   ratingAverage?: number | null,
   locale: SupportedLocale | string = 'en-AE',
 ): string | null {
   if (ratingAverage == null) return null;
   try {
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat(westernDigits(locale), {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
     }).format(ratingAverage / 100);
@@ -98,7 +123,7 @@ export function formatRating(
 
 export function formatCount(value: number, locale: SupportedLocale | string = 'en-AE'): string {
   try {
-    return new Intl.NumberFormat(locale).format(value);
+    return new Intl.NumberFormat(westernDigits(locale)).format(value);
   } catch {
     return String(value);
   }
@@ -114,7 +139,7 @@ export function pluralise(count: number, singular: string, plural = `${singular}
  *
  * Uses `Intl.RelativeTimeFormat` so Arabic gets correct dual and plural forms —
  * Arabic distinguishes one, two, and many, and a naive `${n} days ago` template
- * is wrong for two of the three.
+ * is wrong for two of the three. The digits stay Western either way.
  */
 export function relativeTime(
   date: Date,
@@ -122,10 +147,11 @@ export function relativeTime(
   locale: SupportedLocale | string = 'en-AE',
 ): string {
   const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
+  const tag = westernDigits(locale);
 
   let rtf: Intl.RelativeTimeFormat;
   try {
-    rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    rtf = new Intl.RelativeTimeFormat(tag, { numeric: 'auto' });
   } catch {
     rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
   }
@@ -138,7 +164,7 @@ export function relativeTime(
   const days = Math.round(hours / 24);
   if (days <= 7) return rtf.format(-days, 'day');
 
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(tag, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

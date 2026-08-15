@@ -76,6 +76,47 @@ export interface DispatchResult {
   readonly failed: number;
   /** Rows with no transport for their channel — recorded, not lost. */
   readonly suppressed: number;
+  /** Rows a dead worker left claimed on their final attempt, swept to 'failed'. */
+  readonly abandoned: number;
+}
+
+/**
+ * Exponential backoff between attempts, in seconds — the same curve the job
+ * runner uses (`2^attempts * 15`, capped at an hour), for the same reason: a
+ * provider that just rate-limited us is not ready again on the next tick, and
+ * hammering it turns a transient 429 into a reputation problem.
+ *
+ * Expressed in SQL rather than TypeScript because the decision belongs in the
+ * claim query — a row still inside its backoff window must not be selected at
+ * all, or it is claimed, attempted, and burns an attempt for nothing.
+ *
+ * `attempts` is already incremented when a row is claimed, so a first failure
+ * waits 30s, a second 60s, a third 120s.
+ */
+const BACKOFF = sql`(least(3600, 15 * power(2, attempts))::int * interval '1 second')`;
+
+/**
+ * Marks rows a worker claimed and never reported on.
+ *
+ * The stale-claim branch of the dispatcher reclaims a row locked as 'sending'
+ * for over five minutes — but only while it has attempts left. A worker that
+ * dies mid-send on the *final* attempt therefore leaves a row stuck in
+ * 'sending' forever: never retried, never failed, and invisible on the admin
+ * Messages screen, which surfaces 'draft' and 'failed'. That is the worst
+ * outcome available — a customer who was never told, and nobody who knows.
+ */
+async function sweepAbandoned(db: Database): Promise<number> {
+  const swept = await db.execute(sql`
+    UPDATE notifications
+    SET status = 'failed',
+        last_error = coalesce(last_error, 'dispatcher stopped responding mid-send'),
+        updated_at = now()
+    WHERE status = 'sending'
+      AND attempts >= max_attempts
+      AND locked_at < now() - interval '5 minutes'
+    RETURNING id
+  `);
+  return swept.rows.length;
 }
 
 /**
@@ -95,6 +136,8 @@ export async function dispatchNotifications(
 ): Promise<DispatchResult> {
   const limit = Math.min(Math.max(options.limit ?? 20, 1), 100);
 
+  const abandoned = await sweepAbandoned(db);
+
   const claimed = await db.transaction((tx) =>
     tx.execute<{
       id: string;
@@ -111,8 +154,16 @@ export async function dispatchNotifications(
         status = 'sending', locked_at = now(), attempts = attempts + 1, updated_at = now()
       WHERE id IN (
         SELECT id FROM notifications
-        WHERE (status = 'pending' OR (status = 'sending' AND locked_at < now() - interval '5 minutes'))
-          AND attempts < max_attempts
+        WHERE attempts < max_attempts
+          AND (
+            -- Never attempted, or the backoff since the last attempt has
+            -- elapsed. locked_at doubles as "when we last touched this row":
+            -- it is set on every claim and on every failure, so it is the
+            -- honest measure of when the last attempt happened without a
+            -- second column recording the same instant.
+            (status = 'pending' AND (locked_at IS NULL OR locked_at < now() - ${BACKOFF}))
+            OR (status = 'sending' AND locked_at < now() - interval '5 minutes')
+          )
         ORDER BY created_at
         LIMIT ${limit}
         FOR UPDATE SKIP LOCKED
@@ -162,16 +213,18 @@ export async function dispatchNotifications(
 
     // A permanent failure, or one that has exhausted its attempts, is done —
     // mark it failed so a human can look. A transient failure with attempts
-    // left goes back to 'pending' for the next pass to retry.
+    // left goes back to 'pending' for the next pass to retry, and `locked_at`
+    // moves to now so the backoff window is measured from this failure rather
+    // than from whenever the row was first claimed.
     const exhausted = result.permanent || row.attempts >= row.max_attempts;
     await db.execute(sql`
       UPDATE notifications
       SET status = ${exhausted ? 'failed' : 'pending'}, provider = ${result.provider},
-          last_error = ${result.error ?? 'send failed'}, updated_at = now()
+          last_error = ${result.error ?? 'send failed'}, locked_at = now(), updated_at = now()
       WHERE id = ${row.id}
     `);
     failed += 1;
   }
 
-  return { sent, failed, suppressed };
+  return { sent, failed, suppressed, abandoned };
 }

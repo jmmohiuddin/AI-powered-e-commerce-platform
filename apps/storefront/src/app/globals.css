@@ -428,19 +428,21 @@ p {
 .product-card__media {
   position: relative;
   /* Fixed aspect ratio reserves the space before the image loads, which is what
-     keeps Cumulative Layout Shift at zero on a grid of 24 tiles. */
+     keeps Cumulative Layout Shift at zero on a grid of 24 tiles. Also the
+     containing block `next/image`'s `fill` positions against. */
   aspect-ratio: 4 / 3;
   background: var(--colour-surface);
-  display: grid;
-  place-items: center;
-  padding: var(--space-4);
+  overflow: hidden;
 }
 
-.product-card__media img,
-.product-card__media svg {
-  width: 100%;
-  height: 100%;
+.product-card__media img {
+  /* `contain`, never `cover`: a phone cropped to fill a 4:3 box loses the ends
+     of the product, and the shopper is here to look at the whole thing. */
   object-fit: contain;
+  /* Padding belongs on the image rather than on the box. `fill` positions the
+     image against the *padding box*, so padding on the container is ignored and
+     the photograph would run edge to edge. */
+  padding: var(--space-4);
 }
 
 .product-card__badge {
@@ -566,15 +568,71 @@ p {
 }
 
 .pdp__media {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-4));
+}
+
+/* ───────────────────────────── Gallery ───────────────────────────────── */
+
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.gallery__main {
+  position: relative;
+  aspect-ratio: 1;
   background: var(--colour-surface);
   border: 1px solid var(--colour-border);
   border-radius: var(--radius-lg);
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
+  overflow: hidden;
+}
+
+.gallery__main img {
+  object-fit: contain;
   padding: var(--space-6);
-  position: sticky;
-  top: calc(var(--header-height) + var(--space-4));
+}
+
+/* Logical properties throughout, so the strip reverses in Arabic without a
+   single direction-specific rule. `scroll-padding-inline-start` keeps a
+   keyboard-focused thumbnail off the leading edge in both directions. */
+.gallery__thumbs {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-block-end: var(--space-1);
+  scroll-padding-inline-start: var(--space-2);
+}
+
+.gallery__thumb {
+  position: relative;
+  flex: 0 0 auto;
+  inline-size: 72px;
+  block-size: 72px;
+  padding: 0;
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color var(--duration-base) var(--ease-out);
+}
+
+.gallery__thumb img {
+  object-fit: contain;
+  padding: var(--space-2);
+}
+
+.gallery__thumb:hover {
+  border-color: var(--colour-border-strong);
+}
+
+/* Selection is shown with a colour *and* a thicker border, so it survives both
+   a monochrome display and the most common forms of colour blindness. */
+.gallery__thumb.is-selected {
+  border-color: var(--colour-accent);
+  box-shadow: inset 0 0 0 1px var(--colour-accent);
 }
 
 .pdp__title {
@@ -770,6 +828,111 @@ p {
   text-align: center;
   color: var(--colour-text-muted);
 }
+
+.listing__intro {
+  color: var(--colour-text-muted);
+  max-width: 68ch;
+  margin-bottom: var(--space-5);
+}
+
+.facets__hint {
+  color: var(--colour-text-subtle);
+  font-size: var(--text-xs);
+  margin-bottom: var(--space-3);
+}
+
+/* The inputs shrink rather than overflow the 240px facet rail; `minmax(0, 1fr)`
+   is what stops a number input's default intrinsic width from forcing a
+   horizontal scrollbar on the whole sidebar. */
+.price-filter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.price-filter input {
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--colour-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--colour-surface);
+  color: inherit;
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.price-filter button {
+  grid-column: 1 / -1;
+  margin-block-start: var(--space-2);
+  justify-content: center;
+}
+
+/* ─────────────────────────── Pagination ──────────────────────────────── */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-block-start: var(--space-6);
+  font-size: var(--text-sm);
+}
+
+.pagination__pages {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  list-style: none;
+  padding: 0;
+}
+
+.pagination__pages li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pagination__pages a,
+.pagination__step {
+  /* 44px is the minimum comfortable touch target, and this is a control most
+     often used on a phone. */
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  color: var(--colour-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pagination__pages a:hover,
+.pagination__step:hover {
+  border-color: var(--colour-border-strong);
+  color: var(--colour-text);
+}
+
+.pagination__pages a[aria-current='page'] {
+  background: var(--colour-accent);
+  border-color: var(--colour-accent);
+  color: var(--colour-accent-text);
+  font-weight: 600;
+}
+
+.pagination__gap {
+  color: var(--colour-text-subtle);
+  padding-inline: var(--space-1);
+}
+
+/* No RTL rule here on purpose. A flex row's main axis already follows the
+   writing direction, so "Previous" lands on the right in Arabic by itself —
+   adding `row-reverse` would put it back on the left. Same trap the note
+   further down this file warns about. */
 
 /* ───────────────────────────── Footer ────────────────────────────────── */
 
@@ -1132,6 +1295,33 @@ p {
   .checkout-form__row {
     grid-template-columns: 2fr 1fr;
   }
+}
+
+/*
+  A field most shoppers should not have to read past.
+
+  Collapsed by default so a consumer checkout stays a consumer checkout, and
+  styled as a quiet link rather than a section heading — a business buyer is
+  looking for it, everyone else should be able to skip it without deciding
+  anything.
+*/
+.checkout-form__disclosure > summary {
+  cursor: pointer;
+  color: var(--colour-text-subtle);
+  font-size: var(--text-sm);
+  padding-block: var(--space-2);
+  /* The marker is enough affordance; a full focus ring on a summary reads as
+     an error state next to the inputs above it. */
+  list-style-position: inside;
+}
+
+.checkout-form__disclosure > summary:hover {
+  color: var(--colour-text);
+}
+
+.checkout-form__disclosure[open] > summary {
+  color: var(--colour-text);
+  margin-block-end: var(--space-2);
 }
 
 .payment-options {
