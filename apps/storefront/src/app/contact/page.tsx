@@ -29,9 +29,9 @@ export default function ContactPage() {
   const email = supportEmail();
 
   return (
-    <div className="container section" style={{ maxWidth: '680px' }}>
-      <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>Contact us</h1>
-      <p className="muted" style={{ marginBottom: 'var(--space-6)' }}>
+    <div className="container container--focused section">
+      <h1 className="page__title">Contact us</h1>
+      <p className="page__intro">
         A real person reads every message. Have your order number ready if it is about an order —
         it saves a round trip.
       </p>
@@ -107,7 +107,7 @@ export default function ContactPage() {
         reissue the invoice in your company&rsquo;s name.
       </p>
 
-      <p className="muted" style={{ marginTop: 'var(--space-6)' }}>
+      <p className="page__footnote muted">
         Please do not send card numbers, CVVs, or Emirates ID scans over WhatsApp or email. We will
         never ask for them, and anyone who does is not us.
       </p>

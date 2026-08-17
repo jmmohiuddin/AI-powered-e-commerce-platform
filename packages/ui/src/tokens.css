@@ -48,6 +48,17 @@
   --colour-price: #1c1917;
   --colour-price-was: #a8a29e;
   --colour-discount: #b91c1c;
+  /*
+   * The foreground for text sitting ON the discount fill, not near it.
+   *
+   * This existed as a hard-coded `#fff` on the badge, which is correct here
+   * and wrong in dark mode: `--colour-discount` inverts to a light red
+   * (#f87171) so the fill and the text end up two light colours, at roughly
+   * 2.2:1 — under half the 4.5:1 floor. A pair of colours that must contrast
+   * with EACH OTHER has to flip together, which is only possible if both are
+   * tokens.
+   */
+  --colour-on-discount: #ffffff;
   --colour-in-stock: #15803d;
   --colour-low-stock: #b45309;
   --colour-out-of-stock: #78716c;
@@ -96,11 +107,71 @@
   --container: 1280px;
   --header-height: 64px;
 
+  /* MATERIALS
+     Floating chrome — the sticky header, and any sheet that sits over content —
+     is a translucent layer that the page scrolls *under*, not an opaque strip
+     that eats a band of the viewport.
+
+     TWO FILLS, AND WHICH ONE APPLIES DEPENDS ON WHETHER THE BLUR IS REAL.
+
+     A translucent surface is only legible because the blur behind it destroys
+     the detail of whatever passes underneath. Without the blur the same
+     surface is a window: at 82% the category headings scrolling beneath the
+     header were plainly readable *through* the nav links on top of them — two
+     sets of words in one rectangle.
+
+     So `--material-bg` is the unaided fill: near-opaque, legible with no blur
+     whatsoever, and the value any browser without `backdrop-filter` gets.
+     `--material-bg-blurred` is the real material, and it is only ever applied
+     inside an `@supports (backdrop-filter: ...)` block — see `.site-header` in
+     the storefront's globals.css, which also documents why the feature query
+     is what makes the blur survive the Lightning CSS build at all.
+
+     Pairing them this way is what lets the translucent value be genuinely
+     translucent: it can never reach a browser that would render it as a
+     window, because the same query gates both. Do not apply
+     `--material-bg-blurred` outside a feature query. */
+  --material-bg: color-mix(in srgb, var(--colour-bg) 94%, transparent);
+  --material-bg-blurred: color-mix(in srgb, var(--colour-bg) 72%, transparent);
+  /* The bright top edge reads as light catching the surface. Without it a
+     translucent bar looks like a rendering artefact rather than a material. */
+  --material-edge: color-mix(in srgb, var(--colour-text) 8%, transparent);
+
   /* Motion. 150–200ms is the band where an interaction feels responsive rather
-     than either instant-and-jarring or sluggish. */
+     than either instant-and-jarring or sluggish.
+
+     Two curves, because they answer different questions. `--ease-out` starts
+     fast and is correct for anything *entering* or responding to a press: the
+     user sees movement on the first frame, which is the frame they are
+     watching. `--ease-in-out` accelerates and decelerates, and is correct only
+     for something already on screen *moving* from one place to another.
+
+     There is deliberately no `--ease-in`. It starts slow, delaying the exact
+     moment the user is watching, and makes a 180ms interaction feel slower
+     than a 300ms ease-out one. It has no correct use in this interface. */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  --duration-instant: 100ms;
   --duration-fast: 120ms;
   --duration-base: 180ms;
+  /* Larger surfaces travel further, so they need longer to cover the distance
+     at the same apparent speed. Still under the 300ms ceiling for UI. */
+  --duration-slow: 260ms;
+
+  /* Press feedback. Subtle enough to read as the surface yielding rather than
+     the button shrinking — below ~0.95 it reads as a bug. */
+  --press-scale: 0.97;
+
+  /* TRACKING
+     Letter-spacing is size-specific, never one value for every size. Letters
+     read too far apart as type grows, so display sizes tighten; small text
+     needs the opposite to stay legible at a glance. A single global
+     `letter-spacing` is wrong at one end of the scale or the other. */
+  --tracking-display: -0.022em;
+  --tracking-heading: -0.015em;
+  --tracking-body: 0em;
+  --tracking-caps: 0.04em;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -122,21 +193,74 @@
     --colour-price: #fafaf9;
     --colour-price-was: #78716c;
     --colour-discount: #f87171;
+    /* Near-black on the light red, for the contrast reason in the light
+       block. Not `--colour-bg`: the badge must stay legible if it is ever
+       placed on a surface that is not the page background. */
+    --colour-on-discount: #450a0a;
     --colour-in-stock: #4ade80;
     --colour-low-stock: #fbbf24;
     --colour-out-of-stock: #a8a29e;
+
+    /* Dark needs a brighter edge to read as a material at all — at low
+       luminance the fill alone gives the eye no boundary to catch.
+
+       The blurred fill is less transparent than its light counterpart (76% vs
+       72%). Blur removes detail but not luminance, so a bright element
+       passing under a dark bar still reads as a bright smear, where the same
+       element under a light bar is lost in a light field. Dark materials need
+       more fill to hide the same content. */
+    --material-bg: color-mix(in srgb, var(--colour-bg) 92%, transparent);
+    --material-bg-blurred: color-mix(in srgb, var(--colour-bg) 76%, transparent);
+    --material-edge: color-mix(in srgb, var(--colour-text) 14%, transparent);
   }
 }
 
 /* Respect the user's motion preference. Not optional — vestibular disorders are
-   real and the fix costs three lines. */
+   real and the fix costs a few lines.
+ *
+ * Reduced motion means *gentler*, not none. The trigger for motion sickness is
+ * movement — translation, scale, parallax — not change itself. Killing every
+ * transition to 0.01ms (the usual copy-paste reset) also destroys the opacity
+ * and colour fades that tell a user something responded, so the interface goes
+ * from over-animated to jarringly instant. Neither is comfortable.
+ *
+ * So: narrow `transition-property` to the properties that do not move anything.
+ * A hover still fades, a button still lights up, and nothing travels across the
+ * screen. Animations and scroll-behaviour are still suppressed outright. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    transition-property: opacity, background-color, border-color, color, box-shadow,
+      outline-color, fill, stroke !important;
+    transition-duration: var(--duration-fast) !important;
+  }
+}
+
+/* Some users disable translucency at the OS level — on macOS and iOS it is a
+   documented accessibility setting, and honouring it is the difference between
+   a frosted header and unreadable text over product photography. Make the
+   material solid rather than merely less blurred. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --material-bg: var(--colour-bg);
+    /* Both fills, or the feature query still hands this user a translucent
+       header — it overrides the background as well as adding the blur. */
+    --material-bg-blurred: var(--colour-bg);
+  }
+}
+
+/* Increased contrast: give surfaces a defined edge instead of relying on a
+   subtle fill difference to separate them. */
+@media (prefers-contrast: more) {
+  :root {
+    --colour-border: var(--colour-text-muted);
+    --colour-border-strong: var(--colour-text);
+    --colour-text-subtle: var(--colour-text-muted);
+    --material-bg: var(--colour-bg);
+    --material-bg-blurred: var(--colour-bg);
   }
 }

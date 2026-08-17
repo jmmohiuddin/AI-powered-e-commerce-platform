@@ -35,17 +35,17 @@ export default async function DeliveryPage() {
   })();
 
   return (
-    <div className="container section" style={{ maxWidth: '760px' }}>
-      <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>
+    <div className="container container--prose section">
+      <h1 className="page__title">
         Delivery &amp; charges
       </h1>
-      <p className="muted" style={{ marginBottom: 'var(--space-6)' }}>
+      <p className="page__intro">
         We deliver to all seven emirates. Prices shown across the site already include{' '}
         {UAE_VAT_RATE_BPS / 100}% VAT.
       </p>
 
       {freeFrom !== null && (
-        <div className="notice" style={{ marginBottom: 'var(--space-6)' }}>
+        <div className="notice notice--lead">
           <strong>Free delivery on orders over {formatPrice(freeFrom, UAE.currency, locale)}</strong>
           <p>Applies to every emirate. Below that, the charge depends on where you are.</p>
         </div>
@@ -121,7 +121,7 @@ export default async function DeliveryPage() {
         for a part payment in advance; this is about refused deliveries, not about you.
       </p>
 
-      <p style={{ marginTop: 'var(--space-6)' }}>
+      <p className="page__footnote">
         Already ordered? <Link href="/orders">Track your order</Link>. Something else?{' '}
         <Link href="/contact">Contact us</Link>.
       </p>

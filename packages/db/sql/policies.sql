@@ -95,7 +95,8 @@ DECLARE
     'ai_jobs', 'ai_usage', 'demand_forecasts', 'inventory_health',
     'risk_assessments', 'competitor_prices', 'price_recommendations',
     'assistant_conversations',
-    'counters', 'idempotency_keys', 'notifications'
+    'counters', 'idempotency_keys', 'notifications',
+    'noon_listings', 'noon_warehouse_map', 'noon_order_links'
   ];
 BEGIN
   FOREACH tbl IN ARRAY tenant_tables LOOP

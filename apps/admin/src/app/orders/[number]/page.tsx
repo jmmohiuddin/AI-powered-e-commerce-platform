@@ -162,7 +162,7 @@ export default async function OrderDetailPage({
             link rather than a button because it is a read, and because the
             merchant frequently wants it in its own tab beside the order.
           */}
-          <p style={{ marginTop: 'var(--space-4)' }}>
+          <p className="note--after-tight">
             <a
               className="button button--secondary"
               href={`/orders/${order.number}/invoice`}
@@ -172,7 +172,7 @@ export default async function OrderDetailPage({
               Tax invoice
             </a>
             {order.recipientTrn && (
-              <span className="kpi__note" style={{ marginInlineStart: 'var(--space-3)' }}>
+              <span className="kpi__note kpi__note--inline">
                 Business customer · TRN {order.recipientTrn}
               </span>
             )}

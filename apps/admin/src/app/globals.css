@@ -92,9 +92,11 @@ h3 {
   color: var(--colour-text-muted);
 }
 
-.sidebar nav a:hover {
-  background: var(--colour-surface);
-  color: var(--colour-text);
+@media (hover: hover) and (pointer: fine) {
+  .sidebar nav a:hover {
+    background: var(--colour-surface);
+    color: var(--colour-text);
+  }
 }
 
 .sidebar nav a[aria-current='page'] {
@@ -124,6 +126,13 @@ h3 {
   gap: var(--space-4);
   flex-wrap: wrap;
   margin-bottom: var(--space-5);
+}
+
+/* A page head immediately followed by its own explanatory paragraph, which
+   then carries the gap to the content. Without this the two gaps stack and the
+   explanation floats away from the heading it belongs to. */
+.page-head--tight {
+  margin-bottom: var(--space-3);
 }
 
 .page-head h1 {
@@ -181,6 +190,27 @@ h3 {
   color: var(--colour-text-subtle);
 }
 
+/* A note sitting beside its value on the same line rather than beneath it.
+   Logical property, so it stays on the trailing side in either direction. */
+.kpi__note--inline {
+  margin-inline-start: var(--space-3);
+}
+
+/* ── Note spacing ──
+   Standalone explanatory lines around a block of content. Named for where the
+   gap goes, so the class says what it does at the call site. */
+.note--after {
+  margin-top: var(--space-5);
+}
+
+.note--after-tight {
+  margin-top: var(--space-4);
+}
+
+.note--before {
+  margin-bottom: var(--space-3);
+}
+
 table.data {
   width: 100%;
   border-collapse: collapse;
@@ -205,8 +235,10 @@ table.data td {
   vertical-align: top;
 }
 
-table.data tbody tr:hover {
-  background: var(--colour-surface);
+@media (hover: hover) and (pointer: fine) {
+  table.data tbody tr:hover {
+    background: var(--colour-surface);
+  }
 }
 
 .numeric {
@@ -273,6 +305,12 @@ table.data tbody tr:hover {
   background: var(--colour-bg);
   border: 1px solid var(--colour-border);
   border-radius: var(--radius-md);
+}
+
+/* An insight that opens a page, so it carries the gap to the content below
+   rather than relying on whatever follows to provide it. */
+.insight--lead {
+  margin-bottom: var(--space-4);
 }
 
 .insight--warn {
@@ -477,9 +515,11 @@ table.data tbody tr:hover {
   cursor: pointer;
 }
 
-.sidebar__signout:hover {
-  background: var(--colour-bg);
-  border-color: var(--colour-border-strong);
+@media (hover: hover) and (pointer: fine) {
+  .sidebar__signout:hover {
+    background: var(--colour-bg);
+    border-color: var(--colour-border-strong);
+  }
 }
 
 /* ─────────────────────────── MFA enrolment ──────────────────────────── */
@@ -720,6 +760,20 @@ table.data tbody tr:hover {
   background: var(--colour-surface-raised);
   border: 1px solid var(--colour-border);
   border-radius: var(--radius-lg);
+}
+
+/*
+ * The action row's layout without its panel.
+ *
+ * Used where the actions sit inside a table cell that already provides the
+ * surface — nesting a bordered, filled panel inside a bordered row draws a box
+ * inside a box and makes the table look like it has come apart.
+ */
+.actions--bare {
+  padding: 0;
+  margin-bottom: 0;
+  border: 0;
+  background: transparent;
 }
 
 .actions__row {
@@ -1027,4 +1081,68 @@ table.data tbody tr:hover {
 .media-item__actions .btn {
   font-size: var(--text-xs);
   padding: var(--space-1) var(--space-2);
+}
+
+/* ───────────────────────────── Interaction ───────────────────────────── */
+
+/*
+ * The admin is a tool, not a shopfront. It gets response, not motion.
+ *
+ * Staff hit these controls dozens of times a day — confirm an order, adjust
+ * stock, approve a return. At that frequency an animation that charms on the
+ * first press is friction on the fortieth, and a 200ms transition on a button
+ * someone clicks forty times is eight seconds of waiting spread across a
+ * shift. So everything here is at `--duration-instant` or shorter, and there
+ * are deliberately no entrance animations, no staggered rows, and no
+ * transitions on anything that appears as a result of navigation.
+ *
+ * What was missing was not animation but *acknowledgement*: before this the
+ * admin had zero press states and zero transitions, so a click on a button
+ * that then took a second to round-trip gave no sign it had registered. That
+ * is the gap being closed — the difference between a slow tool and a broken
+ * one is entirely in whether it admits it heard you.
+ */
+
+.btn {
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-out);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(var(--press-scale));
+}
+
+/*
+ * A disabled button must not appear to respond. `:not(:disabled)` above is
+ * load-bearing: a submit button mid-request is disabled, and a press state on
+ * it would tell the operator the second click registered when it did not.
+ */
+
+.sidebar nav a,
+.sidebar__signout,
+.filters__clear,
+.insight__action {
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.sidebar nav a:active,
+.sidebar__signout:active {
+  transform: scale(0.985);
+}
+
+/*
+ * Row hover on data tables fades rather than snaps.
+ *
+ * Scanning a long orders table means the highlight tracks the pointer
+ * continuously; an instant repaint on every row boundary reads as flicker.
+ * This is the one place a slightly longer duration helps, and it is still
+ * well under a tenth of a second.
+ */
+table.data tbody tr {
+  transition: background var(--duration-fast) var(--ease-out);
 }

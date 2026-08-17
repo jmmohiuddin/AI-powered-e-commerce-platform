@@ -58,9 +58,9 @@ export default async function TermsPage() {
   );
 
   return (
-    <div className="container section" style={{ maxWidth: '760px' }}>
-      <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>{t.title}</h1>
-      <p className="muted" style={{ marginBottom: 'var(--space-6)' }}>{t.intro}</p>
+    <div className="container container--prose section">
+      <h1 className="page__title">{t.title}</h1>
+      <p className="page__intro">{t.intro}</p>
 
       <h2 className="section-title">{t.sellerHeading}</h2>
       {hasIdentity ? (
@@ -69,7 +69,7 @@ export default async function TermsPage() {
           <div className="notice">
             {merchant.legalName && <p><strong>{merchant.legalName}</strong></p>}
             {merchant.legalAddress && (
-              <p style={{ whiteSpace: 'pre-line' }}>{merchant.legalAddress}</p>
+              <p className="pre-line">{merchant.legalAddress}</p>
             )}
             {merchant.taxRegistrationNumber && (
               <p>
@@ -157,7 +157,7 @@ export default async function TermsPage() {
         {copy.lastUpdatedLabel}: {copy.lastUpdated}
       </p>
 
-      <p style={{ marginTop: 'var(--space-6)' }}>
+      <p className="page__footnote">
         <Link href="/privacy">{copy.seeAlsoPrivacy}</Link> ·{' '}
         <Link href="/contact">{copy.contactUs}</Link>
       </p>

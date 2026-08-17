@@ -147,7 +147,7 @@ export default async function CategoryPage({
         <section>
           <div className="listing__head">
             <div>
-              <h1 style={{ fontSize: 'var(--text-xl)' }}>{localised.name}</h1>
+              <h1 className="page__title page__title--compact">{localised.name}</h1>
               <p className="listing__count">
                 {formatCount(result.total, locale)}{' '}
                 {result.total === 1 ? t('search.product') : t('search.products')}
@@ -170,7 +170,7 @@ export default async function CategoryPage({
 
           {result.products.length === 0 ? (
             <div className="empty-state">
-              <p style={{ marginBottom: 'var(--space-3)' }}>{t('category.emptyTitle')}</p>
+              <p className="empty-state__title">{t('category.emptyTitle')}</p>
               <p>
                 {t('category.emptyBody')} <Link href="/search">{t('home.browseAll')}</Link>
               </p>
@@ -183,7 +183,7 @@ export default async function CategoryPage({
                 ))}
               </div>
 
-              <p className="vat-note" style={{ marginTop: 'var(--space-4)' }}>
+              <p className="vat-note vat-note--after-grid">
                 {t('vat.inclusive')}
               </p>
 

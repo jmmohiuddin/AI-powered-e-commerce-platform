@@ -47,13 +47,13 @@ export default async function ConfirmationPage({
   const paid = order.paymentStatus === 'paid';
 
   return (
-    <div className="container section" style={{ maxWidth: '640px' }}>
+    <div className="container container--focused section">
       <div className="confirmation">
         <p className="confirmation__badge">Order confirmed</p>
-        <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-3)' }}>
+        <h1 className="page__title">
           Thank you, {order.customerName ?? 'and welcome'}
         </h1>
-        <p className="muted" style={{ marginBottom: 'var(--space-5)' }}>
+        <p className="page__intro">
           Order <strong>#{order.number}</strong> ·{' '}
           {formatPrice(order.total, order.currency, locale)}
         </p>
@@ -73,7 +73,7 @@ export default async function ConfirmationPage({
           </div>
         </dl>
 
-        <p style={{ marginTop: 'var(--space-5)' }}>
+        <p className="page__footnote">
           {paid
             ? 'We have your payment. You will get an SMS when the parcel is dispatched.'
             : 'Have the exact amount ready — the courier collects on delivery. You will get an SMS before they arrive.'}
@@ -94,7 +94,7 @@ export default async function ConfirmationPage({
           invoice route enforces the same two factors — an invoice shows the
           delivery address, every line, and a business buyer's TRN.
         */}
-        <p className="vat-note" style={{ marginTop: 'var(--space-5)' }}>
+        <p className="vat-note vat-note--after-grid">
           <a href={`/checkout/confirmation/${order.number}/invoice?phone=${encodeURIComponent(normalised)}`}>
             Download your tax invoice
           </a>{' '}

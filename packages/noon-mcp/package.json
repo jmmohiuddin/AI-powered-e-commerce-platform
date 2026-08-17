@@ -1,0 +1,27 @@
+{
+  "name": "@voltix/noon-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server exposing the noon Partner API as tools for AI assistants",
+  "type": "module",
+  "main": "./src/index.ts",
+  "bin": {
+    "noon-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.15.0",
+    "@voltix/noon": "*",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.2"
+  }
+}

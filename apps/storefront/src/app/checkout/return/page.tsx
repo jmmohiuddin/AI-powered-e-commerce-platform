@@ -76,7 +76,7 @@ export default async function PaymentReturnPage() {
 
 function Pending({ t, orderNumber }: { t: Translate; orderNumber: string }) {
   return (
-    <div className="container section" style={{ maxWidth: '640px' }}>
+    <div className="container container--focused section">
       {/*
         A plain meta refresh rather than a client component that polls. The
         answer arrives from the job queue within seconds, the page has no other
@@ -86,10 +86,10 @@ function Pending({ t, orderNumber }: { t: Translate; orderNumber: string }) {
       <meta httpEquiv="refresh" content="5" />
       <div className="confirmation">
         <p className="confirmation__badge">{t('return.pendingBadge')}</p>
-        <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-3)' }}>
+        <h1 className="page__title">
           {t('return.pendingTitle')}
         </h1>
-        <p className="muted" style={{ marginBottom: 'var(--space-5)' }}>
+        <p className="page__intro">
           {t('return.orderLabel')} <strong>#{orderNumber}</strong>
         </p>
         <p>{t('return.pendingBody')}</p>
@@ -107,13 +107,13 @@ function Pending({ t, orderNumber }: { t: Translate; orderNumber: string }) {
 
 function Failed({ t, orderNumber }: { t: Translate; orderNumber: string }) {
   return (
-    <div className="container section" style={{ maxWidth: '640px' }}>
+    <div className="container container--focused section">
       <div className="confirmation">
         <p className="confirmation__badge">{t('return.failedBadge')}</p>
-        <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-3)' }}>
+        <h1 className="page__title">
           {t('return.failedTitle')}
         </h1>
-        <p className="muted" style={{ marginBottom: 'var(--space-5)' }}>
+        <p className="page__intro">
           {t('return.orderLabel')} <strong>#{orderNumber}</strong>
         </p>
         {/*
@@ -144,9 +144,9 @@ function Failed({ t, orderNumber }: { t: Translate; orderNumber: string }) {
  */
 function Unknown({ t }: { t: Translate }) {
   return (
-    <div className="container section" style={{ maxWidth: '640px' }}>
+    <div className="container container--focused section">
       <div className="confirmation">
-        <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-3)' }}>
+        <h1 className="page__title">
           {t('return.unknownTitle')}
         </h1>
         <p>{t('return.unknownBody')}</p>

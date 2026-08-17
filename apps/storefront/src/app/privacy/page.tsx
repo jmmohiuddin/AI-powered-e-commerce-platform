@@ -65,9 +65,9 @@ export default async function PrivacyPage() {
     fill(c.cookieDays, { n: number.format(Math.round(seconds / 86_400)) });
 
   return (
-    <div className="container section" style={{ maxWidth: '760px' }}>
-      <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>{c.title}</h1>
-      <p className="muted" style={{ marginBottom: 'var(--space-6)' }}>{c.intro}</p>
+    <div className="container container--prose section">
+      <h1 className="page__title">{c.title}</h1>
+      <p className="page__intro">{c.intro}</p>
 
       <h2 className="section-title">{c.controllerHeading}</h2>
       {hasIdentity && <p>{c.controllerIntro}</p>}
@@ -76,7 +76,7 @@ export default async function PrivacyPage() {
           {merchant.legalName && <p><strong>{merchant.legalName}</strong></p>}
           {merchant.legalAddress && (
             <p>
-              {c.controllerAddress}: <span style={{ whiteSpace: 'pre-line' }}>{merchant.legalAddress}</span>
+              {c.controllerAddress}: <span className="pre-line">{merchant.legalAddress}</span>
             </p>
           )}
           {merchant.taxRegistrationNumber && (
@@ -219,7 +219,7 @@ export default async function PrivacyPage() {
         {copy.lastUpdatedLabel}: {copy.lastUpdated}
       </p>
 
-      <p style={{ marginTop: 'var(--space-6)' }}>
+      <p className="page__footnote">
         <Link href="/terms">{copy.seeAlsoTerms}</Link> · <Link href="/contact">{copy.contactUs}</Link>
       </p>
     </div>

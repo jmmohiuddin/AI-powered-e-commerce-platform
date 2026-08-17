@@ -46,13 +46,38 @@ a {
   text-decoration: none;
 }
 
+/*
+ * Tracking is size-specific, never one value for the whole scale.
+ *
+ * Letters read progressively further apart as type grows, so a display-size h1
+ * needs tighter tracking than an h3 to look evenly set. A single
+ * `letter-spacing: -0.015em` across all three is correct at the middle of the
+ * scale and wrong at both ends — the h1 looks loose, and at small sizes the
+ * same negative value starts closing up the counters.
+ *
+ * Leading moves the opposite way for the same reason: tight on large text,
+ * looser as it gets smaller.
+ */
 h1,
 h2,
 h3 {
-  line-height: var(--leading-tight);
   text-wrap: balance;
   font-weight: 620;
-  letter-spacing: -0.015em;
+}
+
+h1 {
+  line-height: 1.05;
+  letter-spacing: var(--tracking-display);
+}
+
+h2 {
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-heading);
+}
+
+h3 {
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-heading);
 }
 
 p {
@@ -112,13 +137,188 @@ p {
   margin-top: var(--space-4);
 }
 
+/* ───────────────────────── Page scaffold ─────────────────────────────── */
+
+/*
+ * The five things every page was re-declaring inline.
+ *
+ * Before this, essentially every page opened with some variation of
+ *
+ *   <div className="container section" style={{ maxWidth: '760px' }}>
+ *     <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>
+ *     <p className="muted" style={{ marginBottom: 'var(--space-6)' }}>
+ *
+ * — around seventy inline style objects across fifteen files. Three problems,
+ * in increasing order of seriousness:
+ *
+ *  1. The values drifted. Page widths were 640px, 680px and 760px with no
+ *     principle distinguishing them, and heading margins varied between pages
+ *     that were meant to look identical. Nothing was wrong enough to notice on
+ *     any one page, which is exactly why it survived.
+ *  2. They cannot respond to anything. An inline `font-size` cannot change at a
+ *     breakpoint, in dark mode, or under a media query, so the inline value is
+ *     the value everywhere forever.
+ *  3. The storefront enforces a nonce-based CSP. `style={{}}` compiles to a
+ *     `style` attribute, which survives today only because the policy has no
+ *     `style-src` restriction on attributes — tighten the policy and every one
+ *     of these silently stops applying.
+ *
+ * Naming the intent instead of the measurement is also what makes the widths
+ * defensible: `--prose` is a reading measure, `--focused` is a single-task
+ * column, and neither is "760px because that looked about right".
+ */
+
+/*
+ * A reading measure, in `ch` rather than pixels.
+ *
+ * Line length is a function of the font size, not of the viewport: at 760px a
+ * paragraph runs to roughly 95 characters, well past the 65–75 where the eye
+ * starts losing its place on the return sweep. `ch` ties the column to the
+ * text so it stays correct when the user scales their font up — which is the
+ * whole point of respecting a text-size preference.
+ */
+.container--prose {
+  max-width: 72ch;
+}
+
+/* A single-task column: order tracking, confirmation, contact. Sized to the
+   form and card content it holds rather than to a line of text, so it stays in
+   px. */
+.container--focused {
+  max-width: 640px;
+}
+
+.page__title {
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-2);
+}
+
+/*
+ * Listing, cart and checkout headings sit above dense interactive content
+ * rather than above prose, and take the next step down the scale so the
+ * content below stays the focus.
+ *
+ * The larger bottom margin is not an inconsistency. `.page__title` is followed
+ * by its intro paragraph and needs to stay bound to it; this one is followed
+ * directly by content and needs to separate from it. Same token scale, opposite
+ * job.
+ */
+.page__title--compact {
+  font-size: var(--text-xl);
+  margin-bottom: var(--space-4);
+}
+
+/* The lead paragraph under a page title. Carries its own colour so it does not
+   depend on also being given `.muted`. */
+.page__intro {
+  color: var(--colour-text-muted);
+  margin-bottom: var(--space-6);
+  max-width: 68ch;
+}
+
+/* The closing line of a page — "still stuck? talk to us", a VAT note, a last
+   updated date. */
+.page__footnote {
+  margin-top: var(--space-6);
+}
+
+/*
+ * Floating chrome, not an opaque strip.
+ *
+ * The header is a translucent material the page scrolls *under*. `saturate` is
+ * the part that matters and is usually missed: blur alone desaturates whatever
+ * passes beneath it, so product photography turns grey and the bar reads as
+ * dirty glass. Saturating back compensates.
+ *
+ * Both values are tokens because a user who disables transparency at the OS
+ * level gets a solid header instead — see prefers-reduced-transparency in
+ * tokens.css. A hard-coded blur here would ignore that setting.
+ */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--colour-bg) 88%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--colour-border);
+  background: var(--material-bg);
+  border-bottom: 1px solid var(--material-edge);
+  /*
+   * Written as a literal, not `var(--material-blur)`, and that is not an
+   * oversight. Lightning CSS — which Turbopack runs over this file — silently
+   * DROPS a `backdrop-filter` whose value is a custom property while it tries
+   * to derive the `-webkit-` prefix, so the declaration never reaches the
+   * browser and the header loses its blur with no error anywhere. Verified by
+   * reading the served stylesheet, not assumed.
+   *
+   * The colour tokens above survive the same pipeline fine; it is specific to
+   * this property. Keep the value inline here.
+   */
+}
+
+/*
+ * THE BLUR HAS TO BE INSIDE `@supports`, AND THAT IS THE WHOLE FIX.
+ *
+ * Background, because this was wrong twice and the second attempt looked
+ * right:
+ *
+ * Lightning CSS (which Turbopack runs over this file) rewrites
+ * `backdrop-filter` according to its browser targets, and with this project's
+ * targets it emitted ONLY `-webkit-backdrop-filter`, discarding the standard
+ * property. That was survivable while Chrome accepted the prefixed alias. It
+ * no longer does — as of Chrome 151 `-webkit-backdrop-filter` is not a
+ * recognised property at all (`CSS.supports` says false, and setting it via
+ * `el.style` yields an empty `cssText`). So the served rule was inert and the
+ * header had NO BLUR: verified by reading the shipped stylesheet and by
+ * `getComputedStyle(header).backdropFilter === 'none'` on the running page.
+ *
+ * A previous pass diagnosed the Lightning CSS rewrite correctly and worked
+ * around it by writing the value as a literal instead of a `var()`. That
+ * addressed a different failure (a `var()` value made Lightning drop the
+ * declaration outright) and did nothing about this one — the literal was still
+ * collapsed to the prefixed form alone.
+ *
+ * Wrapping the declaration in `@supports` is what actually works: inside a
+ * feature query Lightning CSS emits BOTH properties and widens the condition
+ * to `(-webkit-backdrop-filter: …) or (backdrop-filter: …)`, so old Safari
+ * gets the prefix and current Chrome gets the standard property. Confirmed
+ * against the served CSS, not assumed.
+ *
+ * Keep this in a feature query. Hoisting it back into the rule above silently
+ * turns the blur off again, and nothing will fail to tell you.
+ */
+@supports (backdrop-filter: blur(1px)) {
+  .site-header {
+    /*
+     * A LOWER-OPACITY FILL, AND ONLY IN HERE.
+     *
+     * `--material-bg` is deliberately near-opaque because it has to carry
+     * legibility unaided wherever the blur does not land — a translucent
+     * surface with nothing blurring behind it is a window, and the page
+     * headings scrolling under this bar would compete with the nav sitting on
+     * top of them.
+     *
+     * Inside this block the blur is guaranteed, so the fill can come down to
+     * something that actually reads as glass. Because the override lives in
+     * the feature query, a browser without `backdrop-filter` never sees it and
+     * keeps the safe near-opaque fill. The two values cannot drift apart.
+     */
+    background: var(--material-bg-blurred);
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+}
+
+/*
+ * Reduced transparency and increased contrast both win over the material.
+ *
+ * MUST STAY AFTER THE `@supports` BLOCK. Both selectors are a bare
+ * `.site-header`, so specificity is tied and source order is the only thing
+ * deciding which background applies. Moved above, the feature query would
+ * reinstate the translucent fill for exactly the users who asked for it not
+ * to be.
+ */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .site-header {
+    background: var(--colour-bg);
+    backdrop-filter: none;
+  }
 }
 
 /*
@@ -221,8 +421,10 @@ p {
   white-space: nowrap;
 }
 
-.header-actions a:hover {
-  color: var(--colour-text);
+@media (hover: hover) and (pointer: fine) {
+  .header-actions a:hover {
+    color: var(--colour-text);
+  }
 }
 
 .nav-bar {
@@ -248,9 +450,11 @@ p {
   border-bottom: 2px solid transparent;
 }
 
-.nav-bar li a:hover {
-  color: var(--colour-text);
-  border-bottom-color: var(--colour-accent);
+@media (hover: hover) and (pointer: fine) {
+  .nav-bar li a:hover {
+    color: var(--colour-text);
+    border-bottom-color: var(--colour-accent);
+  }
 }
 
 /* ──────────────────────────── Hero ───────────────────────────────────── */
@@ -301,22 +505,46 @@ p {
   margin-bottom: var(--space-3);
 }
 
-.hero__panel ul {
-  list-style: none;
-  padding: 0;
+/*
+ * Assurances — a labelled term above its explanation.
+ *
+ * This replaced a baseline-aligned flex row per item, where the label was a
+ * flex item free to shrink and each of the four wrapped to a different width.
+ * Stacking makes every row start at the same inline edge, which is the whole
+ * reason a list of four parallel claims scans as a list rather than as four
+ * paragraphs.
+ *
+ * The gap between items is larger than the gap inside one, so proximity does
+ * the grouping and no rules or dividers are needed to say which body belongs
+ * to which label.
+ */
+.assurances {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
-.hero__panel li {
-  display: flex;
-  gap: var(--space-3);
-  align-items: baseline;
+.assurances__item {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.assurances dt {
   font-size: var(--text-sm);
+  font-weight: 620;
+  color: var(--colour-text);
+  letter-spacing: var(--tracking-body);
 }
 
-.hero__panel strong {
-  font-weight: 620;
+/*
+ * `dd` carries a default `margin-inline-start: 40px` from the UA stylesheet,
+ * which would indent every description away from its own term. Logical
+ * property, so it is also the correct reset in Arabic.
+ */
+.assurances dd {
+  margin-inline-start: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--colour-text-muted);
 }
 
 /* ──────────────────────────── Buttons ────────────────────────────────── */
@@ -334,13 +562,26 @@ p {
   cursor: pointer;
   transition:
     background var(--duration-fast) var(--ease-out),
-    transform var(--duration-fast) var(--ease-out);
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-out);
   /* Touch targets below 44px fail on phones, which is most of this traffic. */
   min-height: 44px;
 }
 
+/*
+ * Press feedback is a scale, not a 1px nudge.
+ *
+ * `translateY(1px)` moves the button *under* the finger already covering it,
+ * so on the device where most of this traffic lands the feedback is invisible
+ * — it is a mouse-era idiom for a mouse-era cursor. A scale shrinks the whole
+ * surface, including its label, so the edges move away from the touch point
+ * and the press reads from any angle.
+ *
+ * It fires on :active, which is pointer-*down*. Feedback that waits for the
+ * click event arrives after the user has already decided the tap failed.
+ */
 .button:active {
-  transform: translateY(1px);
+  transform: scale(var(--press-scale));
 }
 
 .button--primary {
@@ -348,8 +589,10 @@ p {
   color: var(--colour-accent-text);
 }
 
-.button--primary:hover {
-  background: var(--colour-accent-hover);
+@media (hover: hover) and (pointer: fine) {
+  .button--primary:hover {
+    background: var(--colour-accent-hover);
+  }
 }
 
 .button--secondary {
@@ -358,8 +601,10 @@ p {
   color: var(--colour-text);
 }
 
-.button--secondary:hover {
-  background: var(--colour-surface-raised);
+@media (hover: hover) and (pointer: fine) {
+  .button--secondary:hover {
+    background: var(--colour-surface-raised);
+  }
 }
 
 .button--whatsapp {
@@ -400,6 +645,116 @@ p {
   font-weight: 540;
 }
 
+/* ────────────────────────── Category tiles ───────────────────────────── */
+
+/*
+ * Its own grid, not `.product-grid`.
+ *
+ * The product grid's 220px minimum is derived from a product card, which has
+ * to hold a 4:3 image, a two-line title, a price and an availability badge. A
+ * category tile holds a short name and a count, so the same track size leaves
+ * it mostly empty — which is exactly how it read: a row of hollow boxes. A
+ * wider minimum means fewer, better-filled tiles rather than more sparse ones.
+ */
+.category-grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+}
+
+/*
+ * A row, not a box.
+ *
+ * The name and count are stacked in the first column and the arrow sits in the
+ * second, spanning both rows. That fixes the two things wrong with the
+ * previous tile: the height no longer depends on whether a name wrapped (the
+ * arrow column holds it steady), and the vertical space is filled by content
+ * instead of by padding waiting for content that never comes.
+ */
+.category-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0 var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  background: var(--colour-surface-raised);
+  color: inherit;
+  transition:
+    border-color var(--duration-base) var(--ease-out),
+    background var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    transform var(--duration-instant) var(--ease-out);
+}
+
+.category-card__name {
+  grid-column: 1;
+  font-size: var(--text-base);
+  font-weight: 620;
+  /*
+   * `text-wrap: balance` is inherited from the global h1–h3 rule and is wrong
+   * here: on a two-word category name it splits the pair across two lines to
+   * equalise them. These are labels, not headlines.
+   *
+   * It wraps rather than truncating with an ellipsis. A clipped category name
+   * is worse than a tall tile — "Computer Access…" and "Computer Accessor…"
+   * are the same label to a shopper scanning for the right one, and merchants
+   * name their own categories, so no width is safe to assume. Grid stretches
+   * every tile in a row to the tallest, so a wrap costs height, never
+   * alignment.
+   */
+  text-wrap: pretty;
+}
+
+.category-card__count {
+  grid-column: 1;
+  font-size: var(--text-sm);
+  color: var(--colour-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The arrow is flipped for Arabic with `scale`, not by putting a different
+ * glyph in the markup.
+ *
+ * `translate` and `scale` are the independent transform properties, applied in
+ * that order — so the hover nudge below is computed *before* the flip and then
+ * mirrored along with everything else. One declaration moves it toward the
+ * inline end in both directions, with no RTL-specific hover rule.
+ */
+.category-card__go {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: var(--colour-text-subtle);
+  font-size: var(--text-lg);
+  line-height: 1;
+  translate: 0;
+  transition:
+    translate var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out);
+}
+
+[dir='rtl'] .category-card__go {
+  scale: -1 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .category-card:hover {
+    border-color: var(--colour-border-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  .category-card:hover .category-card__go {
+    translate: var(--space-1);
+    color: var(--colour-accent);
+  }
+}
+
+.category-card:active {
+  transform: scale(0.99);
+}
+
 /* ─────────────────────────── Product grid ────────────────────────────── */
 
 .product-grid {
@@ -420,9 +775,11 @@ p {
     box-shadow var(--duration-base) var(--ease-out);
 }
 
-.product-card:hover {
-  border-color: var(--colour-border-strong);
-  box-shadow: var(--shadow-md);
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover {
+    border-color: var(--colour-border-strong);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .product-card__media {
@@ -449,12 +806,29 @@ p {
   position: absolute;
   top: var(--space-2);
   inset-inline-start: var(--space-2);
+  /*
+   * PAINTED OVER THE IMAGE, NOT UNDER IT. `z-index` here is load-bearing.
+   *
+   * `next/image` with `fill` renders `position: absolute; inset: 0; z-index:
+   * auto`, and it comes after this badge in DOM order. Two positioned siblings
+   * with auto z-index paint in tree order, so the image was painting on top
+   * and taking a bite out of the discount — on the placeholder it clipped the
+   * `%` off "−19%", and over real product photography it would cover whatever
+   * part of the badge the picture happened to reach.
+   *
+   * Silent, too: nothing about the layout is wrong, the badge is the right
+   * size in the right place, and it only shows up by looking at a rendered
+   * tile. The discount is the single strongest signal on a deal tile, so it
+   * has to be the thing in front.
+   */
+  z-index: 1;
   background: var(--colour-discount);
-  color: #fff;
+  color: var(--colour-on-discount);
   font-size: var(--text-xs);
   font-weight: 640;
   padding: 2px var(--space-2);
   border-radius: var(--radius-sm);
+  font-variant-numeric: tabular-nums;
 }
 
 .product-card__body {
@@ -572,6 +946,70 @@ p {
   top: calc(var(--header-height) + var(--space-4));
 }
 
+/*
+ * The stacked sections below the buy box.
+ *
+ * Spacing lives on the section rather than on its heading so that the gap is
+ * between *blocks of content*, and does not change depending on what each
+ * section happens to open with. A margin on the heading breaks the moment a
+ * section starts with anything else.
+ */
+.pdp__section {
+  margin-top: var(--space-6);
+}
+
+.pdp__section-title {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-3);
+}
+
+.pdp__description {
+  margin-top: var(--space-4);
+  color: var(--colour-text-muted);
+}
+
+.rating--pdp {
+  margin-top: var(--space-3);
+}
+
+/* ───────────────────────── Info cards ────────────────────────────────── */
+
+/*
+ * Static reassurance panels — delivery, payment, warranty.
+ *
+ * A separate block from `.product-card` because they are a different kind of
+ * thing: nothing here is clickable, so none of the card's hover lift, press
+ * scale or pointer cursor belongs. They also do not need the product grid's
+ * media-driven track sizing, so the columns are wider and there are fewer of
+ * them.
+ */
+.info-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+
+.info-card {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-5);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  background: var(--colour-surface-raised);
+}
+
+.info-card__title {
+  font-size: var(--text-base);
+  font-weight: 620;
+}
+
+.info-card__body {
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--colour-text-muted);
+}
+
 /* ───────────────────────────── Gallery ───────────────────────────────── */
 
 .gallery {
@@ -624,8 +1062,10 @@ p {
   padding: var(--space-2);
 }
 
-.gallery__thumb:hover {
-  border-color: var(--colour-border-strong);
+@media (hover: hover) and (pointer: fine) {
+  .gallery__thumb:hover {
+    border-color: var(--colour-border-strong);
+  }
 }
 
 /* Selection is shown with a colour *and* a thicker border, so it survives both
@@ -797,9 +1237,29 @@ p {
   padding-block: 2px;
 }
 
-.facets a:hover,
+/*
+ * SELECTION IS NOT A HOVER STATE. Keep these two rules apart.
+ *
+ * `:hover` and `[aria-current]` were a single grouped selector, and when that
+ * selector was moved inside `@media (hover: hover)` to stop hover styles
+ * sticking on touch, the *selected facet* went with it. The result: on a
+ * phone — where hover never matches, and where most of this traffic is — the
+ * active category and brand rendered identically to the inactive ones. The
+ * shopper filters to Samsung and the page gives no indication that it
+ * happened, beyond the results changing.
+ *
+ * Hover is a capability, and gating it is right. Current state is a fact about
+ * the page, and gating it on the input device is never right.
+ */
 .facets a[aria-current='true'] {
   color: var(--colour-accent);
+  font-weight: 580;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .facets a:hover {
+    color: var(--colour-accent);
+  }
 }
 
 .facets span {
@@ -821,12 +1281,139 @@ p {
   font-size: var(--text-sm);
 }
 
+/* ─────────────────────────── Sort control ────────────────────────────── */
+
+/*
+ * A track holding one selected segment.
+ *
+ * The recessed track (`--colour-surface`) with a raised selected segment
+ * (`--colour-surface-raised` + a small shadow) is what makes the selection
+ * read as a physical position rather than as a colour. That matters here
+ * because colour alone would be the only signal, and it fails for the
+ * red-green colour blind and in high-contrast mode.
+ */
+.sort {
+  /* `min-inline-size: 0` lets the control shrink inside the flex
+     `.listing__head` instead of forcing the row to wrap early. */
+  min-inline-size: 0;
+}
+
+.sort__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  list-style: none;
+  padding: var(--space-1);
+  margin: 0;
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+}
+
+.sort__option {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 540;
+  color: var(--colour-text-muted);
+  white-space: nowrap;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * Not inside a hover media query — see the note on `.facets a[aria-current]`.
+ * This is the state that says which sort is applied.
+ */
+.sort__option[aria-current='true'] {
+  background: var(--colour-surface-raised);
+  color: var(--colour-text);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sort__option:hover {
+    color: var(--colour-text);
+  }
+}
+
+/* In high-contrast mode the raised-fill trick collapses, because the track and
+   the segment resolve to near-identical surfaces. Give the selection a border
+   it cannot lose. */
+@media (prefers-contrast: more) {
+  .sort__option[aria-current='true'] {
+    outline: 2px solid var(--colour-text);
+    outline-offset: -2px;
+  }
+}
+
+/*
+ * A settled surface, not a dashed outline.
+ *
+ * The dashed border is a wireframing convention — it reads as "content will go
+ * here once this is finished". That is the right message in an admin table
+ * with no rows yet and the wrong one on an empty basket, which is a normal
+ * state a shopper reaches constantly and which is the store's best chance to
+ * send them somewhere useful. A filled surface with a hairline says the page
+ * is complete and this is simply what it has to say.
+ */
 .empty-state {
-  border: 1px dashed var(--colour-border-strong);
+  border: 1px solid var(--colour-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-7) var(--space-5);
+  background: var(--colour-surface);
+  padding: var(--space-8) var(--space-5);
   text-align: center;
   color: var(--colour-text-muted);
+}
+
+/*
+ * The title takes full text colour explicitly.
+ *
+ * `.empty-state` sets a muted colour for its body copy, and the heading inside
+ * it inherits that — so "Your basket is empty" rendered at body-text weight
+ * *and* body-text colour, with nothing making it the first thing read.
+ */
+.empty-state__title {
+  margin-bottom: var(--space-3);
+  color: var(--colour-text);
+  font-size: var(--text-xl);
+  font-weight: 620;
+}
+
+.empty-state p {
+  max-width: 46ch;
+  margin-inline: auto;
+}
+
+/* The action needs air between it and the sentence explaining it, and `.button`
+   is an inline-flex element so a top margin is the only thing separating them. */
+.empty-state .button {
+  margin-top: var(--space-5);
+}
+
+/* Two or more recovery routes off a dead end — the 404 offers browsing and
+   contact. Wraps rather than shrinking the buttons below their touch target. */
+.empty-state__actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/*
+ * A postal address typed with real line breaks.
+ *
+ * `pre-line` collapses runs of spaces but honours newlines, which is exactly
+ * what a merchant-entered address needs — `pre` would also preserve the
+ * indentation of the source string, and `normal` would run the whole address
+ * onto one line.
+ */
+.pre-line {
+  white-space: pre-line;
 }
 
 .listing__intro {
@@ -911,10 +1498,12 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
-.pagination__pages a:hover,
-.pagination__step:hover {
-  border-color: var(--colour-border-strong);
-  color: var(--colour-text);
+@media (hover: hover) and (pointer: fine) {
+  .pagination__pages a:hover,
+  .pagination__step:hover {
+    border-color: var(--colour-border-strong);
+    color: var(--colour-text);
+  }
 }
 
 .pagination__pages a[aria-current='page'] {
@@ -964,8 +1553,10 @@ p {
   gap: var(--space-2);
 }
 
-.site-footer a:hover {
-  color: var(--colour-accent);
+@media (hover: hover) and (pointer: fine) {
+  .site-footer a:hover {
+    color: var(--colour-accent);
+  }
 }
 
 .site-footer__legal {
@@ -1054,13 +1645,19 @@ p {
   white-space: nowrap;
 }
 
-.locale-switch:hover {
-  background: var(--colour-surface-raised);
+@media (hover: hover) and (pointer: fine) {
+  .locale-switch:hover {
+    background: var(--colour-surface-raised);
+  }
 }
 
 .vat-note {
   font-size: var(--text-xs);
   color: var(--colour-text-subtle);
+}
+
+.vat-note--after-grid {
+  margin-top: var(--space-4);
 }
 
 /* ─────────────────────── Cart & checkout ─────────────────────────────── */
@@ -1106,8 +1703,10 @@ p {
   font-weight: 560;
 }
 
-.cart-line__title:hover {
-  color: var(--colour-accent);
+@media (hover: hover) and (pointer: fine) {
+  .cart-line__title:hover {
+    color: var(--colour-accent);
+  }
 }
 
 .cart-line__meta {
@@ -1154,8 +1753,10 @@ p {
   min-height: 44px;
 }
 
-.cart-line__remove:hover {
-  color: var(--colour-danger);
+@media (hover: hover) and (pointer: fine) {
+  .cart-line__remove:hover {
+    color: var(--colour-danger);
+  }
 }
 
 .cart-error {
@@ -1175,6 +1776,71 @@ p {
   padding: var(--space-5);
   position: sticky;
   top: calc(var(--header-height) + var(--space-4));
+}
+
+.summary__title {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-4);
+}
+
+.orders__footnote {
+  margin-top: var(--space-4);
+}
+
+/* ── Buy box controls ── */
+
+/*
+ * "Choose an option" is a heading for the variant list, sized down to a label.
+ * It stays an `<h2>` rather than becoming a `<span>` because it genuinely
+ * heads a section of the page and a screen-reader user navigating by heading
+ * needs it there — visual size and document structure are separate decisions.
+ */
+.buy-box__legend {
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-3);
+}
+
+.quantity-field {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.quantity-field__label {
+  font-size: var(--text-sm);
+}
+
+.quantity-field__select {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--colour-border-strong);
+  background: var(--colour-surface);
+  /* `font` and `color` do not inherit into form controls — without these the
+     select renders in the browser's default 13px system face while every
+     other control on the page uses the store's, and in dark mode it keeps
+     black text on the dark surface. */
+  font: inherit;
+  font-size: var(--text-sm);
+  color: inherit;
+  min-height: 44px;
+}
+
+/* ── Cart pending state ── */
+
+/*
+ * Dimmed while a quantity change is in flight.
+ *
+ * Opacity only — nothing moves, and nothing is disabled. Dimming says "this is
+ * being updated" without taking the controls away, so a shopper who meant to
+ * press twice still can. The transition is on opacity alone, which is
+ * compositor-only and safe to run over a list of any length.
+ */
+.cart-lines-region {
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.cart-lines-region--pending {
+  opacity: 0.6;
 }
 
 .summary__items {
@@ -1315,8 +1981,10 @@ p {
   list-style-position: inside;
 }
 
-.checkout-form__disclosure > summary:hover {
-  color: var(--colour-text);
+@media (hover: hover) and (pointer: fine) {
+  .checkout-form__disclosure > summary:hover {
+    color: var(--colour-text);
+  }
 }
 
 .checkout-form__disclosure[open] > summary {
@@ -1434,6 +2102,12 @@ p {
   margin-bottom: var(--space-4);
   display: grid;
   gap: var(--space-2);
+}
+
+/* A notice that opens a page rather than sitting between two paragraphs, so it
+   needs the section gap below it, not the paragraph gap. */
+.notice--lead {
+  margin-bottom: var(--space-6);
 }
 
 .notice--warn {
@@ -1655,8 +2329,10 @@ table.data .numeric {
   color: inherit;
 }
 
-.contact-card:hover {
-  border-color: var(--colour-accent);
+@media (hover: hover) and (pointer: fine) {
+  .contact-card:hover {
+    border-color: var(--colour-accent);
+  }
 }
 
 .contact-card strong {
@@ -1665,4 +2341,93 @@ table.data .numeric {
 
 .contact-card .muted {
   font-size: var(--text-xs);
+}
+
+/* ───────────────────────────── Interaction ───────────────────────────── */
+
+/*
+ * One shared response layer for everything pressable.
+ *
+ * WHAT IS DELIBERATELY NOT HERE: entrance animation on the product grid.
+ *
+ * A shopper browsing categories sees that grid dozens of times a session, and
+ * motion that is charming the first time is friction the twentieth. It would
+ * also delay the largest contentful paint on exactly the pages that have to
+ * convert — animating a server-rendered grid means paying render cost to make
+ * the page *appear* slower. Staggered reveals belong on surfaces seen once,
+ * not on the store's primary browsing view.
+ *
+ * What is here is response, not decoration: the interface acknowledging input
+ * on the frame it arrives.
+ */
+
+/*
+ * Colour and border changes ease instead of snapping.
+ *
+ * These all had hover states with no transition, so they cut between two
+ * states with nothing in between — which reads as a repaint rather than as the
+ * element responding. `--duration-fast` is short enough to feel immediate.
+ *
+ * Only non-moving properties are listed. Transitioning `all` here would catch
+ * layout properties and animate reflows, which is both slow and jarring.
+ */
+.facets a,
+.pagination__step,
+.pagination__pages a,
+.site-footer a,
+.contact-card,
+.locale-switch,
+.cart-line__remove,
+.cart-line__title,
+.header-actions a,
+.nav-bar li a {
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * Press feedback on pressable surfaces that are not <button>.
+ *
+ * Scoped to fine pointers *and* touch alike — unlike hover, a press is real on
+ * every input device. The scale is smaller than the button's because these are
+ * larger surfaces, and a card shrinking by 3% reads as the whole layout
+ * lurching.
+ */
+.contact-card:active,
+.pagination__step:active,
+.locale-switch:active,
+.gallery__thumb:active {
+  transform: scale(0.985);
+}
+
+.contact-card,
+.pagination__step,
+.locale-switch,
+.gallery__thumb {
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-out);
+}
+
+/*
+ * The product card lifts on hover and settles on press.
+ *
+ * The card already changed border and shadow on hover; the missing half was
+ * any acknowledgement of the tap itself. On a phone — where hover never fires
+ * — this is the *only* feedback the card gives before the navigation starts,
+ * and without it a slow page load is indistinguishable from a missed tap.
+ */
+.product-card:active {
+  transform: scale(0.99);
+}
+
+.product-card {
+  transition:
+    border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    transform var(--duration-instant) var(--ease-out);
 }

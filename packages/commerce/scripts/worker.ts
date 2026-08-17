@@ -22,6 +22,8 @@ import '@voltix/config/load-env';
 import { hostname } from 'node:os';
 import { closeConnections, dbAdmin } from '@voltix/db';
 import { buildTransportRegistry, dispatchNotifications } from '@voltix/notifications';
+import { NoonClient, loadNoonConfig } from '@voltix/noon';
+import { dispatchNoonSync } from '@voltix/noon/sync';
 import { runOnce, scheduleRecurring } from '../src/jobs';
 
 const WORKER_ID = `${hostname()}-${process.pid}`;
@@ -50,6 +52,24 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
 // pool and reopen a socket every few seconds.
 const transports = buildTransportRegistry();
 
+/**
+ * The marketplace sync, if it is configured.
+ *
+ * Absent credentials are a normal state, not an error: the storefront runs
+ * perfectly well without a noon integration, and a worker that refused to
+ * start because `NOON_KEY_ID` was unset would take checkout's reservation
+ * sweep down with it. The reason is logged once at boot so that "why is
+ * nothing syncing" has an answer in the first ten lines of the log.
+ */
+const noon = (() => {
+  try {
+    return new NoonClient(loadNoonConfig());
+  } catch (error) {
+    console.log(`  noon sync: disabled (${(error as Error).message.split('\n')[0]})`);
+    return null;
+  }
+})();
+
 async function main(): Promise<void> {
   console.log(`worker ${WORKER_ID} started (polling every ${POLL_INTERVAL_MS}ms)`);
   console.log(`  notification transports: ${transports.channels.join(', ')}`);
@@ -74,6 +94,29 @@ async function main(): Promise<void> {
       const { sent, failed: sendFailed, suppressed } = await dispatching;
       if (sent || sendFailed || suppressed) {
         console.log(`  notifications: ${sent} sent, ${sendFailed} failed, ${suppressed} suppressed`);
+      }
+
+      // Marketplace sync. Outside any transaction for the same reason as the
+      // dispatcher above: these are HTTP round trips to noon, and no database
+      // lock should be held across one. It throttles itself internally, so
+      // calling it every tick is cheap.
+      if (noon) {
+        const syncing = dispatchNoonSync(dbAdmin(), noon);
+        inFlight = syncing;
+        const result = await syncing;
+        const touched =
+          result.stock.accepted + result.price.accepted + result.ordersImported + result.driftFound;
+        if (touched > 0) {
+          console.log(
+            `  noon: ${result.stock.accepted} stock, ${result.price.accepted} price, ` +
+              `${result.ordersImported} order(s) imported, ${result.driftFound} drifted`,
+          );
+        }
+        const rejected = result.stock.rejected.length + result.price.rejected.length;
+        if (rejected > 0) {
+          console.warn(`  noon: ${rejected} item(s) rejected — see noon_listings.last_error`);
+        }
+        if (result.abortedWith) console.warn(`  noon: pass aborted — ${result.abortedWith}`);
       }
     } catch (error) {
       // A poll failure — the database restarting, say — must not kill the

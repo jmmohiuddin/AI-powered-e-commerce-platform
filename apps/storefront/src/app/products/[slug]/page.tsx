@@ -244,7 +244,7 @@ export default async function ProductPage({ params }: { params: Params }) {
           {product.subtitle && <p className="pdp__subtitle">{product.subtitle}</p>}
 
           {rating && (
-            <p className="rating" style={{ marginTop: 'var(--space-3)' }}>
+            <p className="rating rating--pdp">
               <span className="rating__star" aria-hidden="true">
                 ★
               </span>
@@ -273,18 +273,14 @@ export default async function ProductPage({ params }: { params: Params }) {
             }}
           />
 
-          <section style={{ marginTop: 'var(--space-6)' }}>
-            <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-3)' }}>
-              {t('product.whatYouGet')}
-            </h2>
+          <section className="pdp__section">
+            <h2 className="pdp__section-title">{t('product.whatYouGet')}</h2>
             <ul className="highlight-list">
               {product.highlights.map((highlight) => (
                 <li key={highlight}>{highlight}</li>
               ))}
             </ul>
-            <p style={{ marginTop: 'var(--space-4)', color: 'var(--colour-text-muted)' }}>
-              {product.description}
-            </p>
+            <p className="pdp__description">{product.description}</p>
           </section>
 
           {/* Key specs lead, then the rest in the merchant's order — `specsOf`
@@ -298,10 +294,8 @@ export default async function ProductPage({ params }: { params: Params }) {
               used to disappear whenever the attribute rows were missing, which
               against a real database was always. */}
           {(specs.length > 0 || product.warrantyMonths) && (
-            <section style={{ marginTop: 'var(--space-6)' }}>
-              <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-3)' }}>
-                {t('product.specifications')}
-              </h2>
+            <section className="pdp__section">
+              <h2 className="pdp__section-title">{t('product.specifications')}</h2>
               <table className="spec-table">
                 <tbody>
                   {specs.map((spec) => (
@@ -324,17 +318,16 @@ export default async function ProductPage({ params }: { params: Params }) {
           )}
 
           {product.answerableFacts.length > 0 && (
-            <section style={{ marginTop: 'var(--space-6)' }}>
-              <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-3)' }}>
-                {t('product.commonQuestions')}
-              </h2>
-              <dl style={{ display: 'grid', gap: 'var(--space-4)' }}>
+            <section className="pdp__section">
+              <h2 className="pdp__section-title">{t('product.commonQuestions')}</h2>
+              {/* Same term/description structure as the homepage assurances, and
+                  the same `.assurances` block — a labelled fact above its
+                  explanation is one pattern, not two. */}
+              <dl className="assurances">
                 {product.answerableFacts.map((fact) => (
-                  <div key={fact.question}>
-                    <dt style={{ fontWeight: 560 }}>{fact.question}</dt>
-                    <dd style={{ color: 'var(--colour-text-muted)', marginInlineStart: 0 }}>
-                      {fact.answer}
-                    </dd>
+                  <div className="assurances__item" key={fact.question}>
+                    <dt>{fact.question}</dt>
+                    <dd>{fact.answer}</dd>
                   </div>
                 ))}
               </dl>
@@ -373,7 +366,15 @@ export default async function ProductPage({ params }: { params: Params }) {
           The warranty *length* is real, so it stays: it comes from
           `products.warrantyMonths`, defaulted from `brands.defaultWarrantyMonths`.
         */}
-        <div className="product-grid">
+        {/*
+          `.info-card`, not `.product-card` with the padding overridden inline.
+          These are four static reassurances, not products: they have no media
+          box, no link, and no press or hover behaviour, so inheriting a
+          product tile meant inheriting a hover lift and a tap scale on
+          something that does nothing when tapped — an affordance promising an
+          action that does not exist.
+        */}
+        <div className="info-grid">
           {[
             { title: t('product.dpDeliveryTitle'), body: t('product.dpDeliveryBody') },
             { title: t('product.dpPaymentTitle'), body: t('product.dpPaymentBody') },
@@ -383,15 +384,13 @@ export default async function ProductPage({ params }: { params: Params }) {
               body: t('product.dpWarrantyBody', { n: product.warrantyMonths ?? 12 }),
             },
           ].map((item) => (
-            <div key={item.title} className="product-card" style={{ padding: 'var(--space-5)' }}>
-              <strong>{item.title}</strong>
-              <p style={{ color: 'var(--colour-text-muted)', fontSize: 'var(--text-sm)' }}>
-                {item.body}
-              </p>
+            <div key={item.title} className="info-card">
+              <h3 className="info-card__title">{item.title}</h3>
+              <p className="info-card__body">{item.body}</p>
             </div>
           ))}
         </div>
-        <p className="vat-note" style={{ marginTop: 'var(--space-4)' }}>
+        <p className="vat-note vat-note--after-grid">
           {t('vat.inclusive')}
         </p>
       </section>

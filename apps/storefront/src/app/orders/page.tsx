@@ -66,11 +66,11 @@ export default async function TrackOrderPage({
       : null;
 
   return (
-    <div className="container section" style={{ maxWidth: '640px' }}>
-      <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>
+    <div className="container container--focused section">
+      <h1 className="page__title">
         Track your order
       </h1>
-      <p className="muted" style={{ marginBottom: 'var(--space-5)' }}>
+      <p className="page__intro">
         Enter your order number and the mobile number you ordered with.
       </p>
 
@@ -182,7 +182,7 @@ export default async function TrackOrderPage({
             </div>
           </dl>
 
-          <p className="muted" style={{ marginTop: 'var(--space-4)' }}>
+          <p className="muted orders__footnote">
             Something wrong with this order? <Link href="/contact">Get in touch</Link> — quote
             #{order.number} and we can help straight away.
           </p>

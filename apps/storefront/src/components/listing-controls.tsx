@@ -201,27 +201,56 @@ function PriceFilter({
   );
 }
 
+/**
+ * Sort, as a segmented control.
+ *
+ * It was four links joined by middots, rendered into `.listing__count` — the
+ * class for the "6 products" caption — so it inherited that caption's muted
+ * body-text styling and nothing else. Two consequences, both visible on the
+ * page:
+ *
+ *  1. **No current state.** `aria-current` was already being set correctly, but
+ *     the only rule in the stylesheet that responds to it is scoped to
+ *     `.facets`. So all four options rendered identically and the shopper had
+ *     no way to tell what the list was sorted by — on the one control whose
+ *     entire job is to say what the list is sorted by.
+ *  2. **They did not read as controls.** Muted text separated by punctuation
+ *     looks like a sentence. A shopper scanning for a way to sort by price
+ *     skips it, because nothing about it says "pick one of these".
+ *
+ * A segmented control fixes both at once: it is the familiar form for
+ * one-of-N, and the selected segment is visible without needing colour alone
+ * to carry it.
+ *
+ * Still links, still no client JavaScript — the semantics are unchanged, only
+ * the presentation. `aria-current` is what conveys selection to a screen
+ * reader; the fill is the sighted equivalent.
+ */
 export function ListingSort({ basePath, filters, t }: Chrome) {
+  const active = filters.sort ?? 'relevance';
+
   return (
-    <nav aria-label={t('search.sort')} className="listing__count">
-      {(
-        [
-          ['relevance', t('search.relevance')],
-          ['price_asc', t('search.priceAsc')],
-          ['price_desc', t('search.priceDesc')],
-          ['rating', t('search.rating')],
-        ] as const
-      ).map(([value, label], index) => (
-        <span key={value}>
-          {index > 0 && ' · '}
-          <Link
-            href={buildListingHref(basePath, filters, { sort: value })}
-            aria-current={(filters.sort ?? 'relevance') === value}
-          >
-            {label}
-          </Link>
-        </span>
-      ))}
+    <nav aria-label={t('search.sort')} className="sort">
+      <ul className="sort__options">
+        {(
+          [
+            ['relevance', t('search.relevance')],
+            ['price_asc', t('search.priceAsc')],
+            ['price_desc', t('search.priceDesc')],
+            ['rating', t('search.rating')],
+          ] as const
+        ).map(([value, label]) => (
+          <li key={value}>
+            <Link
+              className="sort__option"
+              href={buildListingHref(basePath, filters, { sort: value })}
+              aria-current={active === value}
+            >
+              {label}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </nav>
   );
 }

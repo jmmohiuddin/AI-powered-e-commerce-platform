@@ -87,7 +87,18 @@ structural.
 ## Phase 6 — Mobile & channels (8–10 weeks)
 
 React Native app sharing `packages/core` and `packages/ai` (the dependency rule is what makes this
-cheap rather than a rewrite), POS for physical counter sales, and marketplace channel sync.
+cheap rather than a rewrite), and POS for physical counter sales.
+
+**Marketplace channel sync was pulled forward** and the noon integration now exists in
+`packages/noon`: stock and price push, catalogue content upsert, order import, and a drift
+reconcile, all driven by the worker. It has never run against a live noon account, which is the
+single largest risk on it — see that package's README for exactly which endpoint paths are verified
+against noon's documentation and which one is inferred.
+
+What remains on this phase for channels: turning noon orders into first-class marketplace order
+records in admin, automating shipment confirmation back to noon, replacing the five-minute order
+poll with noon's event-notification webhooks, and generalising `noon_listings` into a channel
+abstraction once there is a second marketplace to generalise *from*.
 
 ---
 

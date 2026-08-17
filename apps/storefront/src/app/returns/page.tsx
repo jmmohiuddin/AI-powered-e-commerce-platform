@@ -19,11 +19,11 @@ export default function ReturnsPage() {
     RETURN_POLICY;
 
   return (
-    <div className="container section" style={{ maxWidth: '760px' }}>
-      <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>
+    <div className="container container--prose section">
+      <h1 className="page__title">
         Returns &amp; warranty
       </h1>
-      <p className="muted" style={{ marginBottom: 'var(--space-6)' }}>
+      <p className="page__intro">
         Electronics are expensive and you should be able to change your mind. Here is exactly where
         you stand.
       </p>
@@ -94,7 +94,7 @@ export default function ReturnsPage() {
         <li>We arrange collection or give you the drop-off address, and confirm the refund amount.</li>
       </ol>
 
-      <p style={{ marginTop: 'var(--space-6)' }} className="muted">
+      <p className="page__footnote muted">
         Refunds are for the amount you paid. Where the fault was ours, that includes the original
         delivery charge; for a change of mind, the delivery charge is not refunded.
       </p>

@@ -77,7 +77,7 @@ export default async function CheckoutPage() {
           </ol>
         </nav>
 
-        <h1 style={{ fontSize: 'var(--text-xl)', margin: 'var(--space-4) 0' }}>Checkout</h1>
+        <h1 className="page__title page__title--compact">Checkout</h1>
 
         <CheckoutForm
           total={cart.pricing.total.amount}
@@ -97,7 +97,7 @@ export default async function CheckoutPage() {
       </section>
 
       <aside className="summary">
-        <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-4)' }}>
+        <h2 className="summary__title">
           Your order ({cart.itemCount})
         </h2>
 

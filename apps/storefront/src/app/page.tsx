@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { formatCount } from '@voltix/ui';
 import { ProductCard } from '@/components/product-card';
 import { listCategories, listProducts } from '@/lib/catalog';
 import { whatsappHref } from '@/lib/contact';
@@ -72,20 +73,38 @@ export default async function HomePage() {
             TRN-bearing invoice is real (packages/invoicing) and is what a
             service centre actually asks to see.
           */}
-          <ul>
-            <li>
-              <strong>{t('home.whyWarrantyTitle')}</strong> — {t('home.whyWarrantyBody')}
-            </li>
-            <li>
-              <strong>{t('home.whyDeliveryTitle')}</strong> — {t('home.whyDeliveryBody')}
-            </li>
-            <li>
-              <strong>{t('home.whyPaymentTitle')}</strong> — {t('home.whyPaymentBody')}
-            </li>
-            <li>
-              <strong>{t('home.whyStockTitle')}</strong> — {t('home.whyStockBody')}
-            </li>
-          </ul>
+          {/*
+            A term-and-definition list, because that is what these are: four
+            labelled assurances. It was a `<ul>` of `<li><strong>Label</strong>
+            — body</li>`, laid out as a baseline-aligned flex row, and the
+            label was a flex item free to shrink. So "Official UAE warranty"
+            collapsed into a three-line column beside its own body text while
+            "Pay how you like" got two — four rows that each wrapped
+            differently and lined up with nothing.
+
+            Stacking the term above its description removes the em-dash too.
+            That dash was doing the separating a line break should do, and it
+            had to be typed into the markup rather than the stylesheet, which
+            meant it stayed an em-dash on the Arabic page as well.
+          */}
+          <dl className="assurances">
+            <div className="assurances__item">
+              <dt>{t('home.whyWarrantyTitle')}</dt>
+              <dd>{t('home.whyWarrantyBody')}</dd>
+            </div>
+            <div className="assurances__item">
+              <dt>{t('home.whyDeliveryTitle')}</dt>
+              <dd>{t('home.whyDeliveryBody')}</dd>
+            </div>
+            <div className="assurances__item">
+              <dt>{t('home.whyPaymentTitle')}</dt>
+              <dd>{t('home.whyPaymentBody')}</dd>
+            </div>
+            <div className="assurances__item">
+              <dt>{t('home.whyStockTitle')}</dt>
+              <dd>{t('home.whyStockBody')}</dd>
+            </div>
+          </dl>
         </div>
       </section>
 
@@ -95,7 +114,7 @@ export default async function HomePage() {
       {products.length === 0 && (
         <section className="container section">
           <div className="empty-state">
-            <p style={{ marginBottom: 'var(--space-3)' }}>{t('home.emptyTitle')}</p>
+            <p className="empty-state__title">{t('home.emptyTitle')}</p>
             <p>{t('home.emptyBody')}</p>
           </div>
         </section>
@@ -107,20 +126,37 @@ export default async function HomePage() {
             <h2>{t('home.categories')}</h2>
             <Link href="/search">{t('home.browseAll')}</Link>
           </div>
-          <div className="product-grid">
+          {/*
+            A category tile is its own block, not a `.product-card` with the
+            padding overridden inline. It was the latter, and the two disagreed
+            about everything that matters: the product card is a media-first
+            tile whose text sits in a padded footer, so reusing it for a
+            text-only tile meant an inline `padding` to undo the footer, no
+            control over how the two lines relate, and — because the card sizes
+            itself to its image — a row of boxes whose height was set by
+            whichever category name happened to wrap onto a second line.
+
+            The count is `formatCount`, not `{category.count}`. A bare number
+            renders Western digits on the Arabic page while every other numeral
+            around it is Eastern Arabic.
+          */}
+          <div className="category-grid">
             {categories.map((category) => (
               <Link
                 key={category.slug}
                 href={`/category${category.path}`}
-                className="product-card"
-                style={{ padding: 'var(--space-5)' }}
+                className="category-card"
               >
-                <strong style={{ fontSize: 'var(--text-lg)' }}>
-                  {localiseCategory(category, locale).name}
-                </strong>
-                <span style={{ color: 'var(--colour-text-subtle)', fontSize: 'var(--text-sm)' }}>
-                  {category.count}{' '}
+                <h3 className="category-card__name">{localiseCategory(category, locale).name}</h3>
+                <span className="category-card__count">
+                  {formatCount(category.count, locale)}{' '}
                   {category.count === 1 ? t('search.product') : t('search.products')}
+                </span>
+                {/* The chevron is ornament — the link's accessible name is the
+                    heading, and a screen reader announcing "arrow" adds
+                    nothing to "Smartphones, link". */}
+                <span className="category-card__go" aria-hidden="true">
+                  →
                 </span>
               </Link>
             ))}
@@ -153,9 +189,7 @@ export default async function HomePage() {
               <ProductCard key={product.id} product={product} locale={locale} t={t} />
             ))}
           </div>
-          <p className="vat-note" style={{ marginTop: 'var(--space-4)' }}>
-            {t('vat.inclusive')}
-          </p>
+          <p className="vat-note vat-note--after-grid">{t('vat.inclusive')}</p>
         </section>
       )}
     </>

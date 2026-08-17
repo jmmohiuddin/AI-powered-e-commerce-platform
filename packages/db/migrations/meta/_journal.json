@@ -57,6 +57,13 @@
       "when": 1786765384839,
       "tag": "0007_majestic_joystick",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786811945513,
+      "tag": "0008_watery_hedge_knight",
+      "breakpoints": true
     }
   ]
 }

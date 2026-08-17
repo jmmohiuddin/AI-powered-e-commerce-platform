@@ -69,7 +69,7 @@ export function ReturnActions({
   }
 
   return (
-    <div className="actions" style={{ padding: 0, border: 0, background: 'transparent' }}>
+    <div className="actions actions--bare">
       {result && (
         <p className={`actions__result ${result.ok ? 'is-ok' : 'is-error'}`} role="status">
           {result.ok ? result.message : result.error}

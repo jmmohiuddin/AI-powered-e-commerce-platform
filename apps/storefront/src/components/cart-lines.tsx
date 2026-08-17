@@ -61,8 +61,17 @@ export function CartLines({
     });
   }
 
+  // `aria-busy` alongside the dimming, not instead of it.
+  //
+  // The fade is the sighted signal that a quantity change is in flight, and it
+  // was the only one — a screen-reader user got no indication that the basket
+  // was mid-update, then heard the totals change with no explanation.
+  // `aria-busy` is the same statement in the accessibility tree.
   return (
-    <div style={{ opacity: pending ? 0.6 : 1, transition: 'opacity var(--duration-fast)' }}>
+    <div
+      className={`cart-lines-region${pending ? ' cart-lines-region--pending' : ''}`}
+      aria-busy={pending}
+    >
       {error && (
         <p className="cart-error" role="alert">
           {error}

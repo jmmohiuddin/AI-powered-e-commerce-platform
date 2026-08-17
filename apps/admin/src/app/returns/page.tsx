@@ -62,7 +62,7 @@ export default async function ReturnsPage({
         <div className="stack-md">
           {result.rows.map((r) => (
             <div key={r.id} className="card">
-              <div className="page-head" style={{ marginBottom: 'var(--space-3)' }}>
+              <div className="page-head page-head--tight">
                 <div>
                   <span className="cell-title">{r.number}</span>
                   <div className="kpi__note">
@@ -91,7 +91,7 @@ export default async function ReturnsPage({
                 </div>
               </div>
 
-              <p className="muted" style={{ marginBottom: 'var(--space-3)' }}>
+              <p className="muted note--before">
                 {r.resolution === 'refund'
                   ? `Refund of ${formatPrice(r.refundAmount, r.currency)} when completed.`
                   : `${r.resolution.replace(/_/g, ' ')} — no money moves.`}

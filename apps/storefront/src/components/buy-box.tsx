@@ -86,9 +86,7 @@ export function BuyBox({
     <div className="buy-box">
       {variants.length > 1 && (
         <div>
-          <h2 style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-3)' }}>
-            {strings.chooseOption}
-          </h2>
+          <h2 className="buy-box__legend">{strings.chooseOption}</h2>
           <ul className="variant-list">
             {variants.map((variant) => {
               const unavailable = variant.available === 0;
@@ -150,18 +148,12 @@ export function BuyBox({
       />
 
       {inStock && (
-        <label style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
-          <span style={{ fontSize: 'var(--text-sm)' }}>{strings.quantity}</span>
+        <label className="quantity-field">
+          <span className="quantity-field__label">{strings.quantity}</span>
           <select
+            className="quantity-field__select"
             value={quantity}
             onChange={(event) => setQuantity(Number(event.target.value))}
-            style={{
-              padding: 'var(--space-2) var(--space-3)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--colour-border-strong)',
-              background: 'var(--colour-surface)',
-              minHeight: '44px',
-            }}
           >
             {Array.from({ length: maxQuantity }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>

@@ -8,3 +8,4 @@ export * from './payments';
 export * from './marketing';
 export * from './ai';
 export * from './operations';
+export * from './channels';

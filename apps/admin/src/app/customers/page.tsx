@@ -78,7 +78,7 @@ export default async function CustomersPage({
       </form>
 
       {!showPii && (
-        <div className="insight" style={{ marginBottom: 'var(--space-4)' }}>
+        <div className="insight insight--lead">
           <strong>Contact details are hidden</strong>
           <p>
             Your role can see purchase behaviour but not email or phone numbers. Ask an owner for

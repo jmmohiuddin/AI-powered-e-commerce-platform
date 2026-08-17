@@ -58,6 +58,8 @@ export default defineConfig({
       '@voltix/auth': r('./packages/auth/src/index.ts'),
       '@voltix/ui': r('./packages/ui/src/index.ts'),
       '@voltix/media': r('./packages/media/src/index.ts'),
+      '@voltix/noon/sync': r('./packages/noon/src/sync/index.ts'),
+      '@voltix/noon': r('./packages/noon/src/index.ts'),
       // The admin's read model imports 'server-only', which throws when loaded
       // outside a React Server Component. Stubbing it lets the SQL be exercised
       // directly; the real guard still applies in the build, where it matters.

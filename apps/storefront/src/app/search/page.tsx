@@ -180,7 +180,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
       <section>
         <div className="listing__head">
           <div>
-            <h1 style={{ fontSize: 'var(--text-xl)' }}>
+            <h1 className="page__title page__title--compact">
               {filters.query ? t('search.results', { q: filters.query }) : t('search.all')}
             </h1>
             <p className="listing__count">
@@ -212,7 +212,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
 
         {result.products.length === 0 ? (
           <div className="empty-state">
-            <p style={{ marginBottom: 'var(--space-4)' }}>{t('search.emptyTitle')}</p>
+            <p className="empty-state__title">{t('search.emptyTitle')}</p>
             {/* A dead end is a lost sale. Every zero-result page offers a route
                 onward, and the query is logged so the merchant can see the
                 demand they are failing to meet. */}
@@ -233,7 +233,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
                 <ProductCard key={product.id} product={product} locale={locale} t={t} />
               ))}
             </div>
-            <p className="vat-note" style={{ marginTop: 'var(--space-4)' }}>
+            <p className="vat-note vat-note--after-grid">
               {t('vat.inclusive')}
             </p>
 

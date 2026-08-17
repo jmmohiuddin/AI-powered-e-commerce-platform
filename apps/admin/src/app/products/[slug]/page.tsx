@@ -199,7 +199,7 @@ export default async function ProductDetailPage({
         </>
       )}
 
-      <p style={{ marginTop: 'var(--space-5)' }} className="muted">
+      <p className="muted note--after">
         {product.status === 'active' ? (
           <>
             Live at{' '}

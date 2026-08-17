@@ -19,7 +19,8 @@
     "@voltix/invoicing": "*",
     "@voltix/notifications": "*",
     "@voltix/payments": "*",
-    "drizzle-orm": "^0.45.2"
+    "drizzle-orm": "^0.45.2",
+    "@voltix/noon": "*"
   },
   "devDependencies": {
     "tsx": "^4.19.2"

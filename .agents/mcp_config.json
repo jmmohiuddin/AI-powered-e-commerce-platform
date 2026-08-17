@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "noon": {
+      "command": "node",
+      "args": ["packages/noon-mcp/dist/index.js"],
+      "env": {
+        "NOON_CREDENTIALS_FILE": "${NOON_CREDENTIALS_FILE}",
+        "NOON_KEY_ID": "${NOON_KEY_ID}",
+        "NOON_PRIVATE_KEY": "${NOON_PRIVATE_KEY}",
+        "NOON_PROJECT_CODE": "${NOON_PROJECT_CODE}",
+        "NOON_API_BASE_URL": "${NOON_API_BASE_URL}"
+      }
+    }
+  }
+}

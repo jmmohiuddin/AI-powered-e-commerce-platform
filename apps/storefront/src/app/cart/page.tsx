@@ -34,12 +34,8 @@ export default async function CartPage() {
     return (
       <div className="container section">
         <div className="empty-state">
-          <h1 style={{ fontSize: 'var(--text-xl)', marginBottom: 'var(--space-3)' }}>
-            Your basket is empty
-          </h1>
-          <p style={{ marginBottom: 'var(--space-5)' }}>
-            Browse smartphones, audio and accessories delivered across the Emirates.
-          </p>
+          <h1 className="empty-state__title">Your basket is empty</h1>
+          <p>Browse smartphones, audio and accessories delivered across the Emirates.</p>
           <Link className="button button--primary" href="/search">
             {t('home.browseAll')}
           </Link>
@@ -51,9 +47,7 @@ export default async function CartPage() {
   return (
     <div className="container checkout-layout">
       <section>
-        <h1 style={{ fontSize: 'var(--text-xl)', marginBottom: 'var(--space-4)' }}>
-          Your basket ({cart!.itemCount})
-        </h1>
+        <h1 className="page__title page__title--compact">Your basket ({cart!.itemCount})</h1>
 
         <CartLines
           lines={lines.map((line) => ({
@@ -80,7 +74,7 @@ export default async function CartPage() {
       </section>
 
       <aside className="summary">
-        <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-4)' }}>Summary</h2>
+        <h2 className="summary__title">Summary</h2>
 
         <dl className="summary__rows">
           <div>
