@@ -44,6 +44,10 @@ services:
     ports:
       - '80:80'
       - '443:443'
+      # HTTP/3. Caddy advertises h3 via Alt-Svc, so QUIC must actually be
+      # reachable — a browser that upgrades and hits a closed UDP port shows
+      # "site can't be reached" on the very next request.
+      - '443:443/udp'
     environment:
       STOREFRONT_DOMAIN: ${STOREFRONT_DOMAIN:?set in .env}
       ADMIN_DOMAIN: ${ADMIN_DOMAIN:?set in .env}
