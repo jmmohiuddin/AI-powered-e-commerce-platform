@@ -44,3 +44,4 @@ apps/storefront/public/uploads/
 *.png
 !apps/**/public/**/*.png
 !docs/**/*.png
+.claude/settings.local.json

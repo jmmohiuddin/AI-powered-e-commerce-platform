@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+**/.next
+coverage
+.git
+.env
+.env.*
+!.env.example
+*.png
+docs
+test
+voltix-sync-wireframes.html

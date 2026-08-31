@@ -1,0 +1,33 @@
+# Reverse proxy + automatic HTTPS (Let's Encrypt) for the Voltix stack.
+# Domains come from the environment (set in .env, injected by compose).
+#
+# Security headers are set by the Next apps themselves (see next.config.ts);
+# Caddy only adds what the apps cannot know about.
+
+{$STOREFRONT_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy storefront:3000
+}
+
+www.{$STOREFRONT_DOMAIN} {
+	redir https://{$STOREFRONT_DOMAIN}{uri} permanent
+}
+
+{$ADMIN_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy admin:3001
+}
+
+# Public media host. Read-only: only GET/HEAD reach the bucket, so the MinIO
+# admin API and any write verb are never exposed to the internet. The bare
+# root redirects to the storefront — a human landing here would otherwise see
+# MinIO's 403 for the denied bucket listing, which reads as a broken site.
+{$MEDIA_DOMAIN} {
+	redir / https://{$STOREFRONT_DOMAIN} permanent
+	@readonly method GET HEAD
+	handle @readonly {
+		header Cache-Control "public, max-age=31536000, immutable"
+		reverse_proxy minio:9000
+	}
+	respond 405
+}
