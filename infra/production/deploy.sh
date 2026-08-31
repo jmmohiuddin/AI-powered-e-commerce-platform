@@ -38,6 +38,13 @@ ssh "$TARGET" "test -f ${REMOTE_DIR}/.env" || {
 echo "==> Building and starting the stack"
 ssh "$TARGET" "cd ${REMOTE_DIR} && ${COMPOSE} build && ${COMPOSE} up -d --remove-orphans"
 
+# rsync replaces files by rename, which gives them a new inode; caddy's
+# bind-mounted Caddyfile keeps pointing at the old one, so a reload inside
+# the container would still read stale config. Recreating the container
+# re-resolves the mount. Costs ~2s of proxy downtime per deploy.
+echo "==> Recreating caddy so it picks up the rsynced Caddyfile"
+ssh "$TARGET" "cd ${REMOTE_DIR} && ${COMPOSE} up -d --force-recreate caddy"
+
 echo "==> Running migrations"
 ssh "$TARGET" "cd ${REMOTE_DIR} && ${COMPOSE} run --rm migrate"
 
