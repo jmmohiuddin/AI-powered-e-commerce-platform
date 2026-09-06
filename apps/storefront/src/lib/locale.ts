@@ -71,9 +71,19 @@ const MESSAGES: Record<Locale, Record<string, string>> = {
     'nav.skip': 'Skip to content',
 
     'home.heroTitle': 'Genuine electronics, delivered across the UAE.',
+    /*
+      THE HERO SELLS WHAT THE CATALOGUE ACTUALLY CONTAINS.
+
+      This read "Official-warranty smartphones, accessories and computer gear"
+      with a "Shop smartphones" button pointing at `?category=smartphones` —
+      copy written against the seeded demo catalogue, which had handsets in it.
+      The real catalogue is Green Lion, Porodo and Levelo accessories: 147 SKUs,
+      not one of them a phone. The headline advertised stock that does not
+      exist and the primary call to action landed on an empty search.
+    */
     'home.heroBody':
-      'Official-warranty smartphones, accessories and computer gear. Pay by card, Apple Pay, Tabby, or cash on delivery.',
-    'home.shopPhones': 'Shop smartphones',
+      'Charging, audio and everyday tech accessories from Green Lion, Porodo and Levelo. Pay by card, Apple Pay, Tabby, or cash on delivery.',
+    'home.shopPhones': 'Browse the catalogue',
     'home.whatsapp': 'Order on WhatsApp',
     'home.whyTitle': 'Why buy here',
 
@@ -89,7 +99,7 @@ const MESSAGES: Record<Locale, Record<string, string>> = {
     */
     'home.whyWarrantyTitle': 'Official UAE warranty',
     'home.whyWarrantyBody':
-      'Every handset carries the manufacturer’s regional warranty, and every order is invoiced — dated and carrying our TRN, which is the proof of purchase a service centre asks for.',
+      'Every product carries the manufacturer’s regional warranty, and every order is invoiced — dated and carrying our TRN, which is the proof of purchase a service centre asks for.',
     'home.whyDeliveryTitle': 'Delivered across all seven emirates',
     'home.whyDeliveryBody':
       'Same-day in Dubai on orders before 2pm, next day to Abu Dhabi and Sharjah.',
@@ -237,14 +247,14 @@ const MESSAGES: Record<Locale, Record<string, string>> = {
 
     'home.heroTitle': 'إلكترونيات أصلية، تُوصَّل في جميع أنحاء الإمارات.',
     'home.heroBody':
-      'هواتف ذكية وملحقات وأجهزة كمبيوتر بضمان رسمي. ادفع بالبطاقة أو Apple Pay أو تابي أو نقداً عند الاستلام.',
-    'home.shopPhones': 'تسوق الهواتف',
+      'ملحقات الشحن والصوت والتقنية اليومية من Green Lion وPorodo وLevelo. ادفع بالبطاقة أو Apple Pay أو تابي أو نقداً عند الاستلام.',
+    'home.shopPhones': 'تصفّح المنتجات',
     'home.whatsapp': 'اطلب عبر واتساب',
     'home.whyTitle': 'لماذا تشتري من هنا',
 
     'home.whyWarrantyTitle': 'ضمان رسمي في الإمارات',
     'home.whyWarrantyBody':
-      'كل جهاز يحمل ضمان الشركة المصنّعة الإقليمي، ولكل طلب فاتورة مؤرّخة تحمل رقمنا الضريبي — وهي إثبات الشراء الذي يطلبه مركز الخدمة.',
+      'كل منتج يحمل ضمان الشركة المصنّعة الإقليمي، ولكل طلب فاتورة مؤرّخة تحمل رقمنا الضريبي — وهي إثبات الشراء الذي يطلبه مركز الخدمة.',
     'home.whyDeliveryTitle': 'توصيل إلى الإمارات السبع',
     'home.whyDeliveryBody':
       'توصيل في نفس اليوم داخل دبي للطلبات قبل الساعة ٢ ظهراً، واليوم التالي إلى أبوظبي والشارقة.',

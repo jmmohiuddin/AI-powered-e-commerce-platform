@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     template: '%s · Voltix',
   },
   description:
-    'Genuine smartphones, mobile accessories and computer gear with official UAE warranty, card, Tabby and cash on delivery, and same-day dispatch across the Emirates.',
+    'Genuine Green Lion, Porodo and Levelo charging, audio and everyday tech accessories with official UAE warranty, card, Tabby and cash on delivery, and same-day dispatch across the Emirates.',
   openGraph: { type: 'website', siteName: 'Voltix', locale: 'en_AE', alternateLocale: ['ar_AE'] },
   // No `site`/`creator` handle: Voltix has no confirmed X/Twitter account, and a
   // guessed one would misattribute the page to the wrong account. `summary_large_image`

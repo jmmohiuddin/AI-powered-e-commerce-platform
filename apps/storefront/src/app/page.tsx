@@ -62,7 +62,10 @@ export default async function HomePage() {
           <h1>{t('home.heroTitle')}</h1>
           <p>{t('home.heroBody')}</p>
           <div className="hero__cta">
-            <Link className="button button--primary" href="/search?category=smartphones">
+            {/* `/search` with no query is this app's browse-everything listing —
+                the same target as the "Browse everything" link below. It used to
+                be `?category=smartphones`, which is now an empty result set. */}
+            <Link className="button button--primary" href="/search">
               {t('home.shopPhones')}
             </Link>
             {whatsapp && (
