@@ -5,30 +5,30 @@
       "performance": {
         "score": 0.99,
         "scores": [
-          0.98,
-          1,
-          0.98,
-          0.98,
-          0.99,
-          0.96,
-          0.94,
-          0.98,
-          0.96,
-          0.98,
-          0.99,
-          1,
           0.99,
           0.99,
+          0.98,
           0.97,
+          0.97,
+          0.96,
           0.98,
-          0.98,
+          0.96,
           0.99,
-          0.99,
+          1,
           0.98,
           1,
           1,
           0.99,
+          0.98,
+          0.98,
+          0.99,
+          0.96,
+          0.98,
+          0.99,
+          0.98,
           1,
+          0.99,
+          0.98,
           0.99
         ],
         "averageScore": 0.98
@@ -37,7 +37,6 @@
         "score": 1,
         "scores": [
           1,
-          0.98,
           1,
           1,
           1,
@@ -48,7 +47,8 @@
           1,
           1,
           1,
-          0.98,
+          1,
+          1,
           1,
           1,
           1,
@@ -129,36 +129,36 @@
     },
     "metrics": {
       "largest-contentful-paint": {
-        "numericValue": 2021.1999999999998,
+        "numericValue": 1979.1820000000002,
         "displayValue": "2.0 s",
         "numericValues": [
-          2244.025,
-          1658.9699999999998,
-          2225.66875,
-          2191.7491,
-          2000.0607999999997,
-          2129.1099999999997,
-          2077.816,
-          2044.172,
-          2130.9482,
-          2208.894,
-          1979.3093,
-          978.896,
-          1979.8712,
-          2137.1207999999997,
-          2396.9179000000004,
-          2385.991,
-          2339.8652,
-          2212.3795,
-          1886.654,
-          2230.828,
-          1236.557,
-          1213.251,
-          1976.3955999999998,
-          1829.755,
-          2021.1999999999998
+          1978.3290000000002,
+          1977.9333,
+          2012.0255000000002,
+          1654.435,
+          2230.6006,
+          1996.328,
+          1092.848,
+          2134.91,
+          2138.73155,
+          1149.313,
+          2158.9159999999997,
+          999.289,
+          1064.756,
+          2135.903,
+          2373.7,
+          2372.618,
+          2197.0886,
+          2651.6331499999997,
+          2342.3842,
+          2194.2464999999997,
+          990.0260000000001,
+          1455.3177,
+          1982.2419999999997,
+          2286.656,
+          1979.1820000000002
         ],
-        "averageNumericValue": 1988.66
+        "averageNumericValue": 1901.98
       },
       "cumulative-layout-shift": {
         "numericValue": 0,
@@ -193,36 +193,36 @@
         "averageNumericValue": 0
       },
       "first-contentful-paint": {
-        "numericValue": 788.2,
+        "numericValue": 760.182,
         "displayValue": "0.8 s",
         "numericValues": [
-          933.0250000000001,
-          758.97,
-          800.2674999999999,
-          798.4993999999999,
-          950.0608,
-          838.1099999999999,
-          782.816,
-          822.172,
-          759.2988,
-          914.894,
-          762.3092999999999,
-          828.896,
-          760.8712,
-          914.1207999999999,
-          985.2786000000001,
-          934.8520000000001,
-          907.4326000000001,
-          913.3795,
-          911.654,
-          933.828,
-          936.557,
-          913.251,
-          759.3956000000001,
-          929.7550000000001,
-          788.2
+          928.329,
+          757.9332999999999,
+          794.0255,
+          904.435,
+          863.6006,
+          775.328,
+          942.848,
+          915.9100000000001,
+          764.4876999999999,
+          774.3130000000001,
+          941.9159999999999,
+          849.289,
+          764.7560000000001,
+          914.903,
+          917.8,
+          914.412,
+          905.0886,
+          908.2814000000001,
+          908.6921,
+          904.2465,
+          915.0260000000001,
+          920.2118,
+          761.242,
+          919.656,
+          760.182
         ],
-        "averageNumericValue": 861.52
+        "averageNumericValue": 865.08
       },
       "total-blocking-time": {
         "numericValue": 0,
@@ -234,7 +234,7 @@
           0,
           0,
           0,
-          201.59199999999987,
+          0,
           0,
           0,
           0,
@@ -254,71 +254,71 @@
           0,
           0
         ],
-        "averageNumericValue": 8.06
+        "averageNumericValue": 0
       },
       "max-potential-fid": {
-        "numericValue": 33,
-        "displayValue": "30 ms",
+        "numericValue": 19,
+        "displayValue": "20 ms",
         "numericValues": [
+          33,
           20,
+          18,
+          18,
           17,
           21,
-          19,
-          16,
-          16,
-          401.9999999999999,
-          50,
-          17,
-          19,
-          17,
-          16,
-          19,
+          21,
           23,
-          19,
-          23,
-          20,
-          24,
-          20,
+          17,
+          18,
+          17,
+          17,
+          17,
+          21,
           22,
-          18,
+          26,
+          17,
+          16,
+          16,
           16,
           17,
-          18,
-          33
+          17,
+          21,
+          17,
+          19
         ],
-        "averageNumericValue": 36.08
+        "averageNumericValue": 19.28
       },
       "interactive": {
-        "numericValue": 2021.2,
+        "numericValue": 1979.1820000000002,
         "displayValue": "2.0 s",
         "numericValues": [
-          2251.525,
-          1658.9699999999998,
-          2225.66875,
-          2191.7491,
-          2015.0607999999997,
-          2136.61,
-          2085.3160000000003,
-          2044.1720000000003,
-          2130.9482,
-          2216.394,
-          1979.3093,
-          978.896,
-          1979.8712,
-          2137.1207999999997,
-          2396.9179000000004,
-          2394.3623,
-          2347.3652,
-          2219.8795,
-          1894.1540000000002,
-          2238.328,
-          1236.557,
-          1213.251,
-          1976.3955999999998,
-          1844.755,
-          2021.2
+          1993.3290000000002,
+          1977.9333000000001,
+          2012.0255000000002,
+          1654.435,
+          2230.6006,
+          1996.3280000000002,
+          1092.848,
+          2134.91,
+          2138.73155,
+          1156.813,
+          2158.916,
+          999.289,
+          1064.7560000000003,
+          2135.9030000000002,
+          2381.2,
+          2380.1180000000004,
+          2204.5886,
+          2674.312045,
+          2349.8842,
+          2201.7465,
+          997.5260000000001,
+          1462.8177,
+          1982.2419999999997,
+          2301.656,
+          1979.1820000000002
         ],
-        "averageNumericValue": 1992.59
+        "averageNumericValue": 1906.48
       }
     }
   },
@@ -328,7 +328,7 @@
       "score": 1,
       "categories": {
         "performance": {
-          "score": 0.98
+          "score": 0.99
         },
         "accessibility": {
           "score": 1
@@ -342,15 +342,15 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 2244.025,
-          "displayValue": "2.2 s"
+          "numericValue": 1978.3290000000002,
+          "displayValue": "2.0 s"
         },
         "cumulative-layout-shift": {
           "numericValue": 0,
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 933.0250000000001,
+          "numericValue": 928.329,
           "displayValue": "0.9 s"
         },
         "total-blocking-time": {
@@ -358,24 +358,24 @@
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 20,
-          "displayValue": "20 ms"
+          "numericValue": 33,
+          "displayValue": "30 ms"
         },
         "interactive": {
-          "numericValue": 2251.525,
-          "displayValue": "2.3 s"
+          "numericValue": 1993.3290000000002,
+          "displayValue": "2.0 s"
         }
       }
     },
     {
       "path": "/cart",
-      "score": 0.9,
+      "score": 0.91,
       "categories": {
         "performance": {
-          "score": 1
+          "score": 0.99
         },
         "accessibility": {
-          "score": 0.98
+          "score": 1
         },
         "best-practices": {
           "score": 1
@@ -386,15 +386,15 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 1658.9699999999998,
-          "displayValue": "1.7 s"
+          "numericValue": 1977.9333,
+          "displayValue": "2.0 s"
         },
         "cumulative-layout-shift": {
           "numericValue": 0,
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 758.97,
+          "numericValue": 757.9332999999999,
           "displayValue": "0.8 s"
         },
         "total-blocking-time": {
@@ -402,12 +402,12 @@
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 17,
+          "numericValue": 20,
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 1658.9699999999998,
-          "displayValue": "1.7 s"
+          "numericValue": 1977.9333000000001,
+          "displayValue": "2.0 s"
         }
       }
     },
@@ -430,7 +430,95 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 2225.66875,
+          "numericValue": 2012.0255000000002,
+          "displayValue": "2.0 s"
+        },
+        "cumulative-layout-shift": {
+          "numericValue": 0,
+          "displayValue": "0"
+        },
+        "first-contentful-paint": {
+          "numericValue": 794.0255,
+          "displayValue": "0.8 s"
+        },
+        "total-blocking-time": {
+          "numericValue": 0,
+          "displayValue": "0 ms"
+        },
+        "max-potential-fid": {
+          "numericValue": 18,
+          "displayValue": "20 ms"
+        },
+        "interactive": {
+          "numericValue": 2012.0255000000002,
+          "displayValue": "2.0 s"
+        }
+      }
+    },
+    {
+      "path": "/category/car-electronics",
+      "score": 0.98,
+      "categories": {
+        "performance": {
+          "score": 0.97
+        },
+        "accessibility": {
+          "score": 1
+        },
+        "best-practices": {
+          "score": 0.96
+        },
+        "seo": {
+          "score": 1
+        }
+      },
+      "metrics": {
+        "largest-contentful-paint": {
+          "numericValue": 1654.435,
+          "displayValue": "1.7 s"
+        },
+        "cumulative-layout-shift": {
+          "numericValue": 0,
+          "displayValue": "0"
+        },
+        "first-contentful-paint": {
+          "numericValue": 904.435,
+          "displayValue": "0.9 s"
+        },
+        "total-blocking-time": {
+          "numericValue": 0,
+          "displayValue": "0 ms"
+        },
+        "max-potential-fid": {
+          "numericValue": 18,
+          "displayValue": "20 ms"
+        },
+        "interactive": {
+          "numericValue": 1654.435,
+          "displayValue": "1.7 s"
+        }
+      }
+    },
+    {
+      "path": "/category/drones-and-rc",
+      "score": 0.98,
+      "categories": {
+        "performance": {
+          "score": 0.97
+        },
+        "accessibility": {
+          "score": 1
+        },
+        "best-practices": {
+          "score": 0.96
+        },
+        "seo": {
+          "score": 1
+        }
+      },
+      "metrics": {
+        "largest-contentful-paint": {
+          "numericValue": 2230.6006,
           "displayValue": "2.2 s"
         },
         "cumulative-layout-shift": {
@@ -438,7 +526,51 @@
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 800.2674999999999,
+          "numericValue": 863.6006,
+          "displayValue": "0.9 s"
+        },
+        "total-blocking-time": {
+          "numericValue": 0,
+          "displayValue": "0 ms"
+        },
+        "max-potential-fid": {
+          "numericValue": 17,
+          "displayValue": "20 ms"
+        },
+        "interactive": {
+          "numericValue": 2230.6006,
+          "displayValue": "2.2 s"
+        }
+      }
+    },
+    {
+      "path": "/category/headphones",
+      "score": 0.98,
+      "categories": {
+        "performance": {
+          "score": 0.96
+        },
+        "accessibility": {
+          "score": 1
+        },
+        "best-practices": {
+          "score": 0.96
+        },
+        "seo": {
+          "score": 1
+        }
+      },
+      "metrics": {
+        "largest-contentful-paint": {
+          "numericValue": 1996.328,
+          "displayValue": "2.0 s"
+        },
+        "cumulative-layout-shift": {
+          "numericValue": 0,
+          "displayValue": "0"
+        },
+        "first-contentful-paint": {
+          "numericValue": 775.328,
           "displayValue": "0.8 s"
         },
         "total-blocking-time": {
@@ -450,13 +582,13 @@
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 2225.66875,
-          "displayValue": "2.2 s"
+          "numericValue": 1996.3280000000002,
+          "displayValue": "2.0 s"
         }
       }
     },
     {
-      "path": "/category/car-electronics",
+      "path": "/category/laptop-accessories",
       "score": 0.99,
       "categories": {
         "performance": {
@@ -474,33 +606,77 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 2191.7491,
-          "displayValue": "2.2 s"
+          "numericValue": 1092.848,
+          "displayValue": "1.1 s"
         },
         "cumulative-layout-shift": {
           "numericValue": 0,
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 798.4993999999999,
-          "displayValue": "0.8 s"
+          "numericValue": 942.848,
+          "displayValue": "0.9 s"
         },
         "total-blocking-time": {
           "numericValue": 0,
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 19,
+          "numericValue": 21,
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 2191.7491,
-          "displayValue": "2.2 s"
+          "numericValue": 1092.848,
+          "displayValue": "1.1 s"
         }
       }
     },
     {
-      "path": "/category/earbuds-and-earphones",
+      "path": "/category/phone-accessories",
+      "score": 0.98,
+      "categories": {
+        "performance": {
+          "score": 0.96
+        },
+        "accessibility": {
+          "score": 1
+        },
+        "best-practices": {
+          "score": 0.96
+        },
+        "seo": {
+          "score": 1
+        }
+      },
+      "metrics": {
+        "largest-contentful-paint": {
+          "numericValue": 2134.91,
+          "displayValue": "2.1 s"
+        },
+        "cumulative-layout-shift": {
+          "numericValue": 0,
+          "displayValue": "0"
+        },
+        "first-contentful-paint": {
+          "numericValue": 915.9100000000001,
+          "displayValue": "0.9 s"
+        },
+        "total-blocking-time": {
+          "numericValue": 0,
+          "displayValue": "0 ms"
+        },
+        "max-potential-fid": {
+          "numericValue": 23,
+          "displayValue": "20 ms"
+        },
+        "interactive": {
+          "numericValue": 2134.91,
+          "displayValue": "2.1 s"
+        }
+      }
+    },
+    {
+      "path": "/category/stationery",
       "score": 0.99,
       "categories": {
         "performance": {
@@ -518,51 +694,7 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 2000.0607999999997,
-          "displayValue": "2.0 s"
-        },
-        "cumulative-layout-shift": {
-          "numericValue": 0,
-          "displayValue": "0"
-        },
-        "first-contentful-paint": {
-          "numericValue": 950.0608,
-          "displayValue": "1.0 s"
-        },
-        "total-blocking-time": {
-          "numericValue": 0,
-          "displayValue": "0 ms"
-        },
-        "max-potential-fid": {
-          "numericValue": 16,
-          "displayValue": "20 ms"
-        },
-        "interactive": {
-          "numericValue": 2015.0607999999997,
-          "displayValue": "2.0 s"
-        }
-      }
-    },
-    {
-      "path": "/category/gaming-accessories",
-      "score": 0.98,
-      "categories": {
-        "performance": {
-          "score": 0.96
-        },
-        "accessibility": {
-          "score": 1
-        },
-        "best-practices": {
-          "score": 0.96
-        },
-        "seo": {
-          "score": 1
-        }
-      },
-      "metrics": {
-        "largest-contentful-paint": {
-          "numericValue": 2129.1099999999997,
+          "numericValue": 2138.73155,
           "displayValue": "2.1 s"
         },
         "cumulative-layout-shift": {
@@ -570,139 +702,7 @@
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 838.1099999999999,
-          "displayValue": "0.8 s"
-        },
-        "total-blocking-time": {
-          "numericValue": 0,
-          "displayValue": "0 ms"
-        },
-        "max-potential-fid": {
-          "numericValue": 16,
-          "displayValue": "20 ms"
-        },
-        "interactive": {
-          "numericValue": 2136.61,
-          "displayValue": "2.1 s"
-        }
-      }
-    },
-    {
-      "path": "/category/personal-care",
-      "score": 0.98,
-      "categories": {
-        "performance": {
-          "score": 0.94
-        },
-        "accessibility": {
-          "score": 1
-        },
-        "best-practices": {
-          "score": 0.96
-        },
-        "seo": {
-          "score": 1
-        }
-      },
-      "metrics": {
-        "largest-contentful-paint": {
-          "numericValue": 2077.816,
-          "displayValue": "2.1 s"
-        },
-        "cumulative-layout-shift": {
-          "numericValue": 0,
-          "displayValue": "0"
-        },
-        "first-contentful-paint": {
-          "numericValue": 782.816,
-          "displayValue": "0.8 s"
-        },
-        "total-blocking-time": {
-          "numericValue": 201.59199999999987,
-          "displayValue": "200 ms"
-        },
-        "max-potential-fid": {
-          "numericValue": 401.9999999999999,
-          "displayValue": "400 ms"
-        },
-        "interactive": {
-          "numericValue": 2085.3160000000003,
-          "displayValue": "2.1 s"
-        }
-      }
-    },
-    {
-      "path": "/category/screen-protectors",
-      "score": 0.99,
-      "categories": {
-        "performance": {
-          "score": 0.98
-        },
-        "accessibility": {
-          "score": 1
-        },
-        "best-practices": {
-          "score": 0.96
-        },
-        "seo": {
-          "score": 1
-        }
-      },
-      "metrics": {
-        "largest-contentful-paint": {
-          "numericValue": 2044.172,
-          "displayValue": "2.0 s"
-        },
-        "cumulative-layout-shift": {
-          "numericValue": 0,
-          "displayValue": "0"
-        },
-        "first-contentful-paint": {
-          "numericValue": 822.172,
-          "displayValue": "0.8 s"
-        },
-        "total-blocking-time": {
-          "numericValue": 0,
-          "displayValue": "0 ms"
-        },
-        "max-potential-fid": {
-          "numericValue": 50,
-          "displayValue": "50 ms"
-        },
-        "interactive": {
-          "numericValue": 2044.1720000000003,
-          "displayValue": "2.0 s"
-        }
-      }
-    },
-    {
-      "path": "/category/tv-and-streaming",
-      "score": 0.98,
-      "categories": {
-        "performance": {
-          "score": 0.96
-        },
-        "accessibility": {
-          "score": 1
-        },
-        "best-practices": {
-          "score": 0.96
-        },
-        "seo": {
-          "score": 1
-        }
-      },
-      "metrics": {
-        "largest-contentful-paint": {
-          "numericValue": 2130.9482,
-          "displayValue": "2.1 s"
-        },
-        "cumulative-layout-shift": {
-          "numericValue": 0,
-          "displayValue": "0"
-        },
-        "first-contentful-paint": {
-          "numericValue": 759.2988,
+          "numericValue": 764.4876999999999,
           "displayValue": "0.8 s"
         },
         "total-blocking-time": {
@@ -714,17 +714,17 @@
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 2130.9482,
+          "numericValue": 2138.73155,
           "displayValue": "2.1 s"
         }
       }
     },
     {
-      "path": "/category/wall-chargers-and-adaptors",
+      "path": "/category/stylus-pens",
       "score": 0.99,
       "categories": {
         "performance": {
-          "score": 0.98
+          "score": 1
         },
         "accessibility": {
           "score": 1
@@ -738,28 +738,28 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 2208.894,
-          "displayValue": "2.2 s"
+          "numericValue": 1149.313,
+          "displayValue": "1.1 s"
         },
         "cumulative-layout-shift": {
           "numericValue": 0,
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 914.894,
-          "displayValue": "0.9 s"
+          "numericValue": 774.3130000000001,
+          "displayValue": "0.8 s"
         },
         "total-blocking-time": {
           "numericValue": 0,
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 19,
+          "numericValue": 18,
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 2216.394,
-          "displayValue": "2.2 s"
+          "numericValue": 1156.813,
+          "displayValue": "1.2 s"
         }
       }
     },
@@ -768,7 +768,7 @@
       "score": 1,
       "categories": {
         "performance": {
-          "score": 0.99
+          "score": 0.98
         },
         "accessibility": {
           "score": 1
@@ -782,16 +782,16 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 1979.3093,
-          "displayValue": "2.0 s"
+          "numericValue": 2158.9159999999997,
+          "displayValue": "2.2 s"
         },
         "cumulative-layout-shift": {
           "numericValue": 0,
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 762.3092999999999,
-          "displayValue": "0.8 s"
+          "numericValue": 941.9159999999999,
+          "displayValue": "0.9 s"
         },
         "total-blocking-time": {
           "numericValue": 0,
@@ -802,8 +802,8 @@
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 1979.3093,
-          "displayValue": "2.0 s"
+          "numericValue": 2158.916,
+          "displayValue": "2.2 s"
         }
       }
     },
@@ -826,7 +826,7 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 978.896,
+          "numericValue": 999.289,
           "displayValue": "1.0 s"
         },
         "cumulative-layout-shift": {
@@ -834,7 +834,7 @@
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 828.896,
+          "numericValue": 849.289,
           "displayValue": "0.8 s"
         },
         "total-blocking-time": {
@@ -842,24 +842,24 @@
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 16,
+          "numericValue": 17,
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 978.896,
+          "numericValue": 999.289,
           "displayValue": "1.0 s"
         }
       }
     },
     {
       "path": "/orders",
-      "score": 0.9,
+      "score": 0.91,
       "categories": {
         "performance": {
-          "score": 0.99
+          "score": 1
         },
         "accessibility": {
-          "score": 0.98
+          "score": 1
         },
         "best-practices": {
           "score": 1
@@ -870,15 +870,15 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 1979.8712,
-          "displayValue": "2.0 s"
+          "numericValue": 1064.756,
+          "displayValue": "1.1 s"
         },
         "cumulative-layout-shift": {
           "numericValue": 0,
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 760.8712,
+          "numericValue": 764.7560000000001,
           "displayValue": "0.8 s"
         },
         "total-blocking-time": {
@@ -886,12 +886,12 @@
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 19,
+          "numericValue": 17,
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 1979.8712,
-          "displayValue": "2.0 s"
+          "numericValue": 1064.7560000000003,
+          "displayValue": "1.1 s"
         }
       }
     },
@@ -914,7 +914,7 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 2137.1207999999997,
+          "numericValue": 2135.903,
           "displayValue": "2.1 s"
         },
         "cumulative-layout-shift": {
@@ -922,7 +922,7 @@
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 914.1207999999999,
+          "numericValue": 914.903,
           "displayValue": "0.9 s"
         },
         "total-blocking-time": {
@@ -930,61 +930,17 @@
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 23,
+          "numericValue": 21,
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 2137.1207999999997,
+          "numericValue": 2135.9030000000002,
           "displayValue": "2.1 s"
         }
       }
     },
     {
-      "path": "/products/green-lion-60w-silicone-cable-usb-c-to-usb-c-1m-blue",
-      "score": 0.98,
-      "categories": {
-        "performance": {
-          "score": 0.97
-        },
-        "accessibility": {
-          "score": 1
-        },
-        "best-practices": {
-          "score": 0.96
-        },
-        "seo": {
-          "score": 1
-        }
-      },
-      "metrics": {
-        "largest-contentful-paint": {
-          "numericValue": 2396.9179000000004,
-          "displayValue": "2.4 s"
-        },
-        "cumulative-layout-shift": {
-          "numericValue": 0,
-          "displayValue": "0"
-        },
-        "first-contentful-paint": {
-          "numericValue": 985.2786000000001,
-          "displayValue": "1.0 s"
-        },
-        "total-blocking-time": {
-          "numericValue": 0,
-          "displayValue": "0 ms"
-        },
-        "max-potential-fid": {
-          "numericValue": 19,
-          "displayValue": "20 ms"
-        },
-        "interactive": {
-          "numericValue": 2396.9179000000004,
-          "displayValue": "2.4 s"
-        }
-      }
-    },
-    {
-      "path": "/products/green-lion-anti-blue-light-eyewear-clear",
+      "path": "/products/green-lion-austin-true-wireless-earbuds-black",
       "score": 0.99,
       "categories": {
         "performance": {
@@ -1002,7 +958,7 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 2385.991,
+          "numericValue": 2373.7,
           "displayValue": "2.4 s"
         },
         "cumulative-layout-shift": {
@@ -1010,183 +966,7 @@
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 934.8520000000001,
-          "displayValue": "0.9 s"
-        },
-        "total-blocking-time": {
-          "numericValue": 0,
-          "displayValue": "0 ms"
-        },
-        "max-potential-fid": {
-          "numericValue": 23,
-          "displayValue": "20 ms"
-        },
-        "interactive": {
-          "numericValue": 2394.3623,
-          "displayValue": "2.4 s"
-        }
-      }
-    },
-    {
-      "path": "/products/green-lion-braided-zinc-alloy-cable-usb-a-to-lightning-12w-black",
-      "score": 0.99,
-      "categories": {
-        "performance": {
-          "score": 0.98
-        },
-        "accessibility": {
-          "score": 1
-        },
-        "best-practices": {
-          "score": 0.96
-        },
-        "seo": {
-          "score": 1
-        }
-      },
-      "metrics": {
-        "largest-contentful-paint": {
-          "numericValue": 2339.8652,
-          "displayValue": "2.3 s"
-        },
-        "cumulative-layout-shift": {
-          "numericValue": 0,
-          "displayValue": "0"
-        },
-        "first-contentful-paint": {
-          "numericValue": 907.4326000000001,
-          "displayValue": "0.9 s"
-        },
-        "total-blocking-time": {
-          "numericValue": 0,
-          "displayValue": "0 ms"
-        },
-        "max-potential-fid": {
-          "numericValue": 20,
-          "displayValue": "20 ms"
-        },
-        "interactive": {
-          "numericValue": 2347.3652,
-          "displayValue": "2.3 s"
-        }
-      }
-    },
-    {
-      "path": "/products/green-lion-container-10000mah-power-bank-pd-20w-4-in-1-cable-black",
-      "score": 0.99,
-      "categories": {
-        "performance": {
-          "score": 0.99
-        },
-        "accessibility": {
-          "score": 1
-        },
-        "best-practices": {
-          "score": 0.96
-        },
-        "seo": {
-          "score": 1
-        }
-      },
-      "metrics": {
-        "largest-contentful-paint": {
-          "numericValue": 2212.3795,
-          "displayValue": "2.2 s"
-        },
-        "cumulative-layout-shift": {
-          "numericValue": 0,
-          "displayValue": "0"
-        },
-        "first-contentful-paint": {
-          "numericValue": 913.3795,
-          "displayValue": "0.9 s"
-        },
-        "total-blocking-time": {
-          "numericValue": 0,
-          "displayValue": "0 ms"
-        },
-        "max-potential-fid": {
-          "numericValue": 24,
-          "displayValue": "20 ms"
-        },
-        "interactive": {
-          "numericValue": 2219.8795,
-          "displayValue": "2.2 s"
-        }
-      }
-    },
-    {
-      "path": "/products/green-lion-pencil-x-universal-pen-white",
-      "score": 0.99,
-      "categories": {
-        "performance": {
-          "score": 0.99
-        },
-        "accessibility": {
-          "score": 1
-        },
-        "best-practices": {
-          "score": 0.96
-        },
-        "seo": {
-          "score": 1
-        }
-      },
-      "metrics": {
-        "largest-contentful-paint": {
-          "numericValue": 1886.654,
-          "displayValue": "1.9 s"
-        },
-        "cumulative-layout-shift": {
-          "numericValue": 0,
-          "displayValue": "0"
-        },
-        "first-contentful-paint": {
-          "numericValue": 911.654,
-          "displayValue": "0.9 s"
-        },
-        "total-blocking-time": {
-          "numericValue": 0,
-          "displayValue": "0 ms"
-        },
-        "max-potential-fid": {
-          "numericValue": 20,
-          "displayValue": "20 ms"
-        },
-        "interactive": {
-          "numericValue": 1894.1540000000002,
-          "displayValue": "1.9 s"
-        }
-      }
-    },
-    {
-      "path": "/products/green-lion-retinex-anti-blue-light-eyewear-black",
-      "score": 0.99,
-      "categories": {
-        "performance": {
-          "score": 0.98
-        },
-        "accessibility": {
-          "score": 1
-        },
-        "best-practices": {
-          "score": 0.96
-        },
-        "seo": {
-          "score": 1
-        }
-      },
-      "metrics": {
-        "largest-contentful-paint": {
-          "numericValue": 2230.828,
-          "displayValue": "2.2 s"
-        },
-        "cumulative-layout-shift": {
-          "numericValue": 0,
-          "displayValue": "0"
-        },
-        "first-contentful-paint": {
-          "numericValue": 933.828,
+          "numericValue": 917.8,
           "displayValue": "0.9 s"
         },
         "total-blocking-time": {
@@ -1198,17 +978,17 @@
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 2238.328,
-          "displayValue": "2.2 s"
+          "numericValue": 2381.2,
+          "displayValue": "2.4 s"
         }
       }
     },
     {
-      "path": "/products/porodo-lifestyle-chillo-1200mah-rechargeable-battery-handy-usb-fan-white-orange",
+      "path": "/products/green-lion-beatbox-portable-speaker-black",
       "score": 0.99,
       "categories": {
         "performance": {
-          "score": 1
+          "score": 0.98
         },
         "accessibility": {
           "score": 1
@@ -1222,15 +1002,15 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 1236.557,
-          "displayValue": "1.2 s"
+          "numericValue": 2372.618,
+          "displayValue": "2.4 s"
         },
         "cumulative-layout-shift": {
           "numericValue": 0,
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 936.557,
+          "numericValue": 914.412,
           "displayValue": "0.9 s"
         },
         "total-blocking-time": {
@@ -1238,21 +1018,21 @@
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 18,
-          "displayValue": "20 ms"
+          "numericValue": 26,
+          "displayValue": "30 ms"
         },
         "interactive": {
-          "numericValue": 1236.557,
-          "displayValue": "1.2 s"
+          "numericValue": 2380.1180000000004,
+          "displayValue": "2.4 s"
         }
       }
     },
     {
-      "path": "/products/porodo-soundtec-snapp-vibe-rgb-wireless-magnetic-speaker-blue",
+      "path": "/products/green-lion-mag-wallet-kickstand-magsafe-card-holder-black",
       "score": 0.99,
       "categories": {
         "performance": {
-          "score": 1
+          "score": 0.99
         },
         "accessibility": {
           "score": 1
@@ -1266,15 +1046,59 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 1213.251,
-          "displayValue": "1.2 s"
+          "numericValue": 2197.0886,
+          "displayValue": "2.2 s"
         },
         "cumulative-layout-shift": {
           "numericValue": 0,
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 913.251,
+          "numericValue": 905.0886,
+          "displayValue": "0.9 s"
+        },
+        "total-blocking-time": {
+          "numericValue": 0,
+          "displayValue": "0 ms"
+        },
+        "max-potential-fid": {
+          "numericValue": 17,
+          "displayValue": "20 ms"
+        },
+        "interactive": {
+          "numericValue": 2204.5886,
+          "displayValue": "2.2 s"
+        }
+      }
+    },
+    {
+      "path": "/products/green-lion-melody-mini-karaoke-speaker-beige",
+      "score": 0.98,
+      "categories": {
+        "performance": {
+          "score": 0.96
+        },
+        "accessibility": {
+          "score": 1
+        },
+        "best-practices": {
+          "score": 0.96
+        },
+        "seo": {
+          "score": 1
+        }
+      },
+      "metrics": {
+        "largest-contentful-paint": {
+          "numericValue": 2651.6331499999997,
+          "displayValue": "2.7 s"
+        },
+        "cumulative-layout-shift": {
+          "numericValue": 0,
+          "displayValue": "0"
+        },
+        "first-contentful-paint": {
+          "numericValue": 908.2814000000001,
           "displayValue": "0.9 s"
         },
         "total-blocking-time": {
@@ -1286,8 +1110,184 @@
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 1213.251,
-          "displayValue": "1.2 s"
+          "numericValue": 2674.312045,
+          "displayValue": "2.7 s"
+        }
+      }
+    },
+    {
+      "path": "/products/green-lion-velar-desktop-fan-white",
+      "score": 0.99,
+      "categories": {
+        "performance": {
+          "score": 0.98
+        },
+        "accessibility": {
+          "score": 1
+        },
+        "best-practices": {
+          "score": 0.96
+        },
+        "seo": {
+          "score": 1
+        }
+      },
+      "metrics": {
+        "largest-contentful-paint": {
+          "numericValue": 2342.3842,
+          "displayValue": "2.3 s"
+        },
+        "cumulative-layout-shift": {
+          "numericValue": 0,
+          "displayValue": "0"
+        },
+        "first-contentful-paint": {
+          "numericValue": 908.6921,
+          "displayValue": "0.9 s"
+        },
+        "total-blocking-time": {
+          "numericValue": 0,
+          "displayValue": "0 ms"
+        },
+        "max-potential-fid": {
+          "numericValue": 16,
+          "displayValue": "20 ms"
+        },
+        "interactive": {
+          "numericValue": 2349.8842,
+          "displayValue": "2.3 s"
+        }
+      }
+    },
+    {
+      "path": "/products/porodo-pd-20w-usb-qc3-0-uk-fast-charger-black",
+      "score": 0.99,
+      "categories": {
+        "performance": {
+          "score": 0.99
+        },
+        "accessibility": {
+          "score": 1
+        },
+        "best-practices": {
+          "score": 0.96
+        },
+        "seo": {
+          "score": 1
+        }
+      },
+      "metrics": {
+        "largest-contentful-paint": {
+          "numericValue": 2194.2464999999997,
+          "displayValue": "2.2 s"
+        },
+        "cumulative-layout-shift": {
+          "numericValue": 0,
+          "displayValue": "0"
+        },
+        "first-contentful-paint": {
+          "numericValue": 904.2465,
+          "displayValue": "0.9 s"
+        },
+        "total-blocking-time": {
+          "numericValue": 0,
+          "displayValue": "0 ms"
+        },
+        "max-potential-fid": {
+          "numericValue": 16,
+          "displayValue": "20 ms"
+        },
+        "interactive": {
+          "numericValue": 2201.7465,
+          "displayValue": "2.2 s"
+        }
+      }
+    },
+    {
+      "path": "/products/porodo-soundtec-stereo-earphones-3-5mm-with-high-clarify-mic-white",
+      "score": 0.99,
+      "categories": {
+        "performance": {
+          "score": 0.98
+        },
+        "accessibility": {
+          "score": 1
+        },
+        "best-practices": {
+          "score": 0.96
+        },
+        "seo": {
+          "score": 1
+        }
+      },
+      "metrics": {
+        "largest-contentful-paint": {
+          "numericValue": 990.0260000000001,
+          "displayValue": "1.0 s"
+        },
+        "cumulative-layout-shift": {
+          "numericValue": 0,
+          "displayValue": "0"
+        },
+        "first-contentful-paint": {
+          "numericValue": 915.0260000000001,
+          "displayValue": "0.9 s"
+        },
+        "total-blocking-time": {
+          "numericValue": 0,
+          "displayValue": "0 ms"
+        },
+        "max-potential-fid": {
+          "numericValue": 17,
+          "displayValue": "20 ms"
+        },
+        "interactive": {
+          "numericValue": 997.5260000000001,
+          "displayValue": "1.0 s"
+        }
+      }
+    },
+    {
+      "path": "/products/porodo-trackfit-screenless-fitband-black-orange-strap-silver-case",
+      "score": 0.99,
+      "categories": {
+        "performance": {
+          "score": 1
+        },
+        "accessibility": {
+          "score": 1
+        },
+        "best-practices": {
+          "score": 0.96
+        },
+        "seo": {
+          "score": 1
+        }
+      },
+      "metrics": {
+        "largest-contentful-paint": {
+          "numericValue": 1455.3177,
+          "displayValue": "1.5 s"
+        },
+        "cumulative-layout-shift": {
+          "numericValue": 0,
+          "displayValue": "0"
+        },
+        "first-contentful-paint": {
+          "numericValue": 920.2118,
+          "displayValue": "0.9 s"
+        },
+        "total-blocking-time": {
+          "numericValue": 0,
+          "displayValue": "0 ms"
+        },
+        "max-potential-fid": {
+          "numericValue": 17,
+          "displayValue": "20 ms"
+        },
+        "interactive": {
+          "numericValue": 1462.8177,
+          "displayValue": "1.5 s"
         }
       }
     },
@@ -1310,7 +1310,7 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 1976.3955999999998,
+          "numericValue": 1982.2419999999997,
           "displayValue": "2.0 s"
         },
         "cumulative-layout-shift": {
@@ -1318,7 +1318,7 @@
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 759.3956000000001,
+          "numericValue": 761.242,
           "displayValue": "0.8 s"
         },
         "total-blocking-time": {
@@ -1326,21 +1326,21 @@
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 17,
+          "numericValue": 21,
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 1976.3955999999998,
+          "numericValue": 1982.2419999999997,
           "displayValue": "2.0 s"
         }
       }
     },
     {
       "path": "/search",
-      "score": 0.91,
+      "score": 0.9,
       "categories": {
         "performance": {
-          "score": 1
+          "score": 0.98
         },
         "accessibility": {
           "score": 1
@@ -1354,15 +1354,15 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 1829.755,
-          "displayValue": "1.8 s"
+          "numericValue": 2286.656,
+          "displayValue": "2.3 s"
         },
         "cumulative-layout-shift": {
           "numericValue": 0,
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 929.7550000000001,
+          "numericValue": 919.656,
           "displayValue": "0.9 s"
         },
         "total-blocking-time": {
@@ -1370,12 +1370,12 @@
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 18,
+          "numericValue": 17,
           "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 1844.755,
-          "displayValue": "1.8 s"
+          "numericValue": 2301.656,
+          "displayValue": "2.3 s"
         }
       }
     },
@@ -1398,7 +1398,7 @@
       },
       "metrics": {
         "largest-contentful-paint": {
-          "numericValue": 2021.1999999999998,
+          "numericValue": 1979.1820000000002,
           "displayValue": "2.0 s"
         },
         "cumulative-layout-shift": {
@@ -1406,7 +1406,7 @@
           "displayValue": "0"
         },
         "first-contentful-paint": {
-          "numericValue": 788.2,
+          "numericValue": 760.182,
           "displayValue": "0.8 s"
         },
         "total-blocking-time": {
@@ -1414,11 +1414,11 @@
           "displayValue": "0 ms"
         },
         "max-potential-fid": {
-          "numericValue": 33,
-          "displayValue": "30 ms"
+          "numericValue": 19,
+          "displayValue": "20 ms"
         },
         "interactive": {
-          "numericValue": 2021.2,
+          "numericValue": 1979.1820000000002,
           "displayValue": "2.0 s"
         }
       }

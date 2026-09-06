@@ -214,7 +214,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="container">
             <div className="site-footer__grid">
               <div>
-                <h3>{t('footer.shop')}</h3>
+                <h2>{t('footer.shop')}</h2>
                 <ul>
                   {categories
                     .filter((c) => c.depth === 0)
@@ -228,7 +228,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </ul>
               </div>
               <div>
-                <h3>{t('footer.help')}</h3>
+                <h2>{t('footer.help')}</h2>
                 <ul>
                   <li>
                     <Link href="/orders">{t('nav.trackOrder')}</Link>
@@ -254,7 +254,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </ul>
               </div>
               <div>
-                <h3>{t('footer.buying')}</h3>
+                <h2>{t('footer.buying')}</h2>
                 <ul>
                   <li>Card, Apple Pay &amp; Google Pay</li>
                   <li>Tabby — 4 interest-free payments</li>
@@ -263,7 +263,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </ul>
               </div>
               <div>
-                <h3>{t('footer.contact')}</h3>
+                <h2>{t('footer.contact')}</h2>
                 <ul>
                   {phone && telephone && (
                     <li>

@@ -17,7 +17,18 @@
 # The apps read /app/.env (the monorepo-root .env mounted below) — the same
 # single-source-of-configuration contract as development.
 
-name: phoyev-prod
+# THE PROJECT NAME IS THE DEPLOYMENT'S IDENTITY, NOT ITS BRANDING.
+#
+# Compose keys containers, networks and volumes off it. Renaming it to
+# `phoyev-prod` does not rename the running stack — it declares a *second* one,
+# which comes up beside the first and collides on ports 80 and 443. The volumes
+# below are pinned for the same reason, from the other direction.
+#
+# Renaming this for real means: copy the .env, `down` the old project, `up` the
+# new one against the pinned volumes. That is a deliberate migration with a
+# minute of downtime, and it belongs in its own change rather than riding along
+# with a find-and-replace over the source tree.
+name: voltix-prod
 
 x-app: &app
   build:

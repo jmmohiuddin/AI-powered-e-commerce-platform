@@ -1545,7 +1545,15 @@ p {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
-.site-footer h3 {
+/*
+ * `<h2>`, not `<h3>` — these were the one heading in the shared footer that
+ * every page renders regardless of what came before it. A page with only an
+ * `<h1>` and no other heading (the cart, an empty order list) then hit this
+ * heading directly, and h1 → h3 is an invalid skip that axe-core (and every
+ * screen reader) flags. h1 → h2 is never invalid, so this is the one level
+ * that is safe here regardless of page content — see layout.tsx.
+ */
+.site-footer h2 {
   font-size: var(--text-sm);
   color: var(--colour-text);
   margin-bottom: var(--space-3);

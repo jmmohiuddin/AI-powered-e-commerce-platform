@@ -13,7 +13,12 @@
 set -euo pipefail
 
 TARGET=${1:?usage: deploy.sh user@host}
-REMOTE_DIR=/opt/phoyev
+# NOT /opt/phoyev. This is where the running deployment lives, next to the .env
+# this script refuses to overwrite — rsync excludes it, so pointing at a fresh
+# directory produces an empty tree with no configuration and a deploy that stops
+# on the very check below. Moving the deployment is a migration (copy the .env,
+# stop the old stack, start the new one), not a variable edit.
+REMOTE_DIR=/opt/voltix
 COMPOSE="docker compose -f infra/production/docker-compose.prod.yml --env-file .env"
 
 REPO_ROOT=$(cd "$(dirname "$0")/../.." && pwd)
