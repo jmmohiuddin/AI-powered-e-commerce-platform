@@ -18,6 +18,17 @@ import { listCategoryPaths, listProductSlugs } from '@/lib/catalog';
  * page change together.
  */
 
+/**
+ * Rendered per request, not at build.
+ *
+ * `STOREFRONT_URL` and the database only exist in the runtime environment: the
+ * production image is built with neither, so prerendering this at build time
+ * baked `http://localhost:3000` into the deployed file and handed Googlebot a
+ * sitemap of unreachable URLs with no products in it. The catch-and-continue
+ * below hid the empty catalogue, which is why it shipped looking healthy.
+ */
+export const dynamic = 'force-dynamic';
+
 const CHANGE_FREQUENCY = {
   home: 'daily',
   category: 'daily',
@@ -26,7 +37,7 @@ const CHANGE_FREQUENCY = {
 } as const;
 
 /** Static pages worth crawling. Excludes anything in `robots.ts`'s disallow list. */
-const CONTENT_ROUTES = ['/contact', '/delivery', '/returns'] as const;
+const CONTENT_ROUTES = ['/contact', '/delivery', '/returns', '/privacy', '/terms'] as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = (process.env.STOREFRONT_URL || 'http://localhost:3000').replace(/\/$/, '');

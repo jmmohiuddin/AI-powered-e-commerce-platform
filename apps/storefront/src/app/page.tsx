@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { formatCount } from '@voltix/ui';
 import { ProductCard } from '@/components/product-card';
@@ -17,6 +18,35 @@ import { resolveLocale, translator } from '@/lib/locale';
  * one row is the trade that quietly destroys LCP on commerce sites.
  */
 export const revalidate = 300;
+
+/**
+ * Without this, the homepage silently inherited the layout's fixed default
+ * metadata verbatim — same title/description in English even on the Arabic
+ * render, and no canonical of its own. `generateMetadata` lets it pick up the
+ * resolved locale like every other page, reusing the same hero copy already
+ * shown on the page rather than writing new marketing copy in a second place.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await resolveLocale();
+  const t = translator(locale);
+  const title = t('home.heroTitle');
+  const description = t('home.heroBody');
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: '/',
+      // Same-URL scheme as every other page — see lib/locale.ts.
+      languages: { 'en-AE': '/', 'ar-AE': '/' },
+    },
+    openGraph: { title, description, type: 'website' },
+    // Next does not deep-merge `twitter` with the layout's default — a page
+    // that sets its own `twitter` object without `card` silently loses it and
+    // falls back to `summary`, downgrading the large-image preview.
+    twitter: { card: 'summary_large_image', title, description },
+  };
+}
 
 export default async function HomePage() {
   const locale = await resolveLocale();

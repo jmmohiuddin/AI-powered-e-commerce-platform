@@ -163,9 +163,34 @@ export default async function ProductPage({ params }: { params: Params }) {
    * requires the shopper to be shown. A feed that publishes ex-VAT prices while
    * the page shows inclusive ones gets penalised for price mismatch.
    */
+  /**
+   * `BreadcrumbList` mirrors the visible breadcrumb rendered just below —
+   * same two hops (category, then this product), same category URL
+   * (`/search?category=…`, matching the actual link in that `<nav>`). See the
+   * identical pattern in category/[...slug]/page.tsx's `BreadcrumbJsonLd`.
+   */
+  const origin = (process.env.STOREFRONT_URL || 'http://localhost:3000').replace(/\/$/, '');
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: t('nav.home'), item: origin },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: product.category,
+            item: `${origin}/search?category=${product.categorySlug}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: product.title,
+            item: `${origin}/products/${product.slug}`,
+          },
+        ],
+      },
       {
         '@type': 'Product',
         name: product.title,

@@ -19,6 +19,15 @@ import type { MetadataRoute } from 'next';
  *    two places where a crawler following links does real work per request.
  *  • `/api` — machine surface, including the payment webhooks.
  */
+/**
+ * Rendered per request, not at build.
+ *
+ * `STOREFRONT_URL` only exists in the runtime environment, so prerendering
+ * this at build time published `Host: http://localhost:3000` and pointed the
+ * `Sitemap:` line at a machine that is not the store.
+ */
+export const dynamic = 'force-dynamic';
+
 export default function robots(): MetadataRoute.Robots {
   const base = (process.env.STOREFRONT_URL || 'http://localhost:3000').replace(/\/$/, '');
 

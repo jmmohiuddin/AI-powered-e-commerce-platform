@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { listCategories, mayServeDemoCatalogue } from '@/lib/catalog';
-import { supportPhone, telHref, whatsappHref } from '@/lib/contact';
+import { supportEmail, supportPhone, telHref, whatsappHref } from '@/lib/contact';
 import { legalCopy } from '@/lib/legal';
 import { merchantIdentity } from '@/lib/merchant';
 import { localiseCategory } from '@/lib/types';
@@ -42,6 +42,10 @@ export const metadata: Metadata = {
   description:
     'Genuine smartphones, mobile accessories and computer gear with official UAE warranty, card, Tabby and cash on delivery, and same-day dispatch across the Emirates.',
   openGraph: { type: 'website', siteName: 'Voltix', locale: 'en_AE', alternateLocale: ['ar_AE'] },
+  // No `site`/`creator` handle: Voltix has no confirmed X/Twitter account, and a
+  // guessed one would misattribute the page to the wrong account. `summary_large_image`
+  // still activates the large-image preview card on the strength of the OG tags alone.
+  twitter: { card: 'summary_large_image' },
   robots: { index: true, follow: true },
 };
 
@@ -83,10 +87,62 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const phone = supportPhone();
   const telephone = telHref();
   const whatsapp = whatsappHref();
+  const email = supportEmail();
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
+
+  /**
+   * Site-wide entity identity — `Organization` + `WebSite`.
+   *
+   * Every field is either a fixed, verifiable fact (the brand name, the URL,
+   * the site description already shown above) or read from the same
+   * conditionally-rendered sources the footer uses (`merchantIdentity()`,
+   * `lib/contact.ts`). Nothing here is invented: a phone/email/legalName that
+   * is not configured is omitted from the graph entirely, exactly as the
+   * footer omits its own line for the same field. See lib/merchant.ts and
+   * lib/contact.ts for why "unset renders nothing" rather than a placeholder.
+   *
+   * No `address`/`sameAs` yet: no legal address or verified social profile is
+   * configured anywhere in this codebase (see SEO-CURRENT-STATE.md). Adding
+   * them once verified is a small addition here, not a new pattern.
+   */
+  const siteUrl = (process.env.STOREFRONT_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        name: 'Voltix',
+        url: siteUrl,
+        description:
+          'Voltix is an electronics and mobile retailer serving customers across the United Arab Emirates.',
+        ...(merchant.legalName ? { legalName: merchant.legalName } : {}),
+        ...(phone ? { telephone: phone } : {}),
+        ...(email ? { email } : {}),
+      },
+      {
+        '@type': 'WebSite',
+        name: 'Voltix',
+        url: siteUrl,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${siteUrl}/search?q={search_term_string}`,
+          'query-input': 'required name=search_term_string',
+        },
+      },
+    ],
+  };
 
   return (
     <html lang={locale} dir={dir}>
       <body>
+        {/* Nonced per src/proxy.ts — see the identical pattern on the product
+            and category pages for why. */}
+        <script
+          type="application/ld+json"
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+
         <a className="skip-link" href="#main">
           {t('nav.skip')}
         </a>

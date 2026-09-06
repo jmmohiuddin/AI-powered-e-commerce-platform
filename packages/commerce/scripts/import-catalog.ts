@@ -29,6 +29,7 @@
  *     npm run db:import-catalog -- --draft # same, but leave everything draft
  *     npm run db:import-catalog -- --dry-run
  *     npm run db:import-catalog -- --skip-images
+ *     npm run db:import-catalog -- --backfill-images  # repair missing photos
  */
 // Must be first: populates process.env from the repo-root .env before any
 // module below reads a connection string at import time.
@@ -103,6 +104,15 @@ const flags = new Set(argv);
 const DRY_RUN = flags.has('--dry-run');
 const SKIP_IMAGES = flags.has('--skip-images');
 const PUBLISH = !flags.has('--draft');
+/**
+ * Attaches a photograph to a SKU that is already imported but has none.
+ *
+ * The import is idempotent on SKU, which means a product created during a run
+ * where its image host returned a transient 403 would never get one — the
+ * re-run skips it before it reaches the image step. This is the repair path,
+ * and it is opt-in so a normal re-run stays a no-op.
+ */
+const BACKFILL_IMAGES = flags.has('--backfill-images');
 /** `--limit=5` imports the first five rows. For smoke-testing a new environment
  *  before committing the whole catalogue to it. */
 const LIMIT = Number(argv.find((a) => a.startsWith('--limit='))?.slice(8) ?? Number.NaN);
@@ -143,6 +153,7 @@ async function main(): Promise<void> {
   if (DRY_RUN) console.log('  DRY RUN — nothing will be written');
   if (SKIP_IMAGES) console.log('  images skipped');
   if (Number.isInteger(LIMIT)) console.log(`  limited to the first ${LIMIT} rows`);
+  if (BACKFILL_IMAGES) console.log('  backfilling photographs for products already imported');
   console.log(`  status on completion: ${PUBLISH ? 'active (live)' : 'draft'}`);
   console.log();
 
@@ -229,6 +240,19 @@ async function main(): Promise<void> {
     `);
     if (existing.rows[0]) {
       skipped += 1;
+      if (BACKFILL_IMAGES && product.imageUrl && storage) {
+        const attached = await backfillImage(existing.rows[0].product_id, product, storage);
+        if (attached === 'added') {
+          images += 1;
+          console.log(`${position} ⤒ ${product.sku} — photograph attached`);
+          continue;
+        }
+        if (attached !== 'has-image') {
+          withoutImage.push(`${product.sku} (${attached})`);
+          console.warn(`${position} ! ${product.sku} — image failed: ${attached}`);
+          continue;
+        }
+      }
       console.log(`${position} · ${product.sku} already imported`);
       continue;
     }
@@ -359,6 +383,45 @@ async function main(): Promise<void> {
   `);
   console.log();
   console.log(`Catalogue now holds ${total.rows[0]?.n ?? 0} products.`);
+}
+
+/**
+ * Attaches a photograph to an already-imported product that has none.
+ *
+ * Returns `'has-image'` when there was nothing to do, `'added'` on success, and
+ * the failure text otherwise — a string rather than a throw because one
+ * unreachable host must not end the run.
+ */
+async function backfillImage(
+  productId: string,
+  product: CatalogueProduct,
+  storage: ReturnType<typeof resolveStorage>,
+): Promise<'added' | 'has-image' | string> {
+  const existing = await dbAdmin().execute<{ n: number }>(sql`
+    SELECT count(*)::int AS n FROM media
+    WHERE tenant_id = ${TENANT_ID} AND product_id = ${productId} AND kind = 'image'
+  `);
+  if (Number(existing.rows[0]?.n ?? 0) > 0) return 'has-image';
+
+  try {
+    const bytes = await fetchImage(product.imageUrl!);
+    const prepared = await prepareImage(bytes);
+    const key = `products/${productId}/${crypto.randomUUID()}.${prepared.extension}`;
+    const stored = await storage.put(key, prepared.body, prepared.contentType);
+    await withTenant(TENANT_ID, (tx) =>
+      addProductImage(tx, ctx, actor, {
+        productId,
+        url: stored.url,
+        width: prepared.width,
+        height: prepared.height,
+        blurDataUrl: prepared.blurDataUrl,
+        altText: product.title,
+      }),
+    );
+    return 'added';
+  } catch (error) {
+    return (error as Error).message;
+  }
 }
 
 /**
