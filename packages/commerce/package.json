@@ -10,17 +10,21 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "worker": "tsx scripts/worker.ts"
+    "worker": "tsx scripts/worker.ts",
+    "import-catalog": "tsx scripts/import-catalog.ts",
+    "remove-demo": "tsx scripts/remove-demo-catalogue.ts"
   },
   "dependencies": {
     "@voltix/ai": "*",
+    "@voltix/config": "*",
     "@voltix/core": "*",
     "@voltix/db": "*",
     "@voltix/invoicing": "*",
+    "@voltix/media": "*",
+    "@voltix/noon": "*",
     "@voltix/notifications": "*",
     "@voltix/payments": "*",
-    "drizzle-orm": "^0.45.2",
-    "@voltix/noon": "*"
+    "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {
     "tsx": "^4.19.2"

@@ -187,6 +187,22 @@ function demoOrEmpty<T>(demo: T, empty: T): T {
   return process.env.NODE_ENV === 'production' ? empty : demo;
 }
 
+/**
+ * Whether this build is able to serve the built-in sample catalogue at all.
+ *
+ * Exists so the footer can stop lying. That notice — "product data is sample
+ * data for evaluation, not a live catalogue" — was written as literal text and
+ * therefore survived onto a production store selling real stock, telling every
+ * visitor that the prices they were about to pay were made up.
+ *
+ * The predicate is the same condition `demoOrEmpty` applies, and no more: a
+ * production build never returns demo rows, so it never needs the disclosure.
+ * A development build might, so it keeps it.
+ */
+export function mayServeDemoCatalogue(): boolean {
+  return process.env.NODE_ENV !== 'production';
+}
+
 /** The shape `searchProducts` returns when there is nothing to return. */
 function emptySearch(): SearchResult {
   return {

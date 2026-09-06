@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { listCategories } from '@/lib/catalog';
+import { listCategories, mayServeDemoCatalogue } from '@/lib/catalog';
 import { supportPhone, telHref, whatsappHref } from '@/lib/contact';
 import { legalCopy } from '@/lib/legal';
 import { merchantIdentity } from '@/lib/merchant';
@@ -250,8 +250,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <>Trade Licence <span dir="ltr">{merchant.tradeLicenceNumber}</span> · </>
               )}
               {t('vat.inclusive')} · <Link href="/privacy">{legal.seeAlsoPrivacy}</Link> ·{' '}
-              <Link href="/terms">{legal.seeAlsoTerms}</Link> · Demo storefront — product data is
-              sample data for evaluation, not a live catalogue.
+              <Link href="/terms">{legal.seeAlsoTerms}</Link>
+              {mayServeDemoCatalogue() && (
+                <> · Development build — the catalogue may fall back to sample data.</>
+              )}
             </p>
           </div>
         </footer>

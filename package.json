@@ -2,7 +2,7 @@
   "name": "voltix-commerce",
   "private": true,
   "version": "0.1.0",
-  "description": "Voltix Commerce — UAE electronics & mobile retail storefront and back office",
+  "description": "Voltix Commerce \u2014 UAE electronics & mobile retail storefront and back office",
   "workspaces": [
     "packages/*",
     "apps/*"
@@ -22,6 +22,8 @@
     "db:generate": "npm run generate --workspace=@voltix/db",
     "db:migrate": "npm run migrate --workspace=@voltix/db",
     "db:seed": "npm run seed --workspace=@voltix/db",
+    "db:import-catalog": "npm run import-catalog --workspace=@voltix/commerce --",
+    "db:remove-demo": "npm run remove-demo --workspace=@voltix/commerce --",
     "db:studio": "npm run studio --workspace=@voltix/db",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
     "infra:down": "docker compose -f infra/docker-compose.yml down",

@@ -79,6 +79,22 @@ services:
     profiles: [ops]
     command: ['npm', 'run', 'db:migrate']
 
+  # One-shot: loads packages/commerce/data/semul-catalog.json into the store.
+  # Idempotent on SKU, so a re-run after fixing one row imports only that row.
+  #
+  #   docker compose ... run --rm import-catalog
+  #   docker compose ... run --rm import-catalog npm run db:import-catalog -- --dry-run
+  #
+  # The same service is how the demo catalogue is retired, because it is the
+  # one container that has both the scripts and the internal network:
+  #
+  #   docker compose ... run --rm import-catalog npm run db:remove-demo -- --confirm
+  import-catalog:
+    <<: *app
+    restart: 'no'
+    profiles: [ops]
+    command: ['npm', 'run', 'db:import-catalog']
+
   postgres:
     image: pgvector/pgvector:pg17
     restart: unless-stopped
