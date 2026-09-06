@@ -87,6 +87,17 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
        */
       images: openGraphImages(product),
     },
+    // Without its own `twitter` object this page would inherit the layout's
+    // generic site title/description verbatim on any client that reads the
+    // twitter tags instead of Open Graph (Next does not derive `twitter` from
+    // `openGraph` automatically, and does not deep-merge a child's `twitter`
+    // with the parent's — see the identical note on the homepage).
+    twitter: {
+      card: 'summary_large_image',
+      title: product.title,
+      description: product.subtitle ?? product.description.slice(0, 200),
+      images: openGraphImages(product).map((image) => image.url),
+    },
   };
 }
 

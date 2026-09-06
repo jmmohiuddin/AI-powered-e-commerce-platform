@@ -83,6 +83,9 @@ export async function generateMetadata({
       languages: { 'en-AE': canonical, 'ar-AE': canonical },
     },
     openGraph: { title, description, type: 'website' },
+    // See the identical note on products/[slug]/page.tsx: `twitter` is not
+    // derived from `openGraph` and is not deep-merged with the layout's.
+    twitter: { card: 'summary_large_image', title, description },
     // Faceted permutations are near-duplicates and must not be indexed; the
     // clean category page and its pagination must. `follow` either way, so a
     // crawler that lands on a filtered URL still reaches the products.

@@ -53,6 +53,22 @@ const STORE_ID = '01920000-0000-7000-8000-000000000002';
 
 const CATALOGUE_PATH = fileURLToPath(new URL('../data/semul-catalog.json', import.meta.url));
 
+/**
+ * Local photographs, named `<SKU>.<ext>`, that win over the source URL.
+ *
+ * Two problems, one directory. Some of the source hosts serve a laptop and 403
+ * a datacentre — maliks.com does exactly that, so one product imported without
+ * a photograph on the server and with one locally, which is the worst kind of
+ * difference between environments. And nine SKUs have no usable source image at
+ * all; a merchant with the right photo needs somewhere to put it that a re-run
+ * will pick up.
+ *
+ * Checked before the network, so dropping a file here also pins a product's
+ * image against a source that later changes or disappears.
+ */
+const LOCAL_IMAGE_DIR = fileURLToPath(new URL('../data/images/', import.meta.url));
+const LOCAL_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'avif'] as const;
+
 /** Third-party image hosts refuse a default fetch agent; this is a real browser UA. */
 const FETCH_UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
@@ -240,7 +256,7 @@ async function main(): Promise<void> {
     `);
     if (existing.rows[0]) {
       skipped += 1;
-      if (BACKFILL_IMAGES && product.imageUrl && storage) {
+      if (BACKFILL_IMAGES && storage && (product.imageUrl || (await localImage(product.sku)))) {
         const attached = await backfillImage(existing.rows[0].product_id, product, storage);
         if (attached === 'added') {
           images += 1;
@@ -317,9 +333,10 @@ async function main(): Promise<void> {
 
     /* ── Photography ────────────────────────────────────────────────── */
 
-    if (product.imageUrl && storage) {
+    const local = storage ? await localImage(product.sku) : undefined;
+    if (storage && (local || product.imageUrl)) {
       try {
-        const bytes = await fetchImage(product.imageUrl);
+        const bytes = local ?? (await fetchImage(product.imageUrl!));
         const prepared = await prepareImage(bytes);
         const key = `products/${productId}/${crypto.randomUUID()}.${prepared.extension}`;
         const stored = await storage.put(key, prepared.body, prepared.contentType);
@@ -404,7 +421,7 @@ async function backfillImage(
   if (Number(existing.rows[0]?.n ?? 0) > 0) return 'has-image';
 
   try {
-    const bytes = await fetchImage(product.imageUrl!);
+    const bytes = (await localImage(product.sku)) ?? (await fetchImage(product.imageUrl!));
     const prepared = await prepareImage(bytes);
     const key = `products/${productId}/${crypto.randomUUID()}.${prepared.extension}`;
     const stored = await storage.put(key, prepared.body, prepared.contentType);
@@ -422,6 +439,19 @@ async function backfillImage(
   } catch (error) {
     return (error as Error).message;
   }
+}
+
+/** Returns the checked-in photograph for a SKU, or undefined if there is none. */
+async function localImage(sku: string): Promise<Uint8Array | undefined> {
+  for (const extension of LOCAL_IMAGE_EXTENSIONS) {
+    try {
+      return new Uint8Array(await readFile(`${LOCAL_IMAGE_DIR}${sku}.${extension}`));
+    } catch {
+      // Missing is the normal case, and the only error worth distinguishing —
+      // an unreadable file that exists still means "no local override".
+    }
+  }
+  return undefined;
 }
 
 /**

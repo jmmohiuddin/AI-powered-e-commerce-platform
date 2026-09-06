@@ -6,7 +6,10 @@ coverage
 .env
 .env.*
 !.env.example
+# Screenshots and design exports at the repo root, not product photography —
+# the override images the catalogue import reads must reach the image.
 *.png
+!packages/commerce/data/images/*.png
 docs
 test
 voltix-sync-wireframes.html
