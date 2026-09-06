@@ -50,7 +50,7 @@ beforeEach(async () => {
   if (reachable) await inspector.del([keyFor('orders', caller), keyFor('search', caller)]);
 });
 
-const keyFor = (bucket: string, identifier: string) => `voltix:rl:${bucket}:${identifier}`;
+const keyFor = (bucket: string, identifier: string) => `phoyev:rl:${bucket}:${identifier}`;
 
 suite('order lookup against real Redis', () => {
   it('blocks the eleventh lookup and records the counter in Redis', async () => {

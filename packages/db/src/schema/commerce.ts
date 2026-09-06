@@ -160,7 +160,7 @@ export const carts = pgTable(
 
     /**
      * Totals are *cached*, not authoritative. The pricing engine in
-     * @voltix/core recomputes from line items on every mutation and again at
+     * @phoyev/core recomputes from line items on every mutation and again at
      * order placement. Trusting a client-supplied or stale total is the single
      * most common way a store gets robbed.
      */
@@ -224,7 +224,7 @@ export const cartItems = pgTable(
  * shipped *and* partially refunded at the same time. Keeping payment,
  * fulfilment and the overall lifecycle separate makes every combination
  * representable and every transition independently guarded (see
- * @voltix/core/orders/state-machine.ts).
+ * @phoyev/core/orders/state-machine.ts).
  */
 export const orderStatus = pgEnum('order_status', [
   'pending',

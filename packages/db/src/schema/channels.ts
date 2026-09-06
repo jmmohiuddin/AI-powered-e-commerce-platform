@@ -20,7 +20,7 @@ import { orders } from './commerce';
 /**
  * MARKETPLACE CHANNEL SYNC
  *
- * Voltix is the system of record; noon is a projection of it. Everything here
+ * Phoyev is the system of record; noon is a projection of it. Everything here
  * exists to answer two questions the sync engine asks constantly:
  *
  *   "What does noon call this variant?"   → noon_listings
@@ -66,13 +66,13 @@ export const noonListingStatus = pgEnum('noon_listing_status', [
 ]);
 
 /**
- * The identity map between a Voltix variant and a noon listing.
+ * The identity map between a Phoyev variant and a noon listing.
  *
  * `partner_sku` is *our* identifier as noon stores it, and it is the join key
  * for every other API in this integration — stock, pricing and orders all
  * speak partner SKU and nothing else. It defaults to the variant's own SKU but
  * is stored separately because it cannot change once noon has seen it: renaming
- * a SKU in Voltix would otherwise orphan the listing and silently create a
+ * a SKU in Phoyev would otherwise orphan the listing and silently create a
  * second one on the next push.
  */
 export const noonListings = pgTable(
@@ -161,7 +161,7 @@ export const noonListings = pgTable(
 );
 
 /**
- * Maps a Voltix warehouse to a noon integration warehouse code.
+ * Maps a Phoyev warehouse to a noon integration warehouse code.
  *
  * Every stock write and every order read is scoped to a `warehouse_code`, and
  * noon issues those codes — they cannot be derived from anything local. Without
@@ -204,7 +204,7 @@ export const noonWarehouseMap = pgTable(
 );
 
 /**
- * Imported noon orders, and the Voltix order each became.
+ * Imported noon orders, and the Phoyev order each became.
  *
  * The unique index on `fbpi_order_nr` is the whole idempotency story for order
  * import. The pull job is at-least-once by construction — it re-reads a time
@@ -232,7 +232,7 @@ export const noonOrderLinks = pgTable(
     /**
      * The order exactly as noon sent it.
      *
-     * Kept because the import is lossy by design — Voltix's order model has no
+     * Kept because the import is lossy by design — Phoyev's order model has no
      * place for `mp_item_nr`, and shipment confirmation needs it back. Storing
      * the payload means a mapping bug is repairable from local data instead of
      * requiring a re-fetch that may no longer return the same thing.

@@ -26,7 +26,7 @@ import { currency, money, tenantId, timestamps } from './_shared';
  *
  * 2. **Spend is metered like any other resource.** An unbounded LLM feature in
  *    a multi-tenant product is an unbounded bill. `aiUsage` is the meter;
- *    @voltix/ai refuses work once a tenant crosses its daily cap.
+ *    @phoyev/ai refuses work once a tenant crosses its daily cap.
  */
 
 export const aiJobStatus = pgEnum('ai_job_status', [

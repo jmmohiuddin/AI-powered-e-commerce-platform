@@ -24,7 +24,7 @@ const base: OrderConfirmationData = {
   payment: 'paid',
   itemCount: 2,
   trackUrl: 'https://shop.ae/orders?number=10042',
-  storeName: 'Voltix',
+  storeName: 'Phoyev',
 };
 
 /** Strips the bidi isolate marks the Arabic render adds, for readable asserts. */
@@ -142,7 +142,7 @@ describe('order confirmation', () => {
 describe('cart recovery', () => {
   it('renders review-ready copy with a link back to the cart', () => {
     const r = renderCartRecovery(
-      { customerName: 'Omar', itemCount: 3, cartUrl: 'https://shop.ae/cart', storeName: 'Voltix' },
+      { customerName: 'Omar', itemCount: 3, cartUrl: 'https://shop.ae/cart', storeName: 'Phoyev' },
       'en-AE',
     );
     expect(r.text).toContain('3 items');
@@ -153,7 +153,7 @@ describe('cart recovery', () => {
 describe('ops alert', () => {
   it('is always English and clearly internal', () => {
     const r = renderOpsAlert({ headline: 'Payment did not reconcile', detail: 'Intent x is stuck.' });
-    expect(r.subject).toContain('[Voltix ops]');
+    expect(r.subject).toContain('[Phoyev ops]');
     expect(r.html).toBeNull();
   });
 });

@@ -1,11 +1,11 @@
 /**
- * STOCK PUSH — Voltix stock levels → noon.
+ * STOCK PUSH — Phoyev stock levels → noon.
  *
  * THE QUANTITY THAT GETS SENT
  * ---------------------------
  * `on_hand - reserved`, floored at zero. Not `on_hand`.
  *
- * A reservation is a unit that a Voltix shopper has at checkout and has not
+ * A reservation is a unit that a Phoyev shopper has at checkout and has not
  * yet paid for. Publishing it to noon offers the same physical unit to two
  * marketplaces at once, and the loser of that race is a noon order that cannot
  * be fulfilled — which on noon costs a cancellation against the seller's
@@ -25,7 +25,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import type { Database } from '@voltix/db';
+import type { Database } from '@phoyev/db';
 import type { NoonClient, StockUpdateItem } from '../client.js';
 import { chunk } from './batch.js';
 import { emptyOutcome, mergeOutcomes, type SyncOutcome, type Tx } from './types.js';

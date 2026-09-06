@@ -135,7 +135,7 @@ export function verifyTotp(secretBase32: string, code: string, now = Date.now())
 }
 
 /** The `otpauth://` URI an authenticator app scans. */
-export function totpUri(secretBase32: string, account: string, issuer = 'Voltix'): string {
+export function totpUri(secretBase32: string, account: string, issuer = 'Phoyev'): string {
   const label = encodeURIComponent(`${issuer}:${account}`);
   const params = new URLSearchParams({
     secret: secretBase32,
@@ -171,7 +171,7 @@ function encryptionKey(): Buffer {
   if (!secret || secret.length < 32) {
     throw new Error('AUTH_SECRET must be set to at least 32 characters to store TOTP secrets');
   }
-  return Buffer.from(hkdfSync('sha256', Buffer.from(secret), Buffer.alloc(0), 'voltix:totp:v1', 32));
+  return Buffer.from(hkdfSync('sha256', Buffer.from(secret), Buffer.alloc(0), 'phoyev:totp:v1', 32));
 }
 
 export function encryptSecret(plaintext: string): string {

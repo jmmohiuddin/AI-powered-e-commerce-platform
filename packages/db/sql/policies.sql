@@ -41,36 +41,36 @@
 --
 -- So: two roles, two connection strings.
 --
---   voltix       owner. Runs migrations and the seed. Bypasses RLS by design.
+--   phoyev       owner. Runs migrations and the seed. Bypasses RLS by design.
 --                Never used by the running application.
---   voltix_app   NOSUPERUSER, NOBYPASSRLS. What the storefront, admin and job
+--   phoyev_app   NOSUPERUSER, NOBYPASSRLS. What the storefront, admin and job
 --                runner connect as. Subject to every policy.
 --
--- `DATABASE_URL` points at voltix_app. `DATABASE_ADMIN_URL` points at voltix.
+-- `DATABASE_URL` points at phoyev_app. `DATABASE_ADMIN_URL` points at phoyev.
 -- If they are ever the same value in production, tenant isolation is off.
 -- ===========================================================================
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'voltix_app') THEN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'phoyev_app') THEN
     -- Password is overridden per environment; this default exists so a local
     -- `npm run db:migrate` produces a working role with no extra step.
-    CREATE ROLE voltix_app LOGIN PASSWORD 'voltix_app_dev_password'
+    CREATE ROLE phoyev_app LOGIN PASSWORD 'phoyev_app_dev_password'
       NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
   END IF;
 END
 $$;
 
-GRANT USAGE ON SCHEMA public TO voltix_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO voltix_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO voltix_app;
+GRANT USAGE ON SCHEMA public TO phoyev_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO phoyev_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO phoyev_app;
 
 -- Tables created by future migrations inherit the same grants, so a new table
 -- is not silently unreachable by the application until someone notices.
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO voltix_app;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO phoyev_app;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-  GRANT USAGE, SELECT ON SEQUENCES TO voltix_app;
+  GRANT USAGE, SELECT ON SEQUENCES TO phoyev_app;
 
 DO $$
 DECLARE
@@ -129,7 +129,7 @@ BEGIN
       $f$, tbl);
 
       -- Explicit full access for the admin/migration role (the role running
-      -- this file — locally `voltix`, on Neon `neondb_owner`).
+      -- this file — locally `phoyev`, on Neon `neondb_owner`).
       --
       -- Locally the admin is a superuser, so this policy is redundant. On
       -- managed Postgres it is load-bearing: BYPASSRLS can only be granted by
@@ -139,7 +139,7 @@ BEGIN
       -- runner sees an empty queue, and the notification dispatcher goes
       -- silent — all with no error, just zero rows. Policies are permissive
       -- (OR-combined), so this grants the admin everything while leaving
-      -- voltix_app exactly as constrained as before.
+      -- phoyev_app exactly as constrained as before.
       EXECUTE format('DROP POLICY IF EXISTS admin_bypass ON public.%I', tbl);
       EXECUTE format(
         'CREATE POLICY admin_bypass ON public.%I TO %I USING (true) WITH CHECK (true)',
@@ -156,18 +156,18 @@ $$;
 -- UPDATE and DELETE at the grant level means even a fully compromised
 -- application credential cannot erase its own tracks.
 -- ---------------------------------------------------------------------------
-REVOKE UPDATE, DELETE ON public.audit_logs           FROM voltix_app;
-REVOKE UPDATE, DELETE ON public.stock_movements      FROM voltix_app;
-REVOKE UPDATE, DELETE ON public.transactions         FROM voltix_app;
-REVOKE UPDATE, DELETE ON public.loyalty_transactions FROM voltix_app;
-REVOKE UPDATE, DELETE ON public.store_credit_entries FROM voltix_app;
+REVOKE UPDATE, DELETE ON public.audit_logs           FROM phoyev_app;
+REVOKE UPDATE, DELETE ON public.stock_movements      FROM phoyev_app;
+REVOKE UPDATE, DELETE ON public.transactions         FROM phoyev_app;
+REVOKE UPDATE, DELETE ON public.loyalty_transactions FROM phoyev_app;
+REVOKE UPDATE, DELETE ON public.store_credit_entries FROM phoyev_app;
 
 -- An issued tax invoice can be voided but never deleted. A missing invoice
 -- number is a gap in a sequence the Federal Tax Authority expects to be
 -- continuous, and "the row was removed" is not an explanation an auditor
 -- accepts. UPDATE is deliberately left granted: voiding writes `voided_at`,
 -- which is how a document is withdrawn without breaking the sequence.
-REVOKE DELETE ON public.invoices FROM voltix_app;
+REVOKE DELETE ON public.invoices FROM phoyev_app;
 
 -- ---------------------------------------------------------------------------
 -- Credential tables are invisible to the application role entirely.
@@ -182,8 +182,8 @@ REVOKE DELETE ON public.invoices FROM voltix_app;
 -- Revoking the app role's access means a SQL-injection foothold in any
 -- storefront query cannot read a session token or enumerate the staff
 -- directory, even with the tenant context set correctly.
-REVOKE ALL ON public.sessions       FROM voltix_app;
-REVOKE ALL ON public.login_attempts FROM voltix_app;
+REVOKE ALL ON public.sessions       FROM phoyev_app;
+REVOKE ALL ON public.login_attempts FROM phoyev_app;
 
 -- `jobs` carries a nullable tenant_id (platform-wide jobs like the nightly
 -- forecast have none), so a blanket tenant policy would make those rows
@@ -214,13 +214,13 @@ $$;
 -- columns from `products` *and* the related brand name, which a generated
 -- column cannot reference. The trigger is the narrowest correct tool here.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION voltix_products_search_vector() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION phoyev_products_search_vector() RETURNS trigger AS $$
 BEGIN
   NEW.search_vector :=
-    setweight(to_tsvector('voltix_search', coalesce(NEW.title, '')), 'A') ||
-    setweight(to_tsvector('voltix_search', coalesce(NEW.subtitle, '')), 'B') ||
-    setweight(to_tsvector('voltix_search', coalesce(NEW.tags::text, '')), 'C') ||
-    setweight(to_tsvector('voltix_search', coalesce(NEW.description, '')), 'D');
+    setweight(to_tsvector('phoyev_search', coalesce(NEW.title, '')), 'A') ||
+    setweight(to_tsvector('phoyev_search', coalesce(NEW.subtitle, '')), 'B') ||
+    setweight(to_tsvector('phoyev_search', coalesce(NEW.tags::text, '')), 'C') ||
+    setweight(to_tsvector('phoyev_search', coalesce(NEW.description, '')), 'D');
   RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
@@ -241,7 +241,7 @@ BEGIN
     CREATE TRIGGER products_search_vector_trg
       BEFORE INSERT OR UPDATE OF title, subtitle, description, tags
       ON public.products
-      FOR EACH ROW EXECUTE FUNCTION voltix_products_search_vector();
+      FOR EACH ROW EXECUTE FUNCTION phoyev_products_search_vector();
 
     CREATE INDEX IF NOT EXISTS products_search_vector_idx
       ON public.products USING gin (search_vector);

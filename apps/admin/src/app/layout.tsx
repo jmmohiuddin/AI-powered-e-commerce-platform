@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { sessionCan } from '@voltix/auth';
-import type { Permission } from '@voltix/core';
+import { sessionCan } from '@phoyev/auth';
+import type { Permission } from '@phoyev/core';
 import { getSession } from '../lib/auth';
 import { signOut } from './login/actions';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: { default: 'Voltix Admin', template: '%s · Voltix Admin' },
+  title: { default: 'Phoyev Admin', template: '%s · Phoyev Admin' },
   description: 'Operate the store: catalogue, orders, stock, marketing and reporting.',
   // The admin must never be indexed, and never be framed.
   robots: { index: false, follow: false, nocache: true },

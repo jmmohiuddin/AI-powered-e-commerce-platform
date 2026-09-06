@@ -42,7 +42,7 @@
  */
 // Must be first: populates process.env from the repo-root .env before
 // any module below reads a connection string at import time.
-import '@voltix/config/load-env';
+import '@phoyev/config/load-env';
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

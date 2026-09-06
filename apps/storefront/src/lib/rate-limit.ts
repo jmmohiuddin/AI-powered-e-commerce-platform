@@ -74,7 +74,7 @@ interface Policy {
 }
 
 async function consume(bucket: string, identifier: string, policy: Policy) {
-  const key = `voltix:rl:${bucket}:${identifier}`;
+  const key = `phoyev:rl:${bucket}:${identifier}`;
   try {
     const { count, ttlMs } = REDIS_URL
       ? await redisIncrement(key, policy.windowMs)
@@ -178,7 +178,7 @@ async function redisIncrement(
  * on a client that is known to be down, which is precisely the stall the
  * timeouts below exist to prevent.
  */
-const CLIENT_KEY = Symbol.for('voltix.storefront.rateLimitRedis');
+const CLIENT_KEY = Symbol.for('phoyev.storefront.rateLimitRedis');
 const globalStore = globalThis as unknown as Record<symbol, Promise<RedisClientType> | undefined>;
 
 function connection(): Promise<RedisClientType> {

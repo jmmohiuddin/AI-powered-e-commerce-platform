@@ -39,7 +39,7 @@ const { privateKey, publicKey } = generateKeyPairSync('rsa', {
 const config = {
   credentials: { keyId: 'key-123', privateKey, projectCode: 'proj-abc' },
   baseUrl: 'https://gateway.test',
-  userAgent: 'VoltixTest/1.0',
+  userAgent: 'PhoyevTest/1.0',
   timeoutMs: 5_000,
 };
 

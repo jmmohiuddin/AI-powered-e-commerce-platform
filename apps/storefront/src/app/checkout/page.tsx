@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getCart, getOrCreateCart } from '@voltix/commerce';
-import { money } from '@voltix/core';
-import { formatPrice, splitVatInclusive } from '@voltix/ui';
+import { getCart, getOrCreateCart } from '@phoyev/commerce';
+import { money } from '@phoyev/core';
+import { formatPrice, splitVatInclusive } from '@phoyev/ui';
 import { CheckoutForm, type PaymentOption } from '@/components/checkout-form';
 import { cartSessionToken, deliveryFee, inTenant, paymentRegistry, tenantContext } from '@/lib/session';
 import { resolveLocale, translator } from '@/lib/locale';

@@ -17,7 +17,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * bounce. Security-wise it is worth exactly zero, and pretending otherwise is
  * how people end up shipping an admin with no real check anywhere.
  */
-const SESSION_COOKIE = 'voltix_admin_session';
+const SESSION_COOKIE = 'phoyev_admin_session';
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

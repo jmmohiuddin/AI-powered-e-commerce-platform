@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
-import { DomainError } from '@voltix/core';
+import { uuidv7 } from '@phoyev/db';
+import { DomainError } from '@phoyev/core';
 import type { ActorContext, TenantContext, Tx } from './types';
 
 /**

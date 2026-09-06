@@ -28,7 +28,7 @@ import { createWhatsAppTransport } from './transports/whatsapp';
  */
 export function buildTransportRegistry(env: NodeJS.ProcessEnv = process.env): TransportRegistry {
   const registry = new TransportRegistry();
-  const from = env.EMAIL_FROM ?? 'Voltix <orders@voltix.ae>';
+  const from = env.EMAIL_FROM ?? 'Phoyev <orders@phoyev.ae>';
 
   if (env.RESEND_API_KEY) {
     registry.register(createResendTransport({ apiKey: env.RESEND_API_KEY, from }));

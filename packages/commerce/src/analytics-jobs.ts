@@ -1,11 +1,11 @@
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
+import { uuidv7 } from '@phoyev/db';
 import {
   classifyInventory,
   forecastDemand,
   recommendReplenishment,
   type DemandPoint,
-} from '@voltix/ai';
+} from '@phoyev/ai';
 import type { Tx } from './types';
 
 /**
@@ -20,7 +20,7 @@ import type { Tx } from './types';
  *
  * These handlers move that work to a scheduled job and persist the result, so
  * the screen becomes a read. Nothing about the maths changes: they call the
- * same pure functions in `@voltix/ai` the page already called, so the numbers
+ * same pure functions in `@phoyev/ai` the page already called, so the numbers
  * cannot drift between the two.
  *
  * Both run across every tenant, which is why they belong to the worker rather

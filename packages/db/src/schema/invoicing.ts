@@ -65,7 +65,7 @@ export const invoices = pgTable(
     /** The recipient's TRN, when this is a B2B supply. Null on a B2C invoice. */
     recipientTrn: varchar('recipient_trn', { length: 20 }),
 
-    /** The frozen document. Shape: `TaxDocument` in @voltix/invoicing. */
+    /** The frozen document. Shape: `TaxDocument` in @phoyev/invoicing. */
     document: jsonb('document').notNull(),
 
     /**

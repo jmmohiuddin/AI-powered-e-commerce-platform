@@ -1,5 +1,5 @@
 {
-  "name": "@voltix/admin",
+  "name": "@phoyev/admin",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,15 +9,15 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@voltix/ai": "*",
-    "@voltix/auth": "*",
-    "@voltix/commerce": "*",
-    "@voltix/core": "*",
-    "@voltix/db": "*",
-    "@voltix/invoicing": "*",
-    "@voltix/media": "*",
-    "@voltix/payments": "*",
-    "@voltix/ui": "*",
+    "@phoyev/ai": "*",
+    "@phoyev/auth": "*",
+    "@phoyev/commerce": "*",
+    "@phoyev/core": "*",
+    "@phoyev/db": "*",
+    "@phoyev/invoicing": "*",
+    "@phoyev/media": "*",
+    "@phoyev/payments": "*",
+    "@phoyev/ui": "*",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "next": "^16.3.0",

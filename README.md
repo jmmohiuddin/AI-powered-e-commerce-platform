@@ -1,4 +1,4 @@
-# Voltix Commerce
+# Phoyev Commerce
 
 A commerce platform for electronics and mobile retail in the **United Arab Emirates** — an online
 store for one merchant, built on foundations that could serve many without a rewrite: every table
@@ -59,8 +59,8 @@ merchant account, and no load test has been run. Those are the largest remaining
 
 | App | URL |
 |---|---|
-| Storefront | https://voltix-storefront.vercel.app |
-| Admin | https://voltix-admin-eosin.vercel.app |
+| Storefront | https://phoyev-storefront.vercel.app |
+| Admin | https://phoyev-admin-eosin.vercel.app |
 
 Both run on Vercel (Singapore region, `sin1` — closest to the Neon database) against the Neon
 Postgres instance, and auto-deploy from `main`.
@@ -99,8 +99,8 @@ the clash produces a confusing "database exists but has no tables" failure.
 ### With a cloud database (Neon, RDS, Cloud SQL)
 
 Skip `npm run infra:up` for Postgres and point the two connection strings at the provider —
-`.env.example` documents the three steps (migrate as the owner, set the `voltix_app` password,
-connect the app as `voltix_app`). Two things the migration handles that are easy to miss on
+`.env.example` documents the three steps (migrate as the owner, set the `phoyev_app` password,
+connect the app as `phoyev_app`). Two things the migration handles that are easy to miss on
 managed Postgres: the owner role usually cannot have `BYPASSRLS`, so `policies.sql` creates an
 explicit `admin_bypass` policy for it; and connection strings should use `sslmode=verify-full`,
 which the pool enforces as full certificate verification. Redis, MinIO and Mailpit still come

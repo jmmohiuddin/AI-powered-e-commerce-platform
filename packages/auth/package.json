@@ -1,5 +1,5 @@
 {
-  "name": "@voltix/auth",
+  "name": "@phoyev/auth",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@node-rs/argon2": "^2.0.2",
-    "@voltix/config": "*",
-    "@voltix/core": "*",
-    "@voltix/db": "*",
+    "@phoyev/config": "*",
+    "@phoyev/core": "*",
+    "@phoyev/db": "*",
     "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {

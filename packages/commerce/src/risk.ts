@@ -1,13 +1,13 @@
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
-import type { UaeAddress } from '@voltix/core';
-import { assessOrderRisk, type RiskAssessment, type RiskSignalInput } from '@voltix/ai';
+import { uuidv7 } from '@phoyev/db';
+import type { UaeAddress } from '@phoyev/core';
+import { assessOrderRisk, type RiskAssessment, type RiskSignalInput } from '@phoyev/ai';
 import type { TenantContext, Tx } from './types';
 
 /**
  * RISK SCORING, WIRED TO REAL DATA.
  *
- * `assessOrderRisk` in @voltix/ai is a pure function over a bag of signals, and
+ * `assessOrderRisk` in @phoyev/ai is a pure function over a bag of signals, and
  * it was complete and unreachable: nothing computed the signals, so nothing ever
  * called it, and the cash-on-delivery risk gate — the control the whole COD
  * refusal problem rests on — sat there accepting a `customerRiskScore` that no

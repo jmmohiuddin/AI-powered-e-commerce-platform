@@ -1,10 +1,10 @@
-import type { Database } from '@voltix/db';
+import type { Database } from '@phoyev/db';
 
 /**
  * The transaction handle every sync function takes.
  *
- * Same convention as @voltix/commerce: the caller owns the transaction
- * boundary. Declared from @voltix/db rather than imported from commerce
+ * Same convention as @phoyev/commerce: the caller owns the transaction
+ * boundary. Declared from @phoyev/db rather than imported from commerce
  * because the dependency runs the other way — commerce's job runner registers
  * these handlers, so this package must not import it.
  */

@@ -6,7 +6,7 @@ import {
   recordSearchQuery,
   type AnalyticsEvent,
   type SearchQueryLog,
-} from '@voltix/commerce';
+} from '@phoyev/commerce';
 import { inTenant, tenantContext } from './session';
 
 /**

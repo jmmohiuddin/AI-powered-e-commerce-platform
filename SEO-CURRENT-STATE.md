@@ -1,4 +1,4 @@
-# Voltix — SEO Current-State Audit (Phase 0: Discover)
+# Phoyev — SEO Current-State Audit (Phase 0: Discover)
 
 Audited: 2026-09-06. Scope: `apps/storefront` (public-facing site). Method: direct codebase inspection (grep/read), no assumptions. Every claim below is sourced to a file:line; anything not found is marked **NOT FOUND**.
 
@@ -19,7 +19,7 @@ Audited: 2026-09-06. Scope: `apps/storefront` (public-facing site). Method: dire
 
 ## 2. Metadata & Open Graph
 
-- Root layout sets sitewide defaults: title template `%s · Voltix`, one fixed description, `openGraph.siteName: 'Voltix'`, `locale: en_AE` / `alternateLocale: ar_AE`, `robots: index,follow`.
+- Root layout sets sitewide defaults: title template `%s · Phoyev`, one fixed description, `openGraph.siteName: 'Phoyev'`, `locale: en_AE` / `alternateLocale: ar_AE`, `robots: index,follow`.
 - **Homepage has no `generateMetadata` at all** — it silently inherits the layout defaults. No homepage-specific canonical either.
 - **Product pages**: genuinely unique metadata, sourced from real DB fields (title, subtitle/description, OG images from real product photos). Good.
 - **Category pages**: unique metadata *only if* the category's `metaTitle`/`metaDescription` DB columns are populated; otherwise falls back to a single templated i18n string shared by every category missing curated copy.
@@ -34,7 +34,7 @@ Only two emission points in the entire repo:
 - **Product page**: `@graph` with `Product`, `Brand`, `AggregateOffer` (price range, availability, `areaServed: AE`), conditional `AggregateRating`, and `FAQPage` (from real `answerableFacts` data). No `BreadcrumbList` here despite a visible breadcrumb existing on the same page.
 - **Category page**: `BreadcrumbList` only.
 
-**Missing entirely**: `Organization`, `WebSite` (+ `SearchAction`), `LocalBusiness`/`Store` schema. There is no site-wide identity schema at all — nothing tells Google or an AI crawler what Voltix *is*, where it operates, or how to contact it.
+**Missing entirely**: `Organization`, `WebSite` (+ `SearchAction`), `LocalBusiness`/`Store` schema. There is no site-wide identity schema at all — nothing tells Google or an AI crawler what Phoyev *is*, where it operates, or how to contact it.
 
 ## 4. Content architecture & e-commerce SEO
 
@@ -49,10 +49,10 @@ Only two emission points in the entire repo:
 
 ## 5. Business identity / NAP — ⚠️ the critical gap
 
-This is the most important finding in this audit, because it blocks Local SEO, Entity SEO, LocalBusiness schema, AEO ("where is Voltix located?"), and correct invoicing simultaneously.
+This is the most important finding in this audit, because it blocks Local SEO, Entity SEO, LocalBusiness schema, AEO ("where is Phoyev located?"), and correct invoicing simultaneously.
 
 **Confirmed present and real (safe to use):**
-- Brand name **"Voltix"** — used pervasively and correctly.
+- Brand name **"Phoyev"** — used pervasively and correctly.
 - Business description: "UAE electronics & mobile retail" — consistent across `package.json`, `README.md`, and the site's meta description.
 - Delivery: **all seven emirates** (`apps/storefront/src/app/delivery/page.tsx`) — UAE-wide, not Dubai-only.
 - Payment methods **actually live today: cash on delivery only.** Stripe, Network International, Tabby, and PayTabs are all wired in code but every credential is blank in `.env` — so any "we accept cards / Tabby" copy on the site is currently describing capability, not current reality.
@@ -70,17 +70,17 @@ This is the most important finding in this audit, because it blocks Local SEO, E
 | Google Maps URL / place ID / lat-long | Not present anywhere in the codebase. |
 | UAE TRN | Blank (`MERCHANT_TRN=`). Example TRNs in docs/tests belong to two different fictional companies — confirms they're illustrative only. |
 | Social media profile links | Not present. Instagram/Facebook/etc. only exist as a marketing-channel *enum type* in the DB schema, not as actual profile URLs. |
-| Production domain | `.env` has `STOREFRONT_URL=http://localhost:3000`. `infra/production/.env.production.example` uses placeholder domains (`example.ae`). **`voltix.ae` appears nowhere as configured value** — only in code comments/test fixtures as an illustrative string. `phoyev.com` (prior deployment target) does not appear anywhere in this repo. |
+| Production domain | `.env` has `STOREFRONT_URL=http://localhost:3000`. `infra/production/.env.production.example` uses placeholder domains (`example.ae`). **`phoyev.ae` appears nowhere as configured value** — only in code comments/test fixtures as an illustrative string. `phoyev.com` (prior deployment target) does not appear anywhere in this repo. |
 | About page | Does not exist. |
 
-**What this means concretely**: right now, if a customer or an AI assistant asks "where is Voltix's store?" or "what's Voltix's phone number?", the live site has no answer anywhere — the contact page explicitly renders a placeholder notice instead of contact info. No LocalBusiness schema can be honestly written today because there is no configured address to put in it.
+**What this means concretely**: right now, if a customer or an AI assistant asks "where is Phoyev's store?" or "what's Phoyev's phone number?", the live site has no answer anywhere — the contact page explicitly renders a placeholder notice instead of contact info. No LocalBusiness schema can be honestly written today because there is no configured address to put in it.
 
 ---
 
 ## Major problems (unranked here — see prioritized plan)
 
 1. No business NAP (name/address/phone) configured anywhere → blocks Local SEO, LocalBusiness schema, AEO location answers entirely.
-2. No production domain configured → `voltix.ae` isn't wired into `.env`/infra, so canonical URLs, sitemap, robots.txt `host`, and OG URLs all currently resolve against `localhost:3000`.
+2. No production domain configured → `phoyev.ae` isn't wired into `.env`/infra, so canonical URLs, sitemap, robots.txt `host`, and OG URLs all currently resolve against `localhost:3000`.
 3. No `Organization`/`WebSite`/`LocalBusiness` JSON-LD anywhere.
 4. No favicon/manifest at all.
 5. Homepage has zero unique metadata (title/description/canonical/OG image).
@@ -111,7 +111,7 @@ This is the most important finding in this audit, because it blocks Local SEO, E
 ## Risks noted
 
 - Changing `STOREFRONT_URL`/domain touches CSP, canonical URLs, sitemap `host`, and OG absolute URLs simultaneously — needs to be done as one coordinated change, tested before deploy.
-- Any schema/contact/about work must wait on verified business data — inventing it would violate Google's spam policies (fake business info) and could get Voltix penalized or its Google Business Profile suspended.
+- Any schema/contact/about work must wait on verified business data — inventing it would violate Google's spam policies (fake business info) and could get Phoyev penalized or its Google Business Profile suspended.
 
 ---
 

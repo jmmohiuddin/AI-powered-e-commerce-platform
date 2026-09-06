@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
-import { hasPermission, roleRequiresMfa, type PermissionPattern } from '@voltix/core';
+import { uuidv7 } from '@phoyev/db';
+import { hasPermission, roleRequiresMfa, type PermissionPattern } from '@phoyev/core';
 import type { Tx } from './types';
 
 /**
@@ -37,7 +37,7 @@ const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 /** Refresh the expiry at most once a minute — otherwise every page view writes. */
 const TOUCH_INTERVAL_MS = 60 * 1000;
 
-export const SESSION_COOKIE = 'voltix_admin_session';
+export const SESSION_COOKIE = 'phoyev_admin_session';
 
 export interface SessionUser {
   readonly userId: string;

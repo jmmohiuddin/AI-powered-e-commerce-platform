@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import sharp from 'sharp';
-import { DomainError } from '@voltix/core';
+import { DomainError } from '@phoyev/core';
 import { MAX_UPLOAD_BYTES, prepareImage } from './image';
 
 /**
@@ -38,7 +38,7 @@ async function photo({ gps }: { gps: boolean }): Promise<Uint8Array> {
     create: { width: 800, height: 600, channels: 3, background: '#3355aa' },
   })
     .withExif({
-      IFD0: { Make: 'Voltix', Model: 'Test Camera' },
+      IFD0: { Make: 'Phoyev', Model: 'Test Camera' },
       ...(gps ? { IFD3: { ...GPS_TAGS } } : {}),
     })
     .jpeg()

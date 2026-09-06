@@ -36,7 +36,7 @@ afterEach(() => {
 
 describe('catalogue fallbacks in production', () => {
   it('serves an empty catalogue rather than demo products when the tenant has no rows', async () => {
-    const catalog = await catalogueWith('production', 'postgres://localhost/voltix');
+    const catalog = await catalogueWith('production', 'postgres://localhost/phoyev');
 
     await expect(catalog.listProducts()).resolves.toEqual([]);
     await expect(catalog.listCategories()).resolves.toEqual([]);
@@ -48,7 +48,7 @@ describe('catalogue fallbacks in production', () => {
   });
 
   it('does not invent a product page for a slug that only exists in the demo data', async () => {
-    const catalog = await catalogueWith('production', 'postgres://localhost/voltix');
+    const catalog = await catalogueWith('production', 'postgres://localhost/phoyev');
 
     // The slug is a real one from DEMO_PRODUCTS — that is the point. Before the
     // fix this resolved to a fully rendered page for a product the store does
@@ -65,7 +65,7 @@ describe('catalogue fallbacks in production', () => {
   });
 
   it('returns no related products for a demo-shaped id', async () => {
-    const catalog = await catalogueWith('production', 'postgres://localhost/voltix');
+    const catalog = await catalogueWith('production', 'postgres://localhost/phoyev');
     const demoShaped = { id: 'p-galaxy-s25', categorySlug: 'smartphones', brand: 'Samsung', tags: [] };
 
     await expect(
@@ -85,7 +85,7 @@ describe('catalogue fallbacks in development', () => {
   });
 
   it('falls back to demo data when a configured database returns nothing', async () => {
-    const catalog = await catalogueWith('development', 'postgres://localhost/voltix');
+    const catalog = await catalogueWith('development', 'postgres://localhost/phoyev');
 
     expect(await catalog.listProducts()).not.toHaveLength(0);
     expect(await catalog.listCategories()).not.toHaveLength(0);

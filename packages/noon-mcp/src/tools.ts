@@ -19,7 +19,7 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { NoonApiError, type NoonClient } from '@voltix/noon';
+import { NoonApiError, type NoonClient } from '@phoyev/noon';
 
 function ok(value: unknown) {
   return { content: [{ type: 'text' as const, text: JSON.stringify(value, null, 2) }] };

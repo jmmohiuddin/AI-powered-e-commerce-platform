@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { formatPrice } from '@voltix/ui';
+import { formatPrice } from '@phoyev/ui';
 import { requirePermission, tenantContextFor } from '../../lib/auth';
 import { analyseInventory } from '../../lib/inventory';
 

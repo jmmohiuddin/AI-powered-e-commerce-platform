@@ -5,7 +5,7 @@ import {
   StripeGateway,
   TabbyGateway,
   type PaymentGateway,
-} from '@voltix/payments';
+} from '@phoyev/payments';
 
 /**
  * The admin's gateway registry.

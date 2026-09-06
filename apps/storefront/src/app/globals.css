@@ -1,4 +1,4 @@
-@import '@voltix/ui/tokens.css';
+@import '@phoyev/ui/tokens.css';
 
 /* ───────────────────────────── Reset ─────────────────────────────────── */
 
@@ -1212,6 +1212,11 @@ p {
   gap: var(--space-5);
   align-content: start;
   font-size: var(--text-sm);
+  /* Markup now puts the listing `<section>` (and its `<h1>`) before this
+     aside, so the heading outline starts at 1 rather than at these facet
+     group `<h3>`s — see category/[...slug]/page.tsx and search/page.tsx.
+     `order` keeps this sidebar visually first regardless of DOM position. */
+  order: -1;
 }
 
 .facets h3 {
@@ -1598,7 +1603,7 @@ p {
  */
 
 /* The wordmark is a Latin brand name and stays LTR even on an Arabic page —
-   mirroring "voltix" produces "xitlov". */
+   mirroring "phoyev" produces "xitlov". */
 [dir='rtl'] .logo {
   direction: ltr;
   unicode-bidi: isolate;

@@ -10,7 +10,7 @@ import { ImageResponse } from 'next/og';
  * this. Copy is the same hero line already shown on the homepage, not new
  * marketing text.
  */
-export const alt = 'Voltix — Genuine electronics, delivered across the UAE.';
+export const alt = 'Phoyev — Genuine electronics, delivered across the UAE.';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -32,7 +32,7 @@ export default function Image() {
         }}
       >
         <div style={{ display: 'flex', fontSize: 72, fontWeight: 700, letterSpacing: -2 }}>
-          Voltix
+          Phoyev
         </div>
         <div style={{ display: 'flex', fontSize: 36, marginTop: 24, opacity: 0.92 }}>
           Genuine electronics, delivered across the UAE.

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getCart, getOrCreateCart } from '@voltix/commerce';
-import { formatPrice, splitVatInclusive } from '@voltix/ui';
+import { getCart, getOrCreateCart } from '@phoyev/commerce';
+import { formatPrice, splitVatInclusive } from '@phoyev/ui';
 import { CartLines } from '@/components/cart-lines';
 import { cartSessionToken, inTenant, tenantContext } from '@/lib/session';
 import { resolveLocale, translator } from '@/lib/locale';

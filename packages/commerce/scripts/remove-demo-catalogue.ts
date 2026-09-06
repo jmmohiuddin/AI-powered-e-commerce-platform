@@ -31,9 +31,9 @@
  */
 // Must be first: populates process.env from the repo-root .env before any
 // module below reads a connection string at import time.
-import '@voltix/config/load-env';
+import '@phoyev/config/load-env';
 import { sql } from 'drizzle-orm';
-import { closeConnections, dbAdmin } from '@voltix/db';
+import { closeConnections, dbAdmin } from '@phoyev/db';
 
 const TENANT_ID = '01920000-0000-7000-8000-000000000001';
 

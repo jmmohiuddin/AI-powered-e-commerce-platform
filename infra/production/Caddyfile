@@ -1,4 +1,4 @@
-# Reverse proxy + automatic HTTPS (Let's Encrypt) for the Voltix stack.
+# Reverse proxy + automatic HTTPS (Let's Encrypt) for the Phoyev stack.
 # Domains come from the environment (set in .env, injected by compose).
 #
 # Security headers are set by the Next apps themselves (see next.config.ts);

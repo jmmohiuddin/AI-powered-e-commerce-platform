@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { formatPrice } from '@voltix/ui';
+import { formatPrice } from '@phoyev/ui';
 import { requireSession, tenantContextFor } from '../lib/auth';
 import { dashboardMetrics, listOrders } from '../lib/queries';
 import { StatusPill } from '../components/status-pill';

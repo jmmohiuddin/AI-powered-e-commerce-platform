@@ -68,7 +68,7 @@ produces something the merchant did not upload.
 ## Getting it running locally
 
 ```sh
-npm run infra:up          # starts MinIO and creates the voltix-media bucket
+npm run infra:up          # starts MinIO and creates the phoyev-media bucket
 npm run dev:admin         # upload images on any product page
 npm run dev               # see them render
 ```

@@ -6,8 +6,8 @@ import {
   settlePayment,
   type ActorContext,
   type CheckoutReturn,
-} from '@voltix/commerce';
-import { outcomeFromStatus, type PaymentProviderId } from '@voltix/payments';
+} from '@phoyev/commerce';
+import { outcomeFromStatus, type PaymentProviderId } from '@phoyev/payments';
 import { whatsappHref } from '@/lib/contact';
 import { cartSessionToken, inTenant, paymentRegistry, tenantContext } from '@/lib/session';
 import { resolveLocale, translator, type Translate } from '@/lib/locale';

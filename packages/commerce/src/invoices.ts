@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
-import { DomainError } from '@voltix/core';
-import { buildTaxDocument, InvoiceError, type TaxDocument } from '@voltix/invoicing';
+import { uuidv7 } from '@phoyev/db';
+import { DomainError } from '@phoyev/core';
+import { buildTaxDocument, InvoiceError, type TaxDocument } from '@phoyev/invoicing';
 import { nextNumber } from './numbering';
 import type { TenantContext, Tx } from './types';
 
@@ -9,7 +9,7 @@ import type { TenantContext, Tx } from './types';
  * ISSUING A TAX DOCUMENT
  *
  * The database side of invoicing: read the frozen order facts, ask
- * `@voltix/invoicing` what document they require, allocate a number, and store
+ * `@phoyev/invoicing` what document they require, allocate a number, and store
  * the result. The rules with legal consequences live in that package and are
  * pure; this file only supplies facts and durability.
  *

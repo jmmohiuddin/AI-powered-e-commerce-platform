@@ -7,14 +7,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@voltix/core": ["../../packages/core/src/index.ts"],
-      "@voltix/ui": ["../../packages/ui/src/index.ts"],
-      "@voltix/ai": ["../../packages/ai/src/index.ts"],
-      "@voltix/auth": ["../../packages/auth/src/index.ts"],
-      "@voltix/commerce": ["../../packages/commerce/src/index.ts"],
-      "@voltix/db": ["../../packages/db/src/index.ts"],
-      "@voltix/payments": ["../../packages/payments/src/index.ts"],
-      "@voltix/notifications": ["../../packages/notifications/src/index.ts"]
+      "@phoyev/core": ["../../packages/core/src/index.ts"],
+      "@phoyev/ui": ["../../packages/ui/src/index.ts"],
+      "@phoyev/ai": ["../../packages/ai/src/index.ts"],
+      "@phoyev/auth": ["../../packages/auth/src/index.ts"],
+      "@phoyev/commerce": ["../../packages/commerce/src/index.ts"],
+      "@phoyev/db": ["../../packages/db/src/index.ts"],
+      "@phoyev/payments": ["../../packages/payments/src/index.ts"],
+      "@phoyev/notifications": ["../../packages/notifications/src/index.ts"]
     },
     "allowJs": true,
     "incremental": true,

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { money } from '@voltix/core';
+import { money } from '@phoyev/core';
 import { CashOnDeliveryGateway } from './adapters/cod';
 import { StripeGateway } from './adapters/stripe';
 import {

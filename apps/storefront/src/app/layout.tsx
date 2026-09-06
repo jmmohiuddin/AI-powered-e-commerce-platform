@@ -36,13 +36,13 @@ export const metadata: Metadata = {
   // `||` not `??`: `new URL('')` throws, which would take down every page.
   metadataBase: new URL(process.env.STOREFRONT_URL || 'http://localhost:3000'),
   title: {
-    default: 'Voltix — Smartphones, accessories & electronics in the UAE',
-    template: '%s · Voltix',
+    default: 'Phoyev — Smartphones, accessories & electronics in the UAE',
+    template: '%s · Phoyev',
   },
   description:
     'Genuine Green Lion, Porodo and Levelo charging, audio and everyday tech accessories with official UAE warranty, card, Tabby and cash on delivery, and same-day dispatch across the Emirates.',
-  openGraph: { type: 'website', siteName: 'Voltix', locale: 'en_AE', alternateLocale: ['ar_AE'] },
-  // No `site`/`creator` handle: Voltix has no confirmed X/Twitter account, and a
+  openGraph: { type: 'website', siteName: 'Phoyev', locale: 'en_AE', alternateLocale: ['ar_AE'] },
+  // No `site`/`creator` handle: Phoyev has no confirmed X/Twitter account, and a
   // guessed one would misattribute the page to the wrong account. `summary_large_image`
   // still activates the large-image preview card on the strength of the OG tags alone.
   twitter: { card: 'summary_large_image' },
@@ -111,17 +111,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '@graph': [
       {
         '@type': 'Organization',
-        name: 'Voltix',
+        name: 'Phoyev',
         url: siteUrl,
         description:
-          'Voltix is an electronics and mobile retailer serving customers across the United Arab Emirates.',
+          'Phoyev is an electronics and mobile retailer serving customers across the United Arab Emirates.',
         ...(merchant.legalName ? { legalName: merchant.legalName } : {}),
         ...(phone ? { telephone: phone } : {}),
         ...(email ? { email } : {}),
       },
       {
         '@type': 'WebSite',
-        name: 'Voltix',
+        name: 'Phoyev',
         url: siteUrl,
         potentialAction: {
           '@type': 'SearchAction',

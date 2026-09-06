@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
+import { uuidv7 } from '@phoyev/db';
 import {
   DomainError,
   isValidTrn,
@@ -8,9 +8,9 @@ import {
   priceChanged,
   validateAddress,
   type UaeAddress,
-} from '@voltix/core';
-import type { PaymentGateway, PaymentOutcome } from '@voltix/payments';
-import { hasEligibility, shouldCommitStock } from '@voltix/payments';
+} from '@phoyev/core';
+import type { PaymentGateway, PaymentOutcome } from '@phoyev/payments';
+import { hasEligibility, shouldCommitStock } from '@phoyev/payments';
 import { getCart } from './cart';
 import { orderNumber } from './numbering';
 import { refreshDerivedStatus } from './orders';
@@ -766,7 +766,7 @@ async function createIntent(
 /**
  * Minor units to a readable amount, for a message the shopper will see.
  *
- * Not `formatPrice` from @voltix/ui: that is a React-facing module and the
+ * Not `formatPrice` from @phoyev/ui: that is a React-facing module and the
  * domain does not depend on the presentation layer. Two decimal places and the
  * code is the right amount of formatting for an error string — the storefront
  * localises anything it renders itself.

@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { uuidv7, type Database } from '@voltix/db';
+import { uuidv7, type Database } from '@phoyev/db';
 import type { NotificationChannel, TransportRegistry } from './port';
 import type { RenderedNotification } from './templates';
 

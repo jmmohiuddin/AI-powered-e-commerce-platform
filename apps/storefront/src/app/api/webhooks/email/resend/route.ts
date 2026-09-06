@@ -1,5 +1,5 @@
-import { recordEmailProviderEvent } from '@voltix/commerce';
-import { parseResendEmailEvent, verifySvixSignature } from '@voltix/notifications';
+import { recordEmailProviderEvent } from '@phoyev/commerce';
+import { parseResendEmailEvent, verifySvixSignature } from '@phoyev/notifications';
 import { inTenant, tenantContext } from '@/lib/session';
 
 /**

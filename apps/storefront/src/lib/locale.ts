@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { directionFor } from '@voltix/ui';
+import { directionFor } from '@phoyev/ui';
 
 /**
  * LOCALE RESOLUTION
@@ -30,7 +30,7 @@ export const LOCALES = ['en-AE', 'ar-AE'] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = 'en-AE';
-export const LOCALE_COOKIE = 'voltix_locale';
+export const LOCALE_COOKIE = 'phoyev_locale';
 /** A year. Exported so the privacy notice states the lifetime that is actually set. */
 export const LOCALE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 

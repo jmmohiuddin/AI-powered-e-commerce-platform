@@ -1,6 +1,6 @@
 import { afterAll, afterEach, describe, expect, it } from 'vitest';
 import { sql } from 'drizzle-orm';
-import { closeConnections, dbAdmin, ping } from '@voltix/db';
+import { closeConnections, dbAdmin, ping } from '@phoyev/db';
 import { dispatchNotifications, insertNotification } from './dispatch';
 import { TransportRegistry, type NotificationTransport, type SendResult } from './port';
 import type { RenderedNotification } from './templates';
@@ -202,14 +202,14 @@ suite('notification dispatch', () => {
     const transport = fakeTransport('email', () => ({
       ok: true,
       provider: 'smtp',
-      providerMessageId: '<abc@voltix.ae>',
+      providerMessageId: '<abc@phoyev.ae>',
     }));
 
     await dispatchNotifications(dbAdmin(), registryWith(transport), { limit: 10 });
 
     const row = await statusOf('test:msgid');
     expect(row?.provider).toBe('smtp');
-    expect(row?.provider_message_id).toBe('<abc@voltix.ae>');
+    expect(row?.provider_message_id).toBe('<abc@phoyev.ae>');
   });
 
   it('suppresses a row whose channel has no transport rather than looping forever', async () => {

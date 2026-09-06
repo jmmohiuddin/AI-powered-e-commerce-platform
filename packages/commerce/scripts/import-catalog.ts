@@ -33,12 +33,12 @@
  */
 // Must be first: populates process.env from the repo-root .env before any
 // module below reads a connection string at import time.
-import '@voltix/config/load-env';
+import '@phoyev/config/load-env';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { sql } from 'drizzle-orm';
-import { closeConnections, dbAdmin, uuidv7, withTenant } from '@voltix/db';
-import { prepareImage, resolveStorage } from '@voltix/media';
+import { closeConnections, dbAdmin, uuidv7, withTenant } from '@phoyev/db';
+import { prepareImage, resolveStorage } from '@phoyev/media';
 import { addProductImage } from '../src/media';
 import { createProduct, setProductStatus } from '../src/catalogue';
 import type { ActorContext, TenantContext } from '../src/types';
@@ -324,7 +324,7 @@ async function main(): Promise<void> {
     `);
     await d.execute(sql`
       UPDATE products SET
-        meta_title = ${`${product.title} — Voltix UAE`},
+        meta_title = ${`${product.title} — Phoyev UAE`},
         meta_description = ${product.metaDescription},
         tags = ${JSON.stringify(product.tags)}::jsonb,
         updated_at = now()

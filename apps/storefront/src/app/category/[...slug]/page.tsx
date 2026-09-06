@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { formatCount } from '@voltix/ui';
+import { formatCount } from '@phoyev/ui';
 import { ProductCard } from '@/components/product-card';
 import {
   ListingFacets,
@@ -137,16 +137,15 @@ export default async function CategoryPage({
       </nav>
 
       <div className="container listing">
-        <ListingFacets
-          basePath={basePath}
-          filters={filters}
-          facets={result.facets}
-          locale={locale}
-          t={t}
-        >
-          {category.children}
-        </ListingFacets>
-
+        {/*
+          `<section>` (carrying this page's only `<h1>`) comes first in markup
+          so the heading outline starts there, not at the facet group `<h3>`s
+          in the aside — the aside used to render first in the DOM, which put
+          "Category"/"Brand"/etc. (`<h3>`) ahead of the page's own `<h1>`, an
+          invalid heading order Lighthouse's axe-core audit flags. Visual
+          position is unaffected: `.facets { order: -1 }` in globals.css keeps
+          it first in the two-column grid regardless of DOM order.
+        */}
         <section>
           <div className="listing__head">
             <div>
@@ -180,6 +179,12 @@ export default async function CategoryPage({
             </div>
           ) : (
             <>
+              {/* Visually hidden, not decorative: `ProductCard` titles are
+                  `<h3>` (see product-card.tsx), and this page's only other
+                  heading is the `<h1>` above — without this, the heading
+                  order jumps from 1 straight to 3, which Lighthouse and every
+                  screen reader flag as invalid structure. */}
+              <h2 className="visually-hidden">{t('search.products')}</h2>
               <div className="product-grid">
                 {result.products.map((product) => (
                   <ProductCard key={product.id} product={product} locale={locale} t={t} />
@@ -201,6 +206,16 @@ export default async function CategoryPage({
             </>
           )}
         </section>
+
+        <ListingFacets
+          basePath={basePath}
+          filters={filters}
+          facets={result.facets}
+          locale={locale}
+          t={t}
+        >
+          {category.children}
+        </ListingFacets>
       </div>
     </>
   );

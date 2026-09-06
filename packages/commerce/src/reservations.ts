@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
-import { outOfStock, reservationTtlMs } from '@voltix/core';
+import { uuidv7 } from '@phoyev/db';
+import { outOfStock, reservationTtlMs } from '@phoyev/core';
 import type { Tx } from './types';
 
 /**

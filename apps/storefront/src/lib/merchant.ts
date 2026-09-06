@@ -1,8 +1,8 @@
 import 'server-only';
 import { cache } from 'react';
 import { eq } from 'drizzle-orm';
-import { withTenantRead, schema } from '@voltix/db';
-import { formatTrn } from '@voltix/core';
+import { withTenantRead, schema } from '@phoyev/db';
+import { formatTrn } from '@phoyev/core';
 import { DEMO_TENANT_ID } from './catalog';
 
 /**
@@ -33,7 +33,7 @@ import { DEMO_TENANT_ID } from './catalog';
  */
 
 export interface MerchantIdentity {
-  /** Registered legal name, e.g. "Voltix Electronics Trading L.L.C." */
+  /** Registered legal name, e.g. "Phoyev Electronics Trading L.L.C." */
   readonly legalName: string | null;
   /** Registered address as it appears on a tax invoice. Free text; may be multi-line. */
   readonly legalAddress: string | null;

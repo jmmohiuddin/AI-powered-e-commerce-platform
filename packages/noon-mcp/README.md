@@ -1,11 +1,11 @@
-# `@voltix/noon-mcp` — noon Partner API as MCP tools
+# `@phoyev/noon-mcp` — noon Partner API as MCP tools
 
 An MCP server that lets an AI client (Claude Code, Claude Desktop, Cursor) query
 and operate a noon seller account in natural language.
 
 This is the **operator** surface — "what did noon sell today", "is this SKU
 live", "mark that order shipped". It is not how the shop stays in sync. That is
-[`@voltix/noon`](../noon/README.md), which runs in the worker and needs no
+[`@phoyev/noon`](../noon/README.md), which runs in the worker and needs no
 assistant in the loop. The distinction matters: a missed tool call here is an
 unanswered question; a missed sync is a listing selling stock that does not
 exist.
@@ -41,14 +41,14 @@ to the sync and would never receive another stock update.
 
 ## Setup
 
-Credentials are shared with `@voltix/noon` — see
+Credentials are shared with `@phoyev/noon` — see
 [its README](../noon/README.md#credentials). In short: a Partner Portal service
 account of type `apijwt` yields a JSON file with `key_id`, `private_key` and
 `project_code`. There is no key/secret pair.
 
 ```bash
 npm install
-npm run build --workspace=@voltix/noon-mcp
+npm run build --workspace=@phoyev/noon-mcp
 ```
 
 ### Claude Code
@@ -116,5 +116,5 @@ The service account's role is below `Project Owner`.
 
 **`HTTP 404` on `noon_list_warehouses`**
 The warehouse service path prefix is the one endpoint inferred rather than
-verified. See the table in [`@voltix/noon`](../noon/README.md#what-is-verified-and-what-is-not).
+verified. See the table in [`@phoyev/noon`](../noon/README.md#what-is-verified-and-what-is-not).
 

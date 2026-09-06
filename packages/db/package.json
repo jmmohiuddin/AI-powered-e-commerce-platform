@@ -1,5 +1,5 @@
 {
-  "name": "@voltix/db",
+  "name": "@phoyev/db",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@voltix/config": "*",
+    "@phoyev/config": "*",
     "drizzle-orm": "^0.45.2",
     "pg": "^8.22.0"
   },

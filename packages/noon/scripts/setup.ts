@@ -7,18 +7,18 @@
  * credentials were added would publish every draft, discontinued and
  * internal-only SKU the merchant has. This script is how a human opts rows in.
  *
- *   npm run setup --workspace=@voltix/noon -- whoami
- *   npm run setup --workspace=@voltix/noon -- warehouses
- *   npm run setup --workspace=@voltix/noon -- map <voltix-warehouse-code> <noon-warehouse-code> [country]
- *   npm run setup --workspace=@voltix/noon -- link [--all | --sku SKU ...] [--live]
- *   npm run setup --workspace=@voltix/noon -- status
+ *   npm run setup --workspace=@phoyev/noon -- whoami
+ *   npm run setup --workspace=@phoyev/noon -- warehouses
+ *   npm run setup --workspace=@phoyev/noon -- map <phoyev-warehouse-code> <noon-warehouse-code> [country]
+ *   npm run setup --workspace=@phoyev/noon -- link [--all | --sku SKU ...] [--live]
+ *   npm run setup --workspace=@phoyev/noon -- status
  *
  * Every subcommand is safe to re-run.
  */
 
-import '@voltix/config/load-env';
+import '@phoyev/config/load-env';
 import { sql } from 'drizzle-orm';
-import { closeConnections, dbAdmin, uuidv7 } from '@voltix/db';
+import { closeConnections, dbAdmin, uuidv7 } from '@phoyev/db';
 import { NoonClient, isProductionTarget, loadNoonConfig } from '../src/index.js';
 
 const [command, ...args] = process.argv.slice(2);
@@ -26,12 +26,12 @@ const [command, ...args] = process.argv.slice(2);
 /**
  * Resolves the tenant to operate on.
  *
- * Voltix is deployed for one tenant but the schema is multi-tenant, so this
+ * Phoyev is deployed for one tenant but the schema is multi-tenant, so this
  * refuses to guess when there is more than one rather than silently picking
  * the first and mapping another merchant's warehouses.
  */
 async function resolveTenant(): Promise<string> {
-  const explicit = process.env.VOLTIX_TENANT_ID?.trim();
+  const explicit = process.env.PHOYEV_TENANT_ID?.trim();
   if (explicit) return explicit;
 
   const rows = await dbAdmin().transaction(async (tx) => {
@@ -44,7 +44,7 @@ async function resolveTenant(): Promise<string> {
   if (rows.length === 0) throw new Error('No tenants exist. Run the seed first.');
   if (rows.length > 1) {
     throw new Error(
-      `${rows.length} tenants found — set VOLTIX_TENANT_ID to choose:\n` +
+      `${rows.length} tenants found — set PHOYEV_TENANT_ID to choose:\n` +
         rows.map((row) => `  ${row.id}  ${row.name}`).join('\n'),
     );
   }
@@ -89,15 +89,15 @@ async function listWarehouses(): Promise<void> {
     return result.rows;
   });
 
-  console.log('\nVoltix warehouses:');
+  console.log('\nPhoyev warehouses:');
   for (const warehouse of local) console.log(`  ${warehouse.code.padEnd(20)} ${warehouse.name}`);
-  console.log('\nMap them with:  … -- map <voltix-code> <noon-code> [country]');
+  console.log('\nMap them with:  … -- map <phoyev-code> <noon-code> [country]');
 }
 
 async function map(): Promise<void> {
-  const [voltixCode, noonCode, country = 'ae'] = args;
-  if (!voltixCode || !noonCode) {
-    throw new Error('Usage: map <voltix-warehouse-code> <noon-warehouse-code> [country]');
+  const [phoyevCode, noonCode, country = 'ae'] = args;
+  if (!phoyevCode || !noonCode) {
+    throw new Error('Usage: map <phoyev-warehouse-code> <noon-warehouse-code> [country]');
   }
 
   const tenantId = await resolveTenant();
@@ -111,10 +111,10 @@ async function map(): Promise<void> {
   await dbAdmin().transaction(async (tx) => {
     const local = await tx.execute<{ id: string }>(sql`
       SELECT id FROM warehouses
-       WHERE tenant_id = ${tenantId} AND code = ${voltixCode} AND deleted_at IS NULL
+       WHERE tenant_id = ${tenantId} AND code = ${phoyevCode} AND deleted_at IS NULL
     `);
     const warehouseId = local.rows[0]?.id;
-    if (!warehouseId) throw new Error(`No Voltix warehouse with code "${voltixCode}".`);
+    if (!warehouseId) throw new Error(`No Phoyev warehouse with code "${phoyevCode}".`);
 
     await tx.execute(sql`
       INSERT INTO noon_warehouse_map
@@ -134,7 +134,7 @@ async function map(): Promise<void> {
     `);
   });
 
-  console.log(`✓ ${voltixCode} → ${noonCode} (${country})`);
+  console.log(`✓ ${phoyevCode} → ${noonCode} (${country})`);
 }
 
 /**
@@ -266,10 +266,10 @@ const COMMANDS: Record<string, () => Promise<void>> = {
 async function main(): Promise<void> {
   const handler = command ? COMMANDS[command] : undefined;
   if (!handler) {
-    console.log(`Usage: npm run setup --workspace=@voltix/noon -- <command>\n`);
+    console.log(`Usage: npm run setup --workspace=@phoyev/noon -- <command>\n`);
     console.log(`  whoami       verify the credentials authenticate`);
-    console.log(`  warehouses   list noon and Voltix warehouses side by side`);
-    console.log(`  map          map a Voltix warehouse to a noon warehouse code`);
+    console.log(`  warehouses   list noon and Phoyev warehouses side by side`);
+    console.log(`  map          map a Phoyev warehouse to a noon warehouse code`);
     console.log(`  link         opt variants into the sync`);
     console.log(`  status       what the sync would do right now`);
     process.exitCode = command ? 1 : 0;

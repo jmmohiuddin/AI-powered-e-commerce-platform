@@ -24,7 +24,7 @@ RUN npm ci
 # read the database are dynamic and resolve their data at request time against
 # the runtime environment.
 ENV NODE_ENV=production
-RUN npm run build --workspace=@voltix/storefront --workspace=@voltix/admin
+RUN npm run build --workspace=@phoyev/storefront --workspace=@phoyev/admin
 
 EXPOSE 3000 3001
-CMD ["npm", "run", "start", "--workspace=@voltix/storefront"]
+CMD ["npm", "run", "start", "--workspace=@phoyev/storefront"]

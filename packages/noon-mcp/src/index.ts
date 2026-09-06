@@ -4,7 +4,7 @@
  *
  * This is the *operator* surface: an assistant answering "what did noon sell
  * today", "is this SKU actually live", "mark that order shipped". It is not
- * how the shop stays in sync — that is the sync engine in @voltix/noon/sync,
+ * how the shop stays in sync — that is the sync engine in @phoyev/noon/sync,
  * which runs in the worker and needs no assistant in the loop.
  *
  * The distinction matters because the failure modes differ. A missed tool call
@@ -17,7 +17,7 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { NoonClient, isProductionTarget, loadNoonConfig } from '@voltix/noon';
+import { NoonClient, isProductionTarget, loadNoonConfig } from '@phoyev/noon';
 import { registerTools } from './tools.js';
 
 async function main(): Promise<void> {

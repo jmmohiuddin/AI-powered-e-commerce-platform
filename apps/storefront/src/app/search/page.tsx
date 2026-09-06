@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { ProductCard } from '@/components/product-card';
-import { formatCount } from '@voltix/ui';
+import { formatCount } from '@phoyev/ui';
 import { ListingFacets, ListingPagination, ListingSort } from '@/components/listing-controls';
 import { searchProducts } from '@/lib/catalog';
 import { whatsappHref } from '@/lib/contact';
 import { parseListingParams } from '@/lib/listing';
 import { clientIdentifier, limitSearch } from '@/lib/rate-limit';
 import { resolveLocale, translator } from '@/lib/locale';
-import { MAX_SEARCH_QUERY_LENGTH } from '@voltix/commerce';
+import { MAX_SEARCH_QUERY_LENGTH } from '@phoyev/commerce';
 import { trackAfterRender, trackSearchQueryAfterRender } from '@/lib/analytics';
 import { pageVisitor } from '@/lib/visitor';
 import type { ListingParams } from '@/lib/listing';
@@ -169,14 +169,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
 
   return (
     <div className="container listing">
-      <ListingFacets
-        basePath={BASE_PATH}
-        filters={filters}
-        facets={result.facets}
-        locale={locale}
-        t={t}
-      />
-
+      {/* `<section>` (carrying this page's only `<h1>`) comes first in markup
+          — see the identical note and CSS fix in category/[...slug]/page.tsx. */}
       <section>
         <div className="listing__head">
           <div>
@@ -228,6 +222,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
           </div>
         ) : (
           <>
+            {/* Same fix as category/[...slug]/page.tsx: `ProductCard` titles
+                are `<h3>`, and without an intervening heading this page's
+                `<h1>` is followed directly by a `<h3>` — invalid order. */}
+            <h2 className="visually-hidden">{t('search.products')}</h2>
             <div className="product-grid">
               {result.products.map((product) => (
                 <ProductCard key={product.id} product={product} locale={locale} t={t} />
@@ -248,6 +246,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
           </>
         )}
       </section>
+
+      <ListingFacets
+        basePath={BASE_PATH}
+        filters={filters}
+        facets={result.facets}
+        locale={locale}
+        t={t}
+      />
     </div>
   );
 }

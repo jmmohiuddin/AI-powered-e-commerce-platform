@@ -10,7 +10,7 @@ import { bigint, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
  * is correct but forces string round-tripping in JS and invites accidental
  * `Number()` casts. Integers in a bigint are exact, cheap to sum, and safe to
  * `JSON.stringify`. The currency lives beside the amount on the owning row —
- * see `Money` in @voltix/core, which is the only type allowed to do arithmetic.
+ * see `Money` in @phoyev/core, which is the only type allowed to do arithmetic.
  *
  * A signed bigint holds ~9.2e18 minor units. Even at AED fils granularity
  * that is ~92 quadrillion dirhams — comfortably beyond any merchant's lifetime

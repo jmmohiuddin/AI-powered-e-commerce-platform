@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DomainError } from '@voltix/core';
+import { DomainError } from '@phoyev/core';
 import { signRequest } from './sigv4';
 
 /**

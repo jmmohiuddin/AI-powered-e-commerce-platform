@@ -2,7 +2,7 @@ import sharp from 'sharp';
 // Separate type import: `sharp` is declared with `export =`, so the namespace
 // is not reachable as a property of the default import under this tsconfig.
 import type { Metadata } from 'sharp';
-import { DomainError } from '@voltix/core';
+import { DomainError } from '@phoyev/core';
 
 /**
  * IMAGE INGESTION

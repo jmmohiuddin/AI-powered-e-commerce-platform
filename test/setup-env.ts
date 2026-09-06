@@ -1,4 +1,4 @@
-import '@voltix/config/load-env';
+import '@phoyev/config/load-env';
 
 /**
  * Vitest setup: load the repo `.env`, then redirect the database at a *test*
@@ -22,16 +22,16 @@ import '@voltix/config/load-env';
  *
  * So the app's own connection strings are overwritten here with the test ones.
  * `packages/commerce/src/test-support.ts` reads the same variables directly;
- * this file covers the suites that go through `@voltix/db` instead, which reads
+ * this file covers the suites that go through `@phoyev/db` instead, which reads
  * `DATABASE_URL` at import time.
  */
 
 const TEST_APP_URL =
   process.env.DATABASE_TEST_URL ??
-  'postgres://voltix_app:voltix_app_dev_password@localhost:5433/voltix';
+  'postgres://phoyev_app:phoyev_app_dev_password@localhost:5433/phoyev';
 const TEST_ADMIN_URL =
   process.env.DATABASE_TEST_ADMIN_URL ??
-  'postgres://voltix:voltix_dev_password@localhost:5433/voltix';
+  'postgres://phoyev:phoyev_dev_password@localhost:5433/phoyev';
 
 process.env.DATABASE_URL = TEST_APP_URL;
 process.env.DATABASE_ADMIN_URL = TEST_ADMIN_URL;

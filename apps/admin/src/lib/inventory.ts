@@ -1,6 +1,6 @@
 import 'server-only';
 import { sql } from 'drizzle-orm';
-import { withTenant } from '@voltix/db';
+import { withTenant } from '@phoyev/db';
 import {
   classifyInventory,
   forecastDemand,
@@ -9,7 +9,7 @@ import {
   type Forecast,
   type InventoryClassification,
   type ReplenishmentAdvice,
-} from '@voltix/ai';
+} from '@phoyev/ai';
 
 /**
  * INVENTORY ANALYSIS ON REAL SALES HISTORY

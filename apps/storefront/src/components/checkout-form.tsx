@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { formatPrice } from '@voltix/ui';
+import { formatPrice } from '@phoyev/ui';
 import { placeOrder } from '@/app/actions';
 import type { Locale } from '@/lib/locale';
 

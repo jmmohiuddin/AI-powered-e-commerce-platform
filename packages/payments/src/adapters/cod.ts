@@ -1,4 +1,4 @@
-import { money, type Money } from '@voltix/core';
+import { money, type Money } from '@phoyev/core';
 import type {
   GatewayCapabilities,
   PaymentGateway,

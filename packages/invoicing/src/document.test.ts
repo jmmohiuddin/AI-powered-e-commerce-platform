@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TAX_INVOICE_REQUIRED_FIELDS } from '@voltix/core';
+import { TAX_INVOICE_REQUIRED_FIELDS } from '@phoyev/core';
 import {
   buildTaxDocument,
   documentHeading,
@@ -125,7 +125,7 @@ describe('the legally required field set', () => {
     expect(html).toContain('5%'); // per-line VAT rate
     expect(html).toContain('Total excluding VAT');
     expect(html).toContain('Total payable');
-    // The checklist in @voltix/core is the source of truth for what is
+    // The checklist in @phoyev/core is the source of truth for what is
     // required; this asserts the two have not drifted apart.
     expect(TAX_INVOICE_REQUIRED_FIELDS.length).toBeGreaterThan(0);
     for (const field of TAX_INVOICE_REQUIRED_FIELDS) {

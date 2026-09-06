@@ -1,4 +1,4 @@
-import type { FulfilmentStatus, OrderStatus, PaymentStatus } from '@voltix/core';
+import type { FulfilmentStatus, OrderStatus, PaymentStatus } from '@phoyev/core';
 
 /**
  * Status badges with one rule: colour follows *whether a human must act*, not

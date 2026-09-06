@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { UAE_VAT_RATE_BPS } from '@voltix/core';
+import { UAE_VAT_RATE_BPS } from '@phoyev/core';
 import { supportEmail, supportPhone, telHref, whatsappHref, whatsappNumber } from '@/lib/contact';
 
 export const metadata: Metadata = {
   title: 'Contact us',
-  description: 'WhatsApp, phone and email — how to reach Voltix, and when we reply.',
+  description: 'WhatsApp, phone and email — how to reach Phoyev, and when we reply.',
 };
 
 /**

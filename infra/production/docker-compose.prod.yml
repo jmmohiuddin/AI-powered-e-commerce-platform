@@ -17,13 +17,13 @@
 # The apps read /app/.env (the monorepo-root .env mounted below) — the same
 # single-source-of-configuration contract as development.
 
-name: voltix-prod
+name: phoyev-prod
 
 x-app: &app
   build:
     context: ../..
     dockerfile: infra/production/Dockerfile
-  image: voltix-app:latest
+  image: phoyev-app:latest
   restart: unless-stopped
   env_file: ../../.env
   volumes:
@@ -35,7 +35,7 @@ x-app: &app
       condition: service_healthy
     minio:
       condition: service_started
-  networks: [voltix]
+  networks: [phoyev]
 
 services:
   caddy:
@@ -57,15 +57,15 @@ services:
       - caddy-data:/data
       - caddy-config:/config
     depends_on: [storefront, admin]
-    networks: [voltix]
+    networks: [phoyev]
 
   storefront:
     <<: *app
-    command: ['npm', 'run', 'start', '--workspace=@voltix/storefront']
+    command: ['npm', 'run', 'start', '--workspace=@phoyev/storefront']
 
   admin:
     <<: *app
-    command: ['npm', 'run', 'start', '--workspace=@voltix/admin']
+    command: ['npm', 'run', 'start', '--workspace=@phoyev/admin']
 
   worker:
     <<: *app
@@ -99,6 +99,14 @@ services:
     image: pgvector/pgvector:pg17
     restart: unless-stopped
     environment:
+      # Also not renamed, and for a harder reason than the volumes: these two
+      # take effect only when initialising an *empty* data directory. The
+      # cluster on disk was created with the role and database `voltix`, and the
+      # server's DATABASE_URL still authenticates as that role. Changing them
+      # here would be ignored by the running database and would then quietly
+      # disagree with it — until someone restored from scratch and could not log
+      # in. Renaming a Postgres role and database is a migration, not a find and
+      # replace.
       POSTGRES_USER: voltix
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
       POSTGRES_DB: voltix
@@ -119,7 +127,7 @@ services:
       - 'pg_stat_statements.track=all'
       - '-c'
       - 'max_connections=200'
-    networks: [voltix]
+    networks: [phoyev]
 
   redis:
     image: redis:7.4-alpine
@@ -132,7 +140,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
-    networks: [voltix]
+    networks: [phoyev]
 
   minio:
     image: minio/minio:latest
@@ -143,7 +151,7 @@ services:
     command: server /data
     volumes:
       - minio-data:/data
-    networks: [voltix]
+    networks: [phoyev]
 
   # Same contract as development: media bucket exists and allows anonymous
   # download before the first upload happens. Idempotent on every up.
@@ -153,20 +161,39 @@ services:
     entrypoint: >
       /bin/sh -c "
       until mc alias set local http://minio:9000 $${MINIO_USER} $${MINIO_PASS}; do sleep 1; done;
-      mc mb --ignore-existing local/${S3_BUCKET:-voltix-media};
-      mc anonymous set download local/${S3_BUCKET:-voltix-media};
+      mc mb --ignore-existing local/${S3_BUCKET:-phoyev-media};
+      mc anonymous set download local/${S3_BUCKET:-phoyev-media};
       "
     environment:
       MINIO_USER: ${S3_ACCESS_KEY_ID}
       MINIO_PASS: ${S3_SECRET_ACCESS_KEY}
-    networks: [voltix]
+    networks: [phoyev]
 
+# THE VOLUME NAMES ARE PINNED. DO NOT LET THEM FOLLOW THE PROJECT NAME.
+#
+# Compose names a volume `<project>_<key>`, so renaming the project from
+# `voltix-prod` to `phoyev-prod` would have asked for `phoyev-prod_postgres-data`
+# — a volume that does not exist. Docker creates a missing volume silently, so
+# the stack would have come up healthy on an empty database: no catalogue, no
+# images, no orders, and the real data still sitting in the old volumes with
+# nothing pointing at it. The rename is cosmetic; the data is not.
+#
+# These five names are what the running server actually has on disk. They keep
+# the `voltix-prod_` prefix because that is where the bytes are, and renaming a
+# volume means copying its contents, not editing this file.
 volumes:
   postgres-data:
+    name: voltix-prod_postgres-data
   redis-data:
+    name: voltix-prod_redis-data
   minio-data:
+    name: voltix-prod_minio-data
+  # TLS certificates. Recreating this one means re-issuing from Let's Encrypt,
+  # which has rate limits a bad afternoon can exhaust.
   caddy-data:
+    name: voltix-prod_caddy-data
   caddy-config:
+    name: voltix-prod_caddy-config
 
 networks:
-  voltix:
+  phoyev:

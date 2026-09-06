@@ -1,10 +1,10 @@
 // Must be first: populates process.env from the repo-root .env before any
 // module below reads a connection string at import time.
-import '@voltix/config/load-env';
+import '@phoyev/config/load-env';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { sql } from 'drizzle-orm';
-import { dbAdmin, closeConnections, uuidv7 } from '@voltix/db';
+import { dbAdmin, closeConnections, uuidv7 } from '@phoyev/db';
 import { hashPassword } from '../src/passwords';
 
 /**

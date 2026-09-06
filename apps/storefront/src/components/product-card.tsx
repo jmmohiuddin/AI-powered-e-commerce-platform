@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { discountPercent, formatCount, formatPrice, formatRating } from '@voltix/ui';
-import { summarise } from '@voltix/core';
+import { discountPercent, formatCount, formatPrice, formatRating } from '@phoyev/ui';
+import { summarise } from '@phoyev/core';
 import { AvailabilityBadge, type AvailabilityLabels } from './availability-badge';
 import { ProductImage } from './product-image';
 import { imagesOf, localise, PLACEHOLDER_IMAGE, type ProductView } from '@/lib/types';

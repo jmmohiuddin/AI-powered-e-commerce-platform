@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { lookupOrder } from '@voltix/commerce';
-import { formatPrice } from '@voltix/ui';
-import { normaliseUaePhone } from '@voltix/core';
+import { lookupOrder } from '@phoyev/commerce';
+import { formatPrice } from '@phoyev/ui';
+import { normaliseUaePhone } from '@phoyev/core';
 import { inTenant, tenantContext } from '@/lib/session';
 import { resolveLocale, translator } from '@/lib/locale';
 

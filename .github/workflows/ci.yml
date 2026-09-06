@@ -21,23 +21,23 @@ jobs:
     # repeating the block three times and letting the copies drift.
     env:
       # Owner: runs migrations, and the cross-tenant reads the worker does.
-      DATABASE_ADMIN_URL: postgres://voltix:voltix@localhost:5432/voltix_test
+      DATABASE_ADMIN_URL: postgres://phoyev:phoyev@localhost:5432/phoyev_test
       # Restricted role: what the app connects as, and the only way an
       # isolation test proves anything — the owner bypasses every policy.
-      DATABASE_URL: postgres://voltix_app:voltix_app_dev_password@localhost:5432/voltix_test
+      DATABASE_URL: postgres://phoyev_app:phoyev_app_dev_password@localhost:5432/phoyev_test
       # The integration suites deliberately refuse to inherit the app's
       # connection string — they create and destroy tenants, and pointing that
       # at whatever DATABASE_URL happens to be is how a test run ends up
       # mutating a production database. They read these instead. Here the two
       # are the same throwaway container; in a real environment they are not.
-      DATABASE_TEST_URL: postgres://voltix_app:voltix_app_dev_password@localhost:5432/voltix_test
-      DATABASE_TEST_ADMIN_URL: postgres://voltix:voltix@localhost:5432/voltix_test
+      DATABASE_TEST_URL: postgres://phoyev_app:phoyev_app_dev_password@localhost:5432/phoyev_test
+      DATABASE_TEST_ADMIN_URL: postgres://phoyev:phoyev@localhost:5432/phoyev_test
       REDIS_URL: redis://localhost:6379
       S3_ENDPOINT: http://localhost:9000
-      S3_BUCKET: voltix-media
+      S3_BUCKET: phoyev-media
       S3_REGION: auto
-      S3_ACCESS_KEY_ID: voltix
-      S3_SECRET_ACCESS_KEY: voltix_dev_password
+      S3_ACCESS_KEY_ID: phoyev
+      S3_SECRET_ACCESS_KEY: phoyev_dev_password
       AUTH_URL: http://localhost:3000
       STOREFRONT_URL: http://localhost:3000
       ADMIN_URL: http://localhost:3001
@@ -45,12 +45,12 @@ jobs:
       postgres:
         image: pgvector/pgvector:pg17
         env:
-          POSTGRES_USER: voltix
-          POSTGRES_PASSWORD: voltix
-          POSTGRES_DB: voltix_test
+          POSTGRES_USER: phoyev
+          POSTGRES_PASSWORD: phoyev
+          POSTGRES_DB: phoyev_test
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U voltix"
+          --health-cmd "pg_isready -U phoyev"
           --health-interval 5s --health-timeout 5s --health-retries 20
       redis:
         image: redis:7.4-alpine
@@ -82,8 +82,8 @@ jobs:
       - name: Start object storage
         run: |
           docker run -d --name minio -p 9000:9000 \
-            -e MINIO_ROOT_USER=voltix \
-            -e MINIO_ROOT_PASSWORD=voltix_dev_password \
+            -e MINIO_ROOT_USER=phoyev \
+            -e MINIO_ROOT_PASSWORD=phoyev_dev_password \
             minio/minio:latest server /data
 
           # Readiness, from the runner rather than inside the container — the
@@ -100,12 +100,12 @@ jobs:
           # problem and is not one.
           curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
           chmod +x /usr/local/bin/mc
-          mc alias set ci http://localhost:9000 voltix voltix_dev_password
-          mc mb --ignore-existing ci/voltix-media
+          mc alias set ci http://localhost:9000 phoyev phoyev_dev_password
+          mc mb --ignore-existing ci/phoyev-media
           # Anonymous read, to match dev — the storefront and the image
           # optimiser fetch these URLs without credentials, and the test
           # asserts on that. Without it MinIO returns 403.
-          mc anonymous set download ci/voltix-media
+          mc anonymous set download ci/phoyev-media
 
       - name: Typecheck
         run: npm run typecheck
@@ -115,7 +115,7 @@ jobs:
       # only a real Postgres can test — RLS, row locking, transactional
       # rollback. A silently-skipped test is worse than a missing one.
       #
-      # `db:migrate` also creates the restricted `voltix_app` role the tests
+      # `db:migrate` also creates the restricted `phoyev_app` role the tests
       # connect as, and applies the very RLS policies being asserted.
       - name: Apply migrations and RLS policies
         run: npm run db:migrate

@@ -17,7 +17,7 @@ import type { NotificationMessage, NotificationTransport, SendResult } from '../
 export interface SmtpConfig {
   /** e.g. smtp://localhost:1025 or smtps://user:pass@smtp.provider.com:465 */
   readonly url: string;
-  /** RFC 5322 From — 'Voltix <orders@voltix.ae>'. */
+  /** RFC 5322 From — 'Phoyev <orders@phoyev.ae>'. */
   readonly from: string;
 }
 

@@ -2,7 +2,7 @@
  * Typed client for the noon Partner API.
  *
  * Field names below are noon's, in snake_case, deliberately unmapped. This is
- * the boundary layer: the translation from Voltix's domain (minor units,
+ * the boundary layer: the translation from Phoyev's domain (minor units,
  * variant IDs, warehouse UUIDs) into noon's (major-unit doubles, partner SKUs,
  * warehouse codes) happens one level up in sync/, where the mapping table
  * lives. Keeping the wire types honest means a doc change is a diff here and
@@ -306,7 +306,7 @@ export class NoonClient {
    * Marks items shipped.
    *
    * `integration_shipment_nr` must be unique and is ours to choose — the sync
-   * derives it from the Voltix shipment ID so that a retried job creates the
+   * derives it from the Phoyev shipment ID so that a retried job creates the
    * same shipment rather than a duplicate.
    */
   createShipment(request: {
@@ -344,7 +344,7 @@ export class NoonClient {
 function assertBatchSize(size: number, method: string): void {
   if (size > MAX_BATCH_SIZE) {
     throw new RangeError(
-      `[@voltix/noon] ${method} was given ${size} items; the cap is ${MAX_BATCH_SIZE}. ` +
+      `[@phoyev/noon] ${method} was given ${size} items; the cap is ${MAX_BATCH_SIZE}. ` +
         `Use chunk() from sync/batch.ts — it splits and reports per-chunk results.`,
     );
   }

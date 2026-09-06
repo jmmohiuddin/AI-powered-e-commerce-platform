@@ -1,4 +1,4 @@
-import { EMIRATES } from '@voltix/core';
+import { EMIRATES } from '@phoyev/core';
 
 /**
  * Renders an emirate for a human.

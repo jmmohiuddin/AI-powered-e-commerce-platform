@@ -1,4 +1,4 @@
-# Voltix Commerce OS
+# Phoyev Commerce OS
 
 ## Design Document v1.0
 
@@ -440,4 +440,4 @@ TRN 100234567800003  Al Noor Trading LLC
 
 * * *
 
-*Companion documents: PRD v2.0, TRD v2.0, Wireframe Document v1.0, and the interactive prototype `voltix-wireframes.html`.*
+*Companion documents: PRD v2.0, TRD v2.0, Wireframe Document v1.0, and the interactive prototype `phoyev-wireframes.html`.*

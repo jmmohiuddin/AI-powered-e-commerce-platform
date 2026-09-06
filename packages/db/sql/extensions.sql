@@ -9,9 +9,9 @@ CREATE EXTENSION IF NOT EXISTS unaccent;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_ts_config WHERE cfgname = 'voltix_search') THEN
-    CREATE TEXT SEARCH CONFIGURATION voltix_search (COPY = english);
-    ALTER TEXT SEARCH CONFIGURATION voltix_search
+  IF NOT EXISTS (SELECT 1 FROM pg_ts_config WHERE cfgname = 'phoyev_search') THEN
+    CREATE TEXT SEARCH CONFIGURATION phoyev_search (COPY = english);
+    ALTER TEXT SEARCH CONFIGURATION phoyev_search
       ALTER MAPPING FOR hword, hword_part, word
       WITH unaccent, english_stem;
   END IF;

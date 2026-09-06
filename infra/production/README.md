@@ -1,4 +1,4 @@
-# Deploying Voltix Commerce to Hostinger
+# Deploying Phoyev Commerce to Hostinger
 
 This stack needs Postgres 17 + pgvector, Redis, S3-compatible object storage,
 two Next.js servers and a background worker. Hostinger's shared/cloud web
@@ -41,7 +41,7 @@ on the internal compose network — so no other ports are needed.
 ```bash
 curl -X POST "https://developers.hostinger.com/api/vps/v1/firewall" \
   -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H "Content-Type: application/json" \
-  -d '{ "name": "voltix-web" }'
+  -d '{ "name": "phoyev-web" }'
 # then add rules for 22/80/443, activate on the VM, and sync
 ```
 
@@ -51,10 +51,10 @@ curl -X POST "https://developers.hostinger.com/api/vps/v1/firewall" \
 ssh root@<VPS_IP>
 # skip if you chose the Docker template
 curl -fsSL https://get.docker.com | sh
-mkdir -p /opt/voltix
+mkdir -p /opt/phoyev
 ```
 
-Create `/opt/voltix/.env`: start from the repo root `.env.example`, apply the
+Create `/opt/phoyev/.env`: start from the repo root `.env.example`, apply the
 overrides in `infra/production/.env.production.example`, and fill in real
 secrets (passwords, AUTH_SECRET, TRN, payment/email keys).
 
@@ -71,21 +71,21 @@ migrations. Re-run the same command for every subsequent release.
 
 ## 6. First boot only — set the app role's real password
 
-The first migration creates the restricted `voltix_app` role with a dev
-password. Replace it and mirror the value in `DATABASE_URL` in `/opt/voltix/.env`:
+The first migration creates the restricted `phoyev_app` role with a dev
+password. Replace it and mirror the value in `DATABASE_URL` in `/opt/phoyev/.env`:
 
 ```bash
-ssh root@<VPS_IP> "cd /opt/voltix && docker compose -f infra/production/docker-compose.prod.yml exec postgres \
-  psql -U voltix -d voltix -c \"ALTER ROLE voltix_app LOGIN PASSWORD '<generated password>';\""
+ssh root@<VPS_IP> "cd /opt/phoyev && docker compose -f infra/production/docker-compose.prod.yml exec postgres \
+  psql -U phoyev -d phoyev -c \"ALTER ROLE phoyev_app LOGIN PASSWORD '<generated password>';\""
 ```
 
 Then restart the app containers, seed if desired, and create the first admin
 user:
 
 ```bash
-ssh root@<VPS_IP> "cd /opt/voltix && docker compose -f infra/production/docker-compose.prod.yml --env-file .env up -d --force-recreate storefront admin worker"
-ssh root@<VPS_IP> "cd /opt/voltix && docker compose -f infra/production/docker-compose.prod.yml --env-file .env run --rm migrate npm run db:seed"
-ssh root@<VPS_IP> "cd /opt/voltix && docker compose -f infra/production/docker-compose.prod.yml --env-file .env run --rm migrate npm run db:create-user -- <email> <password> owner"
+ssh root@<VPS_IP> "cd /opt/phoyev && docker compose -f infra/production/docker-compose.prod.yml --env-file .env up -d --force-recreate storefront admin worker"
+ssh root@<VPS_IP> "cd /opt/phoyev && docker compose -f infra/production/docker-compose.prod.yml --env-file .env run --rm migrate npm run db:seed"
+ssh root@<VPS_IP> "cd /opt/phoyev && docker compose -f infra/production/docker-compose.prod.yml --env-file .env run --rm migrate npm run db:create-user -- <email> <password> owner"
 ```
 
 ## 7. Verify
@@ -103,7 +103,7 @@ ssh root@<VPS_IP> "cd /opt/voltix && docker compose -f infra/production/docker-c
 - **Logs:** `docker compose -f infra/production/docker-compose.prod.yml logs -f <service>`
 - **Backups:** Hostinger VPS backups cover the volumes. Additionally
   `pg_dump` on a cron is cheap insurance:
-  `docker compose ... exec postgres pg_dump -U voltix voltix | gzip > /root/voltix-$(date +%F).sql.gz`
+  `docker compose ... exec postgres pg_dump -U phoyev phoyev | gzip > /root/phoyev-$(date +%F).sql.gz`
 - **Snapshot before risky changes** (hPanel or API) — note a new snapshot
   overwrites the previous one.
 - **Rollback:** re-deploy a previous git checkout with `deploy.sh` (images are

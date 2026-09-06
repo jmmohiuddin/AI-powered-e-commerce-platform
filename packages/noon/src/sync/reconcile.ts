@@ -22,7 +22,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import type { Database } from '@voltix/db';
+import type { Database } from '@phoyev/db';
 import type { NoonClient } from '../client.js';
 import { chunk } from './batch.js';
 

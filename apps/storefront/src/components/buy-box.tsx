@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { addToCart } from '@/app/actions';
 import { whatsappHref } from '@/lib/contact';
-import { formatCount, formatPrice, splitVatInclusive } from '@voltix/ui';
+import { formatCount, formatPrice, splitVatInclusive } from '@phoyev/ui';
 import { AvailabilityBadge, type AvailabilityLabels } from './availability-badge';
 import type { ProductVariantView } from '@/lib/types';
 import type { Locale } from '@/lib/locale';

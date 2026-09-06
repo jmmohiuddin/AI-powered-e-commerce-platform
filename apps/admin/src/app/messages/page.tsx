@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { sql } from 'drizzle-orm';
-import { withTenant } from '@voltix/db';
+import { withTenant } from '@phoyev/db';
 import { requirePermission } from '../../lib/auth';
 import { can } from '../../lib/auth';
 import { MessageRowActions } from './row-actions';

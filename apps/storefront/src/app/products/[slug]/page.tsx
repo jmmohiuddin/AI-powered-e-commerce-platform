@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { formatCount, formatPrice, formatRating } from '@voltix/ui';
+import { formatCount, formatPrice, formatRating } from '@phoyev/ui';
 import { BuyBox } from '@/components/buy-box';
 import { ProductCard, availabilityLabels } from '@/components/product-card';
 import { ProductGallery } from '@/components/product-gallery';

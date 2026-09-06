@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { z } from 'zod';
-import { DomainError } from '@voltix/core';
+import { DomainError } from '@phoyev/core';
 import { costMicroUsd, resolveModel, type ModelTier, type TokenUsage } from './models';
 
 /**

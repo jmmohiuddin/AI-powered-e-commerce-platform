@@ -6,7 +6,7 @@ import {
   StripeGateway,
   type PaymentGateway,
   type PaymentOutcome,
-} from '@voltix/payments';
+} from '@phoyev/payments';
 import { addItem, getCart, getOrCreateCart } from './cart';
 import { completeCheckout } from './checkout';
 import { runOnce, type JobHandler, type JobKind } from './jobs';

@@ -1,5 +1,5 @@
 {
-  "name": "@voltix/noon",
+  "name": "@phoyev/noon",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -14,9 +14,9 @@
     "setup": "tsx scripts/setup.ts"
   },
   "dependencies": {
-    "@voltix/config": "*",
-    "@voltix/core": "*",
-    "@voltix/db": "*"
+    "@phoyev/config": "*",
+    "@phoyev/core": "*",
+    "@phoyev/db": "*"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

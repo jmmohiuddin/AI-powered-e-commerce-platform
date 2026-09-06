@@ -1,4 +1,4 @@
-import { formatPrice } from '@voltix/ui';
+import { formatPrice } from '@phoyev/ui';
 import type { NotificationChannel } from './port';
 
 /**
@@ -282,7 +282,7 @@ export interface OpsAlertData {
 export function renderOpsAlert(data: OpsAlertData): RenderedNotification {
   return {
     channel: 'email',
-    subject: `[Voltix ops] ${data.headline}`,
+    subject: `[Phoyev ops] ${data.headline}`,
     text: `${data.headline}\n\n${data.detail}`,
     html: null,
   };

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Deploy the Voltix stack to a Docker-capable VPS over SSH.
+# Deploy the Phoyev stack to a Docker-capable VPS over SSH.
 #
 #   ./infra/production/deploy.sh root@203.0.113.10
 #
 # What it does:
-#   1. rsyncs the working tree to /opt/voltix on the server
+#   1. rsyncs the working tree to /opt/phoyev on the server
 #      (node_modules/.next/.git excluded; the server's .env is left alone)
 #   2. builds the app image and brings the stack up
 #   3. runs database migrations
@@ -13,7 +13,7 @@
 set -euo pipefail
 
 TARGET=${1:?usage: deploy.sh user@host}
-REMOTE_DIR=/opt/voltix
+REMOTE_DIR=/opt/phoyev
 COMPOSE="docker compose -f infra/production/docker-compose.prod.yml --env-file .env"
 
 REPO_ROOT=$(cd "$(dirname "$0")/../.." && pwd)

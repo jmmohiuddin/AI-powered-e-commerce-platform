@@ -22,7 +22,7 @@ import { diskStorage, s3Storage, type MediaStorage } from './storage';
  */
 
 const ENDPOINT = process.env.S3_ENDPOINT ?? 'http://localhost:9000';
-const BUCKET = process.env.S3_BUCKET ?? 'voltix-media';
+const BUCKET = process.env.S3_BUCKET ?? 'phoyev-media';
 
 async function minioAvailable(): Promise<boolean> {
   try {
@@ -62,8 +62,8 @@ s3Suite('s3Storage against MinIO', () => {
     endpoint: ENDPOINT,
     region: process.env.S3_REGION ?? 'auto',
     bucket: BUCKET,
-    accessKeyId: process.env.S3_ACCESS_KEY_ID ?? 'voltix',
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? 'voltix_dev_password',
+    accessKeyId: process.env.S3_ACCESS_KEY_ID ?? 'phoyev',
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? 'phoyev_dev_password',
     publicBaseUrl: `${ENDPOINT}/${BUCKET}`,
   });
   const written: string[] = [];
@@ -109,7 +109,7 @@ s3Suite('s3Storage against MinIO', () => {
       endpoint: ENDPOINT,
       region: 'auto',
       bucket: BUCKET,
-      accessKeyId: 'voltix',
+      accessKeyId: 'phoyev',
       secretAccessKey: 'not-the-password',
     });
 
@@ -127,7 +127,7 @@ describe('diskStorage', () => {
   });
 
   async function storage(): Promise<MediaStorage> {
-    directory ??= await mkdtemp(join(tmpdir(), 'voltix-media-'));
+    directory ??= await mkdtemp(join(tmpdir(), 'phoyev-media-'));
     return diskStorage({ directory, publicBaseUrl: '/uploads' });
   }
 

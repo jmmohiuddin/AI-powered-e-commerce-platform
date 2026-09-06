@@ -1,4 +1,4 @@
-# Voltix Commerce — Product & Technical Master Document
+# Phoyev Commerce — Product & Technical Master Document
 
 **Status:** Reverse-engineered audit · **Date:** 2026-08-09 · **Commit:** `dcd7947`
 **Author:** Retrospective audit (PM / TPM / UX / Architect / Eng Lead perspectives)
@@ -27,7 +27,7 @@ than missing documentation, because stale documentation is *trusted*.
 
 # 1. Executive Summary
 
-Voltix is a multi-tenant e-commerce platform for electronics retail in the United Arab Emirates,
+Phoyev is a multi-tenant e-commerce platform for electronics retail in the United Arab Emirates,
 built as a modular monolith: 11 TypeScript packages (~27,000 lines) behind two Next.js 16
 applications — a customer storefront and a staff admin.
 
@@ -45,7 +45,7 @@ product is deployed for exactly one tenant, so the multi-tenancy — the most ex
 the system — is unexercised in production.
 
 **The finding that reframes the product.** The repository is called
-`AI-powered-e-commerce-platform` and ships a `@voltix/ai` package with an Anthropic client, a model
+`AI-powered-e-commerce-platform` and ships a `@phoyev/ai` package with an Anthropic client, a model
 registry and a task catalogue. **No language model is invoked anywhere in the running product.**
 The apps import exactly four pure functions from that package: `forecastDemand`,
 `recommendReplenishment`, `classifyQuery`, `reciprocalRankFusion`. The Anthropic client is dead
@@ -72,7 +72,7 @@ money, honest stock, and operations staff can actually run — without a develop
 ### Product Vision
 
 Independent electronics retailers in the Gulf lose margin to three things software can remove:
-manual catalogue work, stock decisions made from memory, and cash-on-delivery losses. Voltix
+manual catalogue work, stock decisions made from memory, and cash-on-delivery losses. Phoyev
 exists to remove those, for merchants too small to build it themselves and too specific to be
 served well by a generic global platform.
 
@@ -83,7 +83,7 @@ admin that a non-technical shop manager can operate on the day they are hired.
 
 ### Value Proposition
 
-| For | Voltix provides | Unlike |
+| For | Phoyev provides | Unlike |
 |---|---|---|
 | A UAE electronics merchant | A storefront and back office that already understands emirates, Makani addressing, 5% inclusive VAT, COD risk, Tabby BNPL and Sat–Sun weekends | Shopify/WooCommerce, which need plugins and configuration for each of those and still get COD wrong |
 | A shop manager | Screens that answer "what needs attention today" rather than reports | Generic dashboards that show revenue lines nobody can act on |
@@ -628,7 +628,7 @@ graph TB
         GH[GitHub Actions<br/>every 5 min]
         VC[Vercel Cron<br/>daily]
     end
-    subgraph Packages["@voltix/* — compiled into both apps"]
+    subgraph Packages["@phoyev/* — compiled into both apps"]
         CORE[core<br/>money · pricing · state machines · UAE]
         COM[commerce<br/>cart · checkout · orders · returns · jobs]
         PAY[payments<br/>port + 4 adapters]

@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { lookupOrder } from '@voltix/commerce';
-import { formatPrice } from '@voltix/ui';
-import { EMIRATES, normaliseUaePhone } from '@voltix/core';
+import { lookupOrder } from '@phoyev/commerce';
+import { formatPrice } from '@phoyev/ui';
+import { EMIRATES, normaliseUaePhone } from '@phoyev/core';
 import { inTenant, tenantContext } from '@/lib/session';
 import { clientIdentifier, limitOrderLookup } from '@/lib/rate-limit';
 import { resolveLocale, translator } from '@/lib/locale';
 
 export const metadata: Metadata = {
   title: 'Track your order',
-  description: 'Check the status of your Voltix order with your order number and phone number.',
+  description: 'Check the status of your Phoyev order with your order number and phone number.',
   // Never indexed: the results carry a delivery address, and a search engine
   // that crawls a successful lookup would cache someone's home address.
   robots: { index: false, follow: false },

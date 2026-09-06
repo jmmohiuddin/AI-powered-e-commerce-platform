@@ -5,7 +5,7 @@ import {
   requiredInvoiceKind,
   UAE_VAT_RATE_BPS,
   type Money,
-} from '@voltix/core';
+} from '@phoyev/core';
 
 /**
  * THE TAX DOCUMENT

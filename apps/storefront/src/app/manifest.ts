@@ -7,8 +7,8 @@ import type { MetadataRoute } from 'next';
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Voltix — Electronics & mobile retail in the UAE',
-    short_name: 'Voltix',
+    name: 'Phoyev — Electronics & mobile retail in the UAE',
+    short_name: 'Phoyev',
     description:
       'Genuine smartphones, mobile accessories and computer gear with official UAE warranty, delivered across the Emirates.',
     start_url: '/',

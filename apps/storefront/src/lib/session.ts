@@ -1,15 +1,15 @@
 import 'server-only';
 import { randomBytes } from 'node:crypto';
 import { cookies } from 'next/headers';
-import { withTenant } from '@voltix/db';
+import { withTenant } from '@phoyev/db';
 import {
   PaymentRegistry,
   CashOnDeliveryGateway,
   NetworkInternationalGateway,
   StripeGateway,
   TabbyGateway,
-} from '@voltix/payments';
-import type { TenantContext } from '@voltix/commerce';
+} from '@phoyev/payments';
+import type { TenantContext } from '@phoyev/commerce';
 import { DEMO_TENANT_ID } from './catalog';
 
 /**
@@ -28,7 +28,7 @@ import { DEMO_TENANT_ID } from './catalog';
  * or missing one it does — is the specific failure that makes such a page
  * worthless.
  */
-export const CART_COOKIE = 'voltix_cart';
+export const CART_COOKIE = 'phoyev_cart';
 export const CART_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 export async function cartSessionToken(): Promise<string> {

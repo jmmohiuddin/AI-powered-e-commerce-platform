@@ -5,7 +5,7 @@
  * stock holds, detecting abandoned carts, and flagging payments that never
  * reached a terminal state.
  *
- *   npm run worker --workspace=@voltix/commerce
+ *   npm run worker --workspace=@phoyev/commerce
  *
  * Runs as the **owner** role deliberately. Its work spans tenants — sweeping
  * every expired reservation regardless of who holds it — which is exactly the
@@ -18,12 +18,12 @@
  */
 // Must be first: populates process.env from the repo-root .env before
 // any module below reads a connection string at import time.
-import '@voltix/config/load-env';
+import '@phoyev/config/load-env';
 import { hostname } from 'node:os';
-import { closeConnections, dbAdmin } from '@voltix/db';
-import { buildTransportRegistry, dispatchNotifications } from '@voltix/notifications';
-import { NoonClient, loadNoonConfig } from '@voltix/noon';
-import { dispatchNoonSync } from '@voltix/noon/sync';
+import { closeConnections, dbAdmin } from '@phoyev/db';
+import { buildTransportRegistry, dispatchNotifications } from '@phoyev/notifications';
+import { NoonClient, loadNoonConfig } from '@phoyev/noon';
+import { dispatchNoonSync } from '@phoyev/noon/sync';
 import { runOnce, scheduleRecurring } from '../src/jobs';
 
 const WORKER_ID = `${hostname()}-${process.pid}`;

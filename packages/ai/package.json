@@ -1,5 +1,5 @@
 {
-  "name": "@voltix/ai",
+  "name": "@phoyev/ai",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
-    "@voltix/config": "*",
-    "@voltix/core": "*",
+    "@phoyev/config": "*",
+    "@phoyev/core": "*",
     "zod": "^4.4.3"
   }
 }

@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
  *
  * This exists because the alternative silently half-works. dotenv resolves
  * `.env` relative to the *current working directory*, and `npm run migrate
- * --workspace=@voltix/db` runs with cwd set to `packages/db`. The root `.env`
+ * --workspace=@phoyev/db` runs with cwd set to `packages/db`. The root `.env`
  * is therefore invisible, and what you get is not a clear error — it is a
  * migration runner that connects to the fallback development URL, or a
  * storefront that quietly serves its demo catalogue. Both look fine.

@@ -1,7 +1,7 @@
 import 'server-only';
 import { and, asc, desc, eq, gte, inArray, isNull, lte, sql, type SQL } from 'drizzle-orm';
-import { withTenantRead, schema, type Database } from '@voltix/db';
-import { classifyQuery, reciprocalRankFusion } from '@voltix/ai';
+import { withTenantRead, schema, type Database } from '@phoyev/db';
+import { classifyQuery, reciprocalRankFusion } from '@phoyev/ai';
 import { DEFAULT_PAGE_SIZE, PLACEHOLDER_IMAGE } from './types';
 import type {
   CategoryDetail,
@@ -291,14 +291,14 @@ export function searchProducts(tenantId: string, filters: SearchFilters): Promis
       const lexical = await tx.execute<{ id: string; score: number }>(sql`
         WITH strict_match AS (
           SELECT p.id,
-                 ts_rank(p.search_vector, websearch_to_tsquery('voltix_search', ${query}))
+                 ts_rank(p.search_vector, websearch_to_tsquery('phoyev_search', ${query}))
                    + similarity(p.title, ${query}) AS score
           FROM products p
           WHERE p.tenant_id = ${tenantId}
             AND p.status = 'active'
             AND p.deleted_at IS NULL
             AND (
-              p.search_vector @@ websearch_to_tsquery('voltix_search', ${query})
+              p.search_vector @@ websearch_to_tsquery('phoyev_search', ${query})
               OR p.title % ${query}
               OR EXISTS (
                 SELECT 1 FROM variants v
@@ -310,14 +310,14 @@ export function searchProducts(tenantId: string, filters: SearchFilters): Promis
         loose_match AS (
           SELECT p.id,
                  -- Discounted, so a loose hit never outranks a strict one.
-                 ts_rank(p.search_vector, to_tsquery('voltix_search', ${orQuery})) * 0.5 AS score
+                 ts_rank(p.search_vector, to_tsquery('phoyev_search', ${orQuery})) * 0.5 AS score
           FROM products p
           WHERE ${orQuery} <> ''
             AND NOT EXISTS (SELECT 1 FROM strict_match)
             AND p.tenant_id = ${tenantId}
             AND p.status = 'active'
             AND p.deleted_at IS NULL
-            AND p.search_vector @@ to_tsquery('voltix_search', ${orQuery})
+            AND p.search_vector @@ to_tsquery('phoyev_search', ${orQuery})
         )
         SELECT id, score FROM strict_match
         UNION ALL

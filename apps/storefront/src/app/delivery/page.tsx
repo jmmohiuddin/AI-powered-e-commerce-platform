@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { DELIVERY_ZONES, EMIRATES, UAE, UAE_VAT_RATE_BPS } from '@voltix/core';
-import { formatPrice } from '@voltix/ui';
+import { DELIVERY_ZONES, EMIRATES, UAE, UAE_VAT_RATE_BPS } from '@phoyev/core';
+import { formatPrice } from '@phoyev/ui';
 import { resolveLocale } from '@/lib/locale';
 import { deliveryFee } from '@/lib/session';
 

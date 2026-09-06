@@ -1,5 +1,5 @@
 {
-  "name": "@voltix/commerce",
+  "name": "@phoyev/commerce",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,15 +15,15 @@
     "remove-demo": "tsx scripts/remove-demo-catalogue.ts"
   },
   "dependencies": {
-    "@voltix/ai": "*",
-    "@voltix/config": "*",
-    "@voltix/core": "*",
-    "@voltix/db": "*",
-    "@voltix/invoicing": "*",
-    "@voltix/media": "*",
-    "@voltix/noon": "*",
-    "@voltix/notifications": "*",
-    "@voltix/payments": "*",
+    "@phoyev/ai": "*",
+    "@phoyev/config": "*",
+    "@phoyev/core": "*",
+    "@phoyev/db": "*",
+    "@phoyev/invoicing": "*",
+    "@phoyev/media": "*",
+    "@phoyev/noon": "*",
+    "@phoyev/notifications": "*",
+    "@phoyev/payments": "*",
     "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {

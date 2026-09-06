@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { isHardBounce, type EmailProviderEvent } from '@voltix/notifications';
+import { isHardBounce, type EmailProviderEvent } from '@phoyev/notifications';
 import { enqueueOnce } from './jobs';
 import type { TenantContext, Tx } from './types';
 

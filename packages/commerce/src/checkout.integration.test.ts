@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { CashOnDeliveryGateway, type PaymentGateway, type PaymentOutcome } from '@voltix/payments';
+import { CashOnDeliveryGateway, type PaymentGateway, type PaymentOutcome } from '@phoyev/payments';
 import { addItem, getCart, getOrCreateCart } from './cart';
 import { completeCheckout } from './checkout';
 import { claimJobs, enqueue, runOnce } from './jobs';

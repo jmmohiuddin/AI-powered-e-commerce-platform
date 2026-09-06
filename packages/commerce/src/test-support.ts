@@ -1,8 +1,8 @@
 import { sql } from 'drizzle-orm';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { uuidv7 } from '@voltix/db';
-import * as schema from '@voltix/db/schema';
+import { uuidv7 } from '@phoyev/db';
+import * as schema from '@phoyev/db/schema';
 import type { TenantContext } from './types';
 
 /**
@@ -14,7 +14,7 @@ import type { TenantContext } from './types';
  * concurrency, gap-free numbering — are properties of the database and its
  * locking behaviour. A mock proves the mock works.
  *
- * Connecting as `voltix_app` rather than the owner is non-negotiable here. The
+ * Connecting as `phoyev_app` rather than the owner is non-negotiable here. The
  * owner bypasses RLS silently, so an isolation test run as the owner passes
  * while proving nothing.
  */
@@ -39,10 +39,10 @@ import type { TenantContext } from './types';
  */
 const APP_URL =
   process.env.DATABASE_TEST_URL ??
-  'postgres://voltix_app:voltix_app_dev_password@localhost:5433/voltix';
+  'postgres://phoyev_app:phoyev_app_dev_password@localhost:5433/phoyev';
 const OWNER_URL =
   process.env.DATABASE_TEST_ADMIN_URL ??
-  'postgres://voltix:voltix_dev_password@localhost:5433/voltix';
+  'postgres://phoyev:phoyev_dev_password@localhost:5433/phoyev';
 
 let appPool: Pool | undefined;
 let ownerPool: Pool | undefined;

@@ -5,8 +5,8 @@ import {
   RETURN_POLICY,
   UAE,
   UAE_VAT_RATE_BPS,
-} from '@voltix/core';
-import { formatPrice } from '@voltix/ui';
+} from '@phoyev/core';
+import { formatPrice } from '@phoyev/ui';
 import { fill, legalCopy, listSentence } from '@/lib/legal';
 import { resolveLocale } from '@/lib/locale';
 import { paymentRegistry } from '@/lib/session';

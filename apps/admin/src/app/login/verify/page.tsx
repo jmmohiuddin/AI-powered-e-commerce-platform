@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import QRCode from 'qrcode';
-import { dbAdmin } from '@voltix/db';
-import { beginEnrolment, hasMfaEnrolled, resolveSession, SESSION_COOKIE } from '@voltix/auth';
+import { dbAdmin } from '@phoyev/db';
+import { beginEnrolment, hasMfaEnrolled, resolveSession, SESSION_COOKIE } from '@phoyev/auth';
 import { EnrolForm, VerifyForm } from './forms';
 
 export const metadata: Metadata = { title: 'Verify', robots: { index: false, follow: false } };

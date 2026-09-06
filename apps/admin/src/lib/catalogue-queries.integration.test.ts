@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { sql } from 'drizzle-orm';
-import { closeConnections, dbAdmin, ping, uuidv7 } from '@voltix/db';
+import { closeConnections, dbAdmin, ping, uuidv7 } from '@phoyev/db';
 import { getProductDetail, listCustomers, listProducts } from './catalogue-queries';
 
 /**

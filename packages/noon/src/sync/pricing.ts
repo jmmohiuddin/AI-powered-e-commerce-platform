@@ -1,9 +1,9 @@
 /**
- * PRICE PUSH — Voltix variant prices → noon.
+ * PRICE PUSH — Phoyev variant prices → noon.
  *
  * UNITS ARE THE WHOLE RISK HERE
  * -----------------------------
- * Voltix stores an integer count of minor units. noon's pricing API takes a
+ * Phoyev stores an integer count of minor units. noon's pricing API takes a
  * floating-point number of *major* units. Every price that crosses this
  * boundary is one missing division away from being 100× wrong, and noon will
  * accept it: there is no sanity check on their side that a phone costs
@@ -23,8 +23,8 @@
  */
 
 import { sql } from 'drizzle-orm';
-import type { Database } from '@voltix/db';
-import { minorUnitExponent } from '@voltix/core';
+import type { Database } from '@phoyev/db';
+import { minorUnitExponent } from '@phoyev/core';
 import type { NoonClient, PricingUpsertItem } from '../client.js';
 import { chunk, toMajorUnits } from './batch.js';
 import { emptyOutcome, mergeOutcomes, type SyncOutcome, type Tx } from './types.js';
@@ -67,7 +67,7 @@ export interface DesiredPrice {
  */
 export class ImplausiblePriceError extends Error {
   constructor(partnerSku: string, detail: string) {
-    super(`[@voltix/noon] Refusing to publish ${partnerSku}: ${detail}`);
+    super(`[@phoyev/noon] Refusing to publish ${partnerSku}: ${detail}`);
     this.name = 'ImplausiblePriceError';
   }
 }
@@ -166,7 +166,7 @@ export function selectChangedPrices(desired: readonly DesiredPrice[]): DesiredPr
 /**
  * Builds the wire item for one desired price.
  *
- * noon treats `msrp` below `price` as invalid, and Voltix's own rule is that a
+ * noon treats `msrp` below `price` as invalid, and Phoyev's own rule is that a
  * compare-at price which is not above the price is simply not shown. Rather
  * than send a value noon will reject, an inconsistent MSRP is dropped — the
  * listing still gets the correct price, which is the part that matters.

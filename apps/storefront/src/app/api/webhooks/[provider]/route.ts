@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
-import { recordPaymentWebhookEvent } from '@voltix/commerce';
-import type { PaymentProviderId, WebhookVerification } from '@voltix/payments';
+import { recordPaymentWebhookEvent } from '@phoyev/commerce';
+import type { PaymentProviderId, WebhookVerification } from '@phoyev/payments';
 import { inTenant, paymentRegistry, tenantContext } from '@/lib/session';
 
 /**

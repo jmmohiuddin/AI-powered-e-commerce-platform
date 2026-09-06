@@ -23,15 +23,15 @@ const config: NextConfig = {
   // pulled in transitively (commerce → notifications). They ship TypeScript
   // source rather than build output, so Next has to compile them.
   transpilePackages: [
-    '@voltix/core',
-    '@voltix/ui',
-    '@voltix/ai',
-    '@voltix/auth',
-    '@voltix/commerce',
-    '@voltix/db',
-    '@voltix/media',
-    '@voltix/payments',
-    '@voltix/notifications',
+    '@phoyev/core',
+    '@phoyev/ui',
+    '@phoyev/ai',
+    '@phoyev/auth',
+    '@phoyev/commerce',
+    '@phoyev/db',
+    '@phoyev/media',
+    '@phoyev/payments',
+    '@phoyev/notifications',
   ],
 
   // `sharp` is a native addon. Bundling it into the server build breaks the

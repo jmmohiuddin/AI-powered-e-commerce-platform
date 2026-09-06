@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { formatCount, formatPrice } from '@voltix/ui';
+import { formatCount, formatPrice } from '@phoyev/ui';
 import { removeFromCart, setCartQuantity } from '@/app/actions';
 import type { Locale } from '@/lib/locale';
 

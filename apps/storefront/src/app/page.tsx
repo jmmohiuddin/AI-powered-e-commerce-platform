@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { formatCount } from '@voltix/ui';
+import { formatCount } from '@phoyev/ui';
 import { ProductCard } from '@/components/product-card';
 import { listCategories, listProducts } from '@/lib/catalog';
 import { whatsappHref } from '@/lib/contact';

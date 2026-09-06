@@ -14,7 +14,7 @@ export function chunk<T>(items: readonly T[], size: number = MAX_BATCH_SIZE): T[
 /**
  * Converts minor units to the major-unit double noon's pricing API expects.
  *
- * Voltix stores 129950 fils; noon wants 1299.5. The exponent is looked up per
+ * Phoyev stores 129950 fils; noon wants 1299.5. The exponent is looked up per
  * currency rather than assumed to be 2 — the GCC three-decimal currencies
  * (KWD, BHD, OMR) are exactly why, and a 1,000-fils dinar sent as 100.0 is a
  * 10× underpricing that noon will happily accept and sell at.

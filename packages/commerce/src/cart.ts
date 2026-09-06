@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
+import { uuidv7 } from '@phoyev/db';
 import {
   calculatePricing,
   money,
@@ -9,7 +9,7 @@ import {
   type DiscountInput,
   type PricingLineInput,
   type PricingResult,
-} from '@voltix/core';
+} from '@phoyev/core';
 import { availabilityFor } from './reservations';
 import type { TenantContext, Tx } from './types';
 

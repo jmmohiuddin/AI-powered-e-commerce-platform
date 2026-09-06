@@ -1,5 +1,5 @@
 
-# Local development infrastructure for Voltix Commerce.
+# Local development infrastructure for Phoyev Commerce.
 # Production runs the managed equivalents (see docs/10-deployment.md):
 #   postgres -> Neon / RDS Aurora Serverless v2, redis -> Upstash / ElastiCache,
 #   minio    -> Cloudflare R2, mailpit -> Resend.
@@ -7,18 +7,18 @@
 # Everything here is intentionally the *same major version* as production so that
 # "works locally" is a meaningful statement.
 
-name: voltix
+name: phoyev
 
 services:
   postgres:
     # pgvector image ships Postgres 17 + the vector extension pre-built.
     image: pgvector/pgvector:pg17
-    container_name: voltix-postgres
+    container_name: phoyev-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: voltix
-      POSTGRES_PASSWORD: voltix_dev_password
-      POSTGRES_DB: voltix
+      POSTGRES_USER: phoyev
+      POSTGRES_PASSWORD: phoyev_dev_password
+      POSTGRES_DB: phoyev
       # Deterministic collation avoids index-corruption surprises across machines.
       POSTGRES_INITDB_ARGS: '--locale-provider=icu --icu-locale=en-US --encoding=UTF8'
     ports:
@@ -30,7 +30,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U voltix -d voltix']
+      test: ['CMD-SHELL', 'pg_isready -U phoyev -d phoyev']
       interval: 5s
       timeout: 5s
       retries: 20
@@ -45,7 +45,7 @@ services:
 
   redis:
     image: redis:7.4-alpine
-    container_name: voltix-redis
+    container_name: phoyev-redis
     restart: unless-stopped
     ports:
       - '6379:6379'
@@ -61,11 +61,11 @@ services:
   minio:
     # S3-compatible object storage; production uses Cloudflare R2 (same API).
     image: minio/minio:latest
-    container_name: voltix-minio
+    container_name: phoyev-minio
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: voltix
-      MINIO_ROOT_PASSWORD: voltix_dev_password
+      MINIO_ROOT_USER: phoyev
+      MINIO_ROOT_PASSWORD: phoyev_dev_password
     ports:
       - '9000:9000'
       - '9001:9001'
@@ -78,20 +78,20 @@ services:
   # credentials problem and is not one. Idempotent, so it is safe on every up.
   minio-init:
     image: minio/mc:latest
-    container_name: voltix-minio-init
+    container_name: phoyev-minio-init
     depends_on:
       - minio
     entrypoint: >
       /bin/sh -c "
-      until mc alias set local http://minio:9000 voltix voltix_dev_password; do sleep 1; done;
-      mc mb --ignore-existing local/voltix-media;
-      mc anonymous set download local/voltix-media;
+      until mc alias set local http://minio:9000 phoyev phoyev_dev_password; do sleep 1; done;
+      mc mb --ignore-existing local/phoyev-media;
+      mc anonymous set download local/phoyev-media;
       "
 
   mailpit:
     # Catches all outbound email in development. Never forwards anything.
     image: axllent/mailpit:latest
-    container_name: voltix-mailpit
+    container_name: phoyev-mailpit
     restart: unless-stopped
     ports:
       - '1025:1025'

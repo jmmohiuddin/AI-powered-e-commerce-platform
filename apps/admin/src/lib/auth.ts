@@ -2,8 +2,8 @@ import 'server-only';
 import { cache } from 'react';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { dbAdmin } from '@voltix/db';
-import { resolveSession, sessionCan, SESSION_COOKIE, type SessionUser } from '@voltix/auth';
+import { dbAdmin } from '@phoyev/db';
+import { resolveSession, sessionCan, SESSION_COOKIE, type SessionUser } from '@phoyev/auth';
 
 /**
  * THE AUTHORISATION BOUNDARY

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { formatPrice } from '@voltix/ui';
+import { formatPrice } from '@phoyev/ui';
 import { can, requirePermission } from '../../../lib/auth';
 import { getProductDetail } from '../../../lib/catalogue-queries';
 import { ProductControls, StockAdjuster } from './product-controls';

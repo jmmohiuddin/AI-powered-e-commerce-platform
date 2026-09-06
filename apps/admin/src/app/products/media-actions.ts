@@ -1,16 +1,16 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { withTenant } from '@voltix/db';
+import { withTenant } from '@phoyev/db';
 import {
   addProductImage,
   listProductImages,
   removeProductImage,
   reorderProductImages,
   setProductImageAlt,
-} from '@voltix/commerce';
-import { prepareImage, resolveStorage } from '@voltix/media';
-import { DomainError } from '@voltix/core';
+} from '@phoyev/commerce';
+import { prepareImage, resolveStorage } from '@phoyev/media';
+import { DomainError } from '@phoyev/core';
 import { actorFor, requirePermission, requestOrigin, tenantContextFor } from '../../lib/auth';
 import type { ActionResult } from './actions';
 

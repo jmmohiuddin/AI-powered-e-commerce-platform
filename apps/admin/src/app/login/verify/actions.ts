@@ -2,14 +2,14 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { dbAdmin } from '@voltix/db';
+import { dbAdmin } from '@phoyev/db';
 import {
   beginEnrolment,
   completeEnrolment,
   SESSION_COOKIE,
   resolveSession,
   verifyMfaChallenge,
-} from '@voltix/auth';
+} from '@phoyev/auth';
 
 export interface MfaState {
   readonly error?: string;

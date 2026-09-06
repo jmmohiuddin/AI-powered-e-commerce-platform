@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
+import { uuidv7 } from '@phoyev/db';
 import type { TenantContext, Tx } from './types';
 
 /**

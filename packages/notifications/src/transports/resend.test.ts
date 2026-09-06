@@ -36,7 +36,7 @@ function stubFetch(status: number, body: unknown) {
 }
 
 function transport() {
-  return createResendTransport({ apiKey: 'test-key', from: 'Voltix <orders@voltix.ae>' });
+  return createResendTransport({ apiKey: 'test-key', from: 'Phoyev <orders@phoyev.ae>' });
 }
 
 describe('resend transport', () => {

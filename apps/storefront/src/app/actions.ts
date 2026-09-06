@@ -11,8 +11,8 @@ import {
   getOrCreateCart,
   removeItem,
   updateItemQuantity,
-} from '@voltix/commerce';
-import { isDomainError, normaliseUaePhone, type UaeAddress } from '@voltix/core';
+} from '@phoyev/commerce';
+import { isDomainError, normaliseUaePhone, type UaeAddress } from '@phoyev/core';
 import { track } from '@/lib/analytics';
 import {
   cartSessionToken,

@@ -1,5 +1,5 @@
 /**
- * ORDER IMPORT — noon → Voltix.
+ * ORDER IMPORT — noon → Phoyev.
  *
  * WHY THIS EXISTS AT ALL
  * ----------------------
@@ -23,14 +23,14 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { uuidv7, type Database } from '@voltix/db';
+import { uuidv7, type Database } from '@phoyev/db';
 import type { FbpiOrder, NoonClient } from '../client.js';
 import type { Tx } from './types.js';
 
 export interface ImportResult {
   readonly seen: number;
   readonly imported: number;
-  /** Orders whose SKUs are not mapped to a Voltix variant. */
+  /** Orders whose SKUs are not mapped to a Phoyev variant. */
   readonly unmapped: Array<{ fbpiOrderNr: string; partnerSku: string }>;
 }
 
@@ -125,8 +125,8 @@ async function linkOrder(tx: Tx, tenantId: string, order: FbpiOrder): Promise<bo
  * Only `MP_ITEM_STATUS_CONFIRMED` items move stock — a line cancelled by the
  * marketplace before it reached us was never ours to ship.
  *
- * Note what this does *not* do: it does not create a Voltix `orders` row. A
- * noon order has no Voltix customer, no local cart, no payment intent and no
+ * Note what this does *not* do: it does not create a Phoyev `orders` row. A
+ * noon order has no Phoyev customer, no local cart, no payment intent and no
  * address until `GetFbpiOrderCustomerData` is called, and manufacturing a
  * synthetic order record to hold it would put rows into the revenue and VAT
  * reporting tables for a sale that noon invoices, not us. The link row plus
@@ -153,7 +153,7 @@ async function applyStockEffect(
       tx,
       tenantId,
       order.fbpi_order_nr,
-      `No Voltix warehouse mapped to noon warehouse_code "${order.warehouse_code}"`,
+      `No Phoyev warehouse mapped to noon warehouse_code "${order.warehouse_code}"`,
     );
     return unmapped;
   }

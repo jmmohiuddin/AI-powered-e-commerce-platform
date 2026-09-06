@@ -1,5 +1,5 @@
 /**
- * CATALOGUE PUSH — Voltix products → noon listings.
+ * CATALOGUE PUSH — Phoyev products → noon listings.
  *
  * This is the expensive, slow, and least reversible half of the integration,
  * and it is treated differently from stock and price accordingly.
@@ -34,7 +34,7 @@ export class AttributeValidationError extends Error {
     readonly problems: string[],
   ) {
     super(
-      `[@voltix/noon] Product rejected before sending — category ${categoryCode}: ` +
+      `[@phoyev/noon] Product rejected before sending — category ${categoryCode}: ` +
         problems.join('; '),
     );
     this.name = 'AttributeValidationError';
@@ -164,7 +164,7 @@ function stableStringify(value: unknown): string {
 }
 
 export interface ProductPushInput {
-  /** Voltix variant ids covered by this request, in `skus[]` order. */
+  /** Phoyev variant ids covered by this request, in `skus[]` order. */
   readonly variantIds: readonly string[];
   readonly request: ProductUpsertRequest;
 }

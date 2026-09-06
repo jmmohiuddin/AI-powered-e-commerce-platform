@@ -1,9 +1,9 @@
-# `@voltix/noon` — noon Marketplace integration
+# `@phoyev/noon` — noon Marketplace integration
 
-Keeps a noon seller account in step with Voltix: stock and prices are pushed out,
+Keeps a noon seller account in step with Phoyev: stock and prices are pushed out,
 orders are pulled in, and the two channels share one inventory pool.
 
-Voltix is the system of record. noon is a projection of it.
+Phoyev is the system of record. noon is a projection of it.
 
 ---
 
@@ -68,20 +68,20 @@ npm run db:migrate
 #    NOON_API_BASE_URL=https://sandbox-api-gateway.noon.partners
 
 # 2. Prove the credentials work.
-npm run setup --workspace=@voltix/noon -- whoami
+npm run setup --workspace=@phoyev/noon -- whoami
 
 # 3. Map a warehouse. Nothing syncs until at least one is mapped, because
 #    every stock write and order read is scoped to a noon warehouse code.
-npm run setup --workspace=@voltix/noon -- warehouses
-npm run setup --workspace=@voltix/noon -- map DXB-01 WH-DXB-01 ae
+npm run setup --workspace=@phoyev/noon -- warehouses
+npm run setup --workspace=@phoyev/noon -- map DXB-01 WH-DXB-01 ae
 
 # 4. Opt variants in. Drafts by default — see below.
-npm run setup --workspace=@voltix/noon -- link --sku PHONE-X --sku PHONE-Y
+npm run setup --workspace=@phoyev/noon -- link --sku PHONE-X --sku PHONE-Y
 #   …or, once you trust it:
-npm run setup --workspace=@voltix/noon -- link --all
+npm run setup --workspace=@phoyev/noon -- link --all
 
 # 5. See what the sync would do, without doing it.
-npm run setup --workspace=@voltix/noon -- status
+npm run setup --workspace=@phoyev/noon -- status
 
 # 6. Run it.
 npm run worker
@@ -117,7 +117,7 @@ tick's diff, because the diff reads the resulting state rather than trusting a
 notification about it. `pushed_qty` is written only after noon confirms the
 item — never optimistically.
 
-**Reserved stock is withheld on purpose.** A reservation is a unit a Voltix
+**Reserved stock is withheld on purpose.** A reservation is a unit a Phoyev
 shopper has at checkout and has not paid for. Publishing it offers the same
 physical unit to two marketplaces, and the loser is a noon order that cannot be
 fulfilled — which costs a cancellation against the seller's fulfilment rate,
@@ -137,7 +137,7 @@ wrong quantity for a week while the dashboard shows green. `NoonBatchResult`
 forces the caller to look at both, and rejections land in
 `noon_listings.last_error`.
 
-**Units.** Voltix stores integer minor units; noon takes major-unit doubles.
+**Units.** Phoyev stores integer minor units; noon takes major-unit doubles.
 Every price crossing this boundary is one missing division away from being
 100× wrong, and noon will accept it. `guardPrice` applies an absolute bound
 and — for anything published before — refuses a change of more than 20×, which
@@ -167,7 +167,7 @@ absolute quantity, which is a no-op on noon's side.
 
 ## What is not built
 
-- **noon orders do not become Voltix `orders` rows.** They get a link row in
+- **noon orders do not become Phoyev `orders` rows.** They get a link row in
   `noon_order_links` and a `stock_movements` entry, so the inventory pool is
   shared and the audit trail is intact. A synthetic order record would put rows
   into revenue and VAT reporting for a sale noon invoices, not us.

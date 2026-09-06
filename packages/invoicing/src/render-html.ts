@@ -1,4 +1,4 @@
-import { formatTrn } from '@voltix/core';
+import { formatTrn } from '@phoyev/core';
 import { documentHeading, missingRequiredFields, type TaxDocument } from './document';
 
 /**

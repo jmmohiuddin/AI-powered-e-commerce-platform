@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { sql } from 'drizzle-orm';
-import { CashOnDeliveryGateway } from '@voltix/payments';
-import { renderInvoiceHtml } from '@voltix/invoicing';
+import { CashOnDeliveryGateway } from '@phoyev/payments';
+import { renderInvoiceHtml } from '@phoyev/invoicing';
 import { addItem, getCart, getOrCreateCart } from './cart';
 import { completeCheckout } from './checkout';
 import { getInvoiceForOrder, issueInvoice } from './invoices';
@@ -45,7 +45,7 @@ suite('invoice issuance', () => {
     // A merchant cannot issue any VAT document without their tax identity, so
     // the fixture tenant gets one. The absence case is tested separately.
     await ownerDb().execute(sql`
-      UPDATE tenants SET legal_name = 'Voltix Electronics Trading L.L.C',
+      UPDATE tenants SET legal_name = 'Phoyev Electronics Trading L.L.C',
                          legal_address = 'Shop 12, Naif, Deira, Dubai',
                          tax_registration_number = '100234567800003',
                          trade_licence_number = 'CN-1234567'

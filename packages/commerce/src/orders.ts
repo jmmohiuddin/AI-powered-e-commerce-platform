@@ -11,7 +11,7 @@ import {
   type OrderState,
   type OrderStatus,
   type PaymentStatus,
-} from '@voltix/core';
+} from '@phoyev/core';
 import { recordEvent } from './checkout';
 import { releaseReservations } from './reservations';
 import type { ActorContext, TenantContext, Tx } from './types';
@@ -19,7 +19,7 @@ import type { ActorContext, TenantContext, Tx } from './types';
 /**
  * ORDER SERVICE
  *
- * Every state change goes through the state machine in @voltix/core rather than
+ * Every state change goes through the state machine in @phoyev/core rather than
  * writing the column directly. That is what makes "refunded before shipped"
  * impossible instead of merely unlikely, and it is why the admin can ask
  * `availableActions()` and render exactly the buttons that will work — a UI

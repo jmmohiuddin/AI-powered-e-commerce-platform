@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
-import { outcomeFromStatus, shouldCommitStock, type PaymentOutcome } from '@voltix/payments';
+import { uuidv7 } from '@phoyev/db';
+import { outcomeFromStatus, shouldCommitStock, type PaymentOutcome } from '@phoyev/payments';
 import { applyPaymentOutcome, recordEvent } from './checkout';
 import { enqueue } from './jobs';
 import { commitReservations, releaseReservations } from './reservations';

@@ -72,8 +72,8 @@ describe('TOTP (RFC 6238)', () => {
   });
 
   it('builds a scannable otpauth URI', () => {
-    const uri = totpUri('JBSWY3DPEHPK3PXP', 'amal@voltix.ae');
-    expect(uri).toContain('otpauth://totp/Voltix%3Aamal%40voltix.ae');
+    const uri = totpUri('JBSWY3DPEHPK3PXP', 'amal@phoyev.ae');
+    expect(uri).toContain('otpauth://totp/Phoyev%3Aamal%40phoyev.ae');
     expect(uri).toContain('secret=JBSWY3DPEHPK3PXP');
     // Authenticator apps default to SHA1/6/30 but Microsoft Authenticator has
     // historically mis-scanned URIs that omit them. Stating them is free.

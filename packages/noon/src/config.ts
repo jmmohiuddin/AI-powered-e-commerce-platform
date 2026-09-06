@@ -66,7 +66,7 @@ export interface NoonConfig {
 class MissingCredentialError extends Error {
   constructor(detail: string) {
     super(
-      `[@voltix/noon] ${detail}\n` +
+      `[@phoyev/noon] ${detail}\n` +
         `  → Partner Portal → User & Access → Project users → +Add new → Service account\n` +
         `    Type: apijwt, Role: Project Owner, then download the credentials JSON.\n` +
         `  → Set NOON_CREDENTIALS_FILE to its path, or set NOON_KEY_ID,\n` +
@@ -143,7 +143,7 @@ export function loadNoonConfig(env: NodeJS.ProcessEnv = process.env): NoonConfig
   return {
     credentials,
     baseUrl: (env.NOON_API_BASE_URL?.trim() || NOON_PRODUCTION_URL).replace(/\/+$/, ''),
-    userAgent: env.NOON_USER_AGENT?.trim() || 'VoltixCommerce/0.1 (+https://voltix.ae)',
+    userAgent: env.NOON_USER_AGENT?.trim() || 'PhoyevCommerce/0.1 (+https://phoyev.ae)',
     timeoutMs: Number.parseInt(env.NOON_API_TIMEOUT_MS?.trim() || '20000', 10),
   };
 }

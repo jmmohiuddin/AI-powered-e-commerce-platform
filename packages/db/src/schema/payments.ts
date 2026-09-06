@@ -33,7 +33,7 @@ import { customers, orders } from './commerce';
  */
 
 /**
- * Must stay in step with `PaymentProviderId` in @voltix/payments.
+ * Must stay in step with `PaymentProviderId` in @phoyev/payments.
  *
  * The two drifted once, and the failure was not subtle: `TabbyGateway` was
  * registered, offered at checkout, and every BNPL order died on

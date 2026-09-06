@@ -1,7 +1,7 @@
 import 'server-only';
 import { sql } from 'drizzle-orm';
-import { withTenant } from '@voltix/db';
-import { availableActions, type FulfilmentStatus, type OrderStatus, type PaymentStatus } from '@voltix/core';
+import { withTenant } from '@phoyev/db';
+import { availableActions, type FulfilmentStatus, type OrderStatus, type PaymentStatus } from '@phoyev/core';
 
 /**
  * ADMIN READ MODEL

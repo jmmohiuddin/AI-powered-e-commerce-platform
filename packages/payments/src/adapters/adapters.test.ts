@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { money } from '@voltix/core';
+import { money } from '@phoyev/core';
 import { NetworkInternationalGateway } from './network';
 import { TabbyGateway } from './tabby';
 import type { PaymentRequest, RefundRequest } from '../gateway';

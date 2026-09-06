@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { DomainError } from '@voltix/core';
+import { DomainError } from '@phoyev/core';
 import {
   failureReason,
   MAX_SEARCH_QUERY_LENGTH,

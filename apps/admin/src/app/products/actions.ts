@@ -3,9 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { sql } from 'drizzle-orm';
-import { withTenant } from '@voltix/db';
-import { adjustStock, createProduct, setProductStatus, updateProduct } from '@voltix/commerce';
-import { DomainError } from '@voltix/core';
+import { withTenant } from '@phoyev/db';
+import { adjustStock, createProduct, setProductStatus, updateProduct } from '@phoyev/commerce';
+import { DomainError } from '@phoyev/core';
 import { actorFor, requestOrigin, requirePermission, tenantContextFor } from '../../lib/auth';
 
 /**

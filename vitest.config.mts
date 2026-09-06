@@ -45,21 +45,21 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@voltix/config/load-env': r('./packages/config/src/load-env.ts'),
-      '@voltix/config': r('./packages/config/src/index.ts'),
-      '@voltix/core': r('./packages/core/src/index.ts'),
-      '@voltix/db/schema': r('./packages/db/src/schema/index.ts'),
-      '@voltix/db': r('./packages/db/src/index.ts'),
-      '@voltix/commerce': r('./packages/commerce/src/index.ts'),
-      '@voltix/payments': r('./packages/payments/src/index.ts'),
-      '@voltix/ai': r('./packages/ai/src/index.ts'),
-      '@voltix/invoicing': r('./packages/invoicing/src/index.ts'),
-      '@voltix/notifications': r('./packages/notifications/src/index.ts'),
-      '@voltix/auth': r('./packages/auth/src/index.ts'),
-      '@voltix/ui': r('./packages/ui/src/index.ts'),
-      '@voltix/media': r('./packages/media/src/index.ts'),
-      '@voltix/noon/sync': r('./packages/noon/src/sync/index.ts'),
-      '@voltix/noon': r('./packages/noon/src/index.ts'),
+      '@phoyev/config/load-env': r('./packages/config/src/load-env.ts'),
+      '@phoyev/config': r('./packages/config/src/index.ts'),
+      '@phoyev/core': r('./packages/core/src/index.ts'),
+      '@phoyev/db/schema': r('./packages/db/src/schema/index.ts'),
+      '@phoyev/db': r('./packages/db/src/index.ts'),
+      '@phoyev/commerce': r('./packages/commerce/src/index.ts'),
+      '@phoyev/payments': r('./packages/payments/src/index.ts'),
+      '@phoyev/ai': r('./packages/ai/src/index.ts'),
+      '@phoyev/invoicing': r('./packages/invoicing/src/index.ts'),
+      '@phoyev/notifications': r('./packages/notifications/src/index.ts'),
+      '@phoyev/auth': r('./packages/auth/src/index.ts'),
+      '@phoyev/ui': r('./packages/ui/src/index.ts'),
+      '@phoyev/media': r('./packages/media/src/index.ts'),
+      '@phoyev/noon/sync': r('./packages/noon/src/sync/index.ts'),
+      '@phoyev/noon': r('./packages/noon/src/index.ts'),
       // The admin's read model imports 'server-only', which throws when loaded
       // outside a React Server Component. Stubbing it lets the SQL be exercised
       // directly; the real guard still applies in the build, where it matters.

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { formatCount, formatPrice } from '@voltix/ui';
+import { formatCount, formatPrice } from '@phoyev/ui';
 import { buildListingHref, paginationWindow, toDirhams, type ListingParams } from '@/lib/listing';
 import type { CategoryView, SearchResult } from '@/lib/types';
 import { localiseCategory } from '@/lib/types';

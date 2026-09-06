@@ -1,12 +1,12 @@
 import { sql } from 'drizzle-orm';
-import { DELIVERY_ZONES, isEmirateCode, EMIRATES } from '@voltix/core';
+import { DELIVERY_ZONES, isEmirateCode, EMIRATES } from '@phoyev/core';
 import {
   insertNotification,
   renderCartRecovery,
   renderOpsAlert,
   renderOrderConfirmation,
   type NotificationChannel,
-} from '@voltix/notifications';
+} from '@phoyev/notifications';
 import type { Job } from './jobs';
 import type { Tx } from './types';
 
@@ -35,7 +35,7 @@ import type { Tx } from './types';
  * the least recoverable place to be wrong. Treating empty as absent is the
  * correct reading for a string with a default.
  */
-const STORE_NAME = process.env.STORE_NAME || 'Voltix';
+const STORE_NAME = process.env.STORE_NAME || 'Phoyev';
 
 function storefrontUrl(path: string): string {
   const base = (process.env.STOREFRONT_URL || 'http://localhost:3000').replace(/\/$/, '');

@@ -18,7 +18,7 @@ import type { NotificationMessage, NotificationTransport, SendResult } from '../
  */
 export interface ResendConfig {
   readonly apiKey: string;
-  /** RFC 5322 From — 'Voltix <orders@voltix.ae>'. The domain must be verified. */
+  /** RFC 5322 From — 'Phoyev <orders@phoyev.ae>'. The domain must be verified. */
   readonly from: string;
   /** Overridable for tests; there is no sandbox host to point at otherwise. */
   readonly endpoint?: string;

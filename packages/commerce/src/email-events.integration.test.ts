@@ -1,8 +1,8 @@
 import { createHmac } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { uuidv7 } from '@voltix/db';
-import { parseResendEmailEvent, verifySvixSignature } from '@voltix/notifications';
+import { uuidv7 } from '@phoyev/db';
+import { parseResendEmailEvent, verifySvixSignature } from '@phoyev/notifications';
 import { recordEmailProviderEvent } from './email-events';
 import { runOnce, type JobHandler, type JobKind } from './jobs';
 import {

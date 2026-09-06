@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { RETURN_POLICY } from '@voltix/core';
+import { RETURN_POLICY } from '@phoyev/core';
 
 export const metadata: Metadata = {
   title: 'Returns & warranty',

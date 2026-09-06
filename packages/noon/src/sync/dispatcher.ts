@@ -31,7 +31,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import type { Database } from '@voltix/db';
+import type { Database } from '@phoyev/db';
 import { NoonApiError } from '../errors.js';
 import type { NoonClient } from '../client.js';
 import { pushStock } from './stock.js';
@@ -165,7 +165,7 @@ async function pullOrders(db: Database, client: NoonClient, tenantId: string): P
 
     if (result.unmapped.length > 0) {
       // Not an error the sync can fix: someone sold a SKU on noon that has no
-      // Voltix variant. Logged loudly because the stock for it is now wrong.
+      // Phoyev variant. Logged loudly because the stock for it is now wrong.
       console.warn(
         `  noon: ${result.unmapped.length} order line(s) reference unmapped SKUs — ` +
           result.unmapped

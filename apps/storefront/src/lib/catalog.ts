@@ -1,4 +1,4 @@
-import { classifyQuery, reciprocalRankFusion } from '@voltix/ai';
+import { classifyQuery, reciprocalRankFusion } from '@phoyev/ai';
 import * as repository from './repository';
 import type {
   CategoryDetail,

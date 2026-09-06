@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { formatPrice } from '@voltix/ui';
+import { formatPrice } from '@phoyev/ui';
 import { requirePermission } from '../../lib/auth';
 import { listReturns } from '../../lib/returns-queries';
 import { ReturnActions } from './return-actions';

@@ -1,6 +1,6 @@
 import 'server-only';
 import { sql } from 'drizzle-orm';
-import { withTenant } from '@voltix/db';
+import { withTenant } from '@phoyev/db';
 
 /**
  * CATALOGUE READ MODEL

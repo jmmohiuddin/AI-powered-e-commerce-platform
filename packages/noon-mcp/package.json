@@ -1,5 +1,5 @@
 {
-  "name": "@voltix/noon-mcp",
+  "name": "@phoyev/noon-mcp",
   "version": "0.1.0",
   "private": true,
   "description": "MCP server exposing the noon Partner API as tools for AI assistants",
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.15.0",
-    "@voltix/noon": "*",
+    "@phoyev/noon": "*",
     "zod": "^4.4.3"
   },
   "devDependencies": {

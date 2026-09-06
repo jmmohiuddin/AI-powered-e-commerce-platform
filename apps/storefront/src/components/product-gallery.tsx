@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { formatCount } from '@voltix/ui';
+import { formatCount } from '@phoyev/ui';
 import { ProductImage } from './product-image';
 import { PLACEHOLDER_IMAGE, type ProductImageView } from '@/lib/types';
 

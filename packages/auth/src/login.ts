@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
-import { uuidv7 } from '@voltix/db';
-import { roleRequiresMfa } from '@voltix/core';
+import { uuidv7 } from '@phoyev/db';
+import { roleRequiresMfa } from '@phoyev/core';
 import { verifyPassword } from './passwords';
 import { createSession, type IssuedSession } from './sessions';
 import type { Tx } from './types';

@@ -2,8 +2,8 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { dbAdmin } from '@voltix/db';
-import { login, revokeSession, SESSION_COOKIE } from '@voltix/auth';
+import { dbAdmin } from '@phoyev/db';
+import { login, revokeSession, SESSION_COOKIE } from '@phoyev/auth';
 import { getSession, requestOrigin } from '../../lib/auth';
 
 export interface LoginState {

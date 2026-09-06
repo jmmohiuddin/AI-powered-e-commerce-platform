@@ -41,7 +41,7 @@ const baseSchema = z.object({
 
   S3_ENDPOINT: z.string().optional(),
   S3_REGION: z.string().default('auto'),
-  S3_BUCKET: z.string().default('voltix-media'),
+  S3_BUCKET: z.string().default('phoyev-media'),
   S3_ACCESS_KEY_ID: z.string().optional(),
   S3_SECRET_ACCESS_KEY: z.string().optional(),
   CDN_BASE_URL: z.string().optional(),
@@ -104,7 +104,7 @@ const baseSchema = z.object({
    * and says so in the log.
    */
   RESEND_WEBHOOK_SECRET: z.string().optional(),
-  EMAIL_FROM: z.string().default('Voltix <orders@example.com>'),
+  EMAIL_FROM: z.string().default('Phoyev <orders@example.com>'),
   SMTP_URL: z.string().optional(),
 
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),

@@ -15,7 +15,7 @@
  */
 // Must be first: populates process.env from the repo-root .env before
 // any module below reads a connection string at import time.
-import '@voltix/config/load-env';
+import '@phoyev/config/load-env';
 import { sql } from 'drizzle-orm';
 import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import { closeConnections, dbAdmin } from '../src/client';
@@ -36,8 +36,8 @@ async function main() {
     .insert(s.tenants)
     .values({
       id: TENANT_ID,
-      slug: 'voltix-demo',
-      name: 'Voltix Electronics LLC',
+      slug: 'phoyev-demo',
+      name: 'Phoyev Electronics LLC',
       plan: 'growth',
       status: 'active',
       countryCode: 'AE',
@@ -45,7 +45,7 @@ async function main() {
       defaultLocale: 'en-AE',
       supportedLocales: ['en-AE', 'ar-AE'],
       timezone: 'Asia/Dubai',
-      legalName: 'Voltix Electronics Trading L.L.C.',
+      legalName: 'Phoyev Electronics Trading L.L.C.',
       /**
        * Required to issue a tax invoice, and it was missing.
        *
@@ -72,7 +72,7 @@ async function main() {
     .values({
       id: STORE_ID,
       tenantId: TENANT_ID,
-      name: 'Voltix',
+      name: 'Phoyev',
       domain: 'localhost:3000',
       currency: 'AED',
       locale: 'en-AE',
@@ -261,7 +261,7 @@ async function main() {
         priceFrom: Math.min(...p.variants.map((v) => v.price)),
         compareAtPriceFrom: p.variants[0]!.compareAtPrice ?? null,
         currency: 'AED',
-        metaTitle: `${p.title} — Voltix UAE`,
+        metaTitle: `${p.title} — Phoyev UAE`,
         metaDescription: p.subtitle,
         aeoFacts: p.answerableFacts,
         tags: p.tags,

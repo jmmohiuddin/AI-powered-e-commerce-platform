@@ -1,4 +1,4 @@
-import type { Money } from '@voltix/core';
+import type { Money } from '@phoyev/core';
 
 /**
  * THE PAYMENT GATEWAY PORT

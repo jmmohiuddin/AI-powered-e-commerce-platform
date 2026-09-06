@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { sql } from 'drizzle-orm';
-import { withTenant } from '@voltix/db';
+import { withTenant } from '@phoyev/db';
 import { requirePermission } from '../../lib/auth';
 
 export interface MessageActionResult {

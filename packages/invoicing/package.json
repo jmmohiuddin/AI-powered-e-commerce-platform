@@ -1,5 +1,5 @@
 {
-  "name": "@voltix/invoicing",
+  "name": "@phoyev/invoicing",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,6 +12,6 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@voltix/core": "*"
+    "@phoyev/core": "*"
   }
 }
