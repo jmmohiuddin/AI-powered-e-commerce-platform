@@ -210,6 +210,10 @@ export function reservationTtlMs(paymentProvider?: string): number {
       return 60 * MINUTE;
     case 'bank_transfer':
       return 24 * 60 * MINUTE;
+    // Must outlive the Stripe Checkout Session (31 min, see the Stripe
+    // adapter), or a shopper can pay for stock the sweep already released.
+    case 'stripe':
+      return 35 * MINUTE;
     default:
       return 20 * MINUTE;
   }

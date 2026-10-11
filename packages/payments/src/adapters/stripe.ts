@@ -13,6 +13,9 @@ import {
 } from '../gateway';
 import { withRetry } from '../retry';
 
+/** Checkout Session lifetime. Keep below `reservationTtlMs('stripe')`. */
+export const SESSION_TTL_SECONDS = 31 * 60;
+
 export interface StripeOptions {
   readonly secretKey: string;
   readonly webhookSecret: string;
@@ -45,15 +48,20 @@ export class StripeGateway implements PaymentGateway {
   readonly displayName = 'Card';
 
   readonly capabilities: GatewayCapabilities = {
-    supportsAuthorisation: true,
-    supportsPartialCapture: true,
+    // Sale, not auth/capture: nothing in checkout ever calls capturePayment, so
+    // a manual-capture intent would hold the shopper's money and never take it.
+    supportsAuthorisation: false,
+    supportsPartialCapture: false,
     supportsRefund: true,
     supportsPartialRefund: true,
-    supportsTokenisation: true,
-    requiresRedirect: false,
+    supportsTokenisation: false,
+    // Stripe-hosted Checkout: the shopper pays on stripe.com (cards, Apple Pay,
+    // Google Pay, 3-D Secure) and returns via `returnUrl` + webhook.
+    requiresRedirect: true,
     isDeferredSettlement: false,
-    supportedCurrencies: ['USD', 'EUR', 'GBP', 'AED', 'SAR', 'INR', 'AED'],
-    minAmount: 50,
+    supportedCurrencies: ['AED', 'USD', 'EUR', 'GBP', 'SAR', 'INR'],
+    // Stripe's minimum charge is AED 2.00.
+    minAmount: 200,
   };
 
   private readonly fetchImpl: typeof fetch;
@@ -63,23 +71,54 @@ export class StripeGateway implements PaymentGateway {
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
+  /**
+   * Creates a Stripe-hosted Checkout Session and returns its URL as a redirect.
+   *
+   * The provider reference is the session id (`cs_…`). The PaymentIntent behind
+   * it only exists once the shopper confirms, so refunds, capture and status
+   * resolve it from the session on demand (`paymentIntentFor`).
+   *
+   * One line item for the whole order total: the order amount already includes
+   * shipping, VAT and discounts, and itemising only the products would make
+   * Stripe's total disagree with ours.
+   */
   async createPayment(request: PaymentRequest): Promise<PaymentOutcome> {
     const body = new URLSearchParams({
-      amount: String(request.amount.amount),
-      currency: request.amount.currency.toLowerCase(),
-      // Manual capture so stock is only committed once we decide to take the
-      // money — the safer default for physical goods that might be out of stock
-      // by the time the warehouse picks them.
-      capture_method: 'manual',
-      'automatic_payment_methods[enabled]': 'true',
-      description: `Order ${request.orderNumber}`,
+      mode: 'payment',
+      success_url: request.returnUrl,
+      cancel_url: request.cancelUrl,
+      client_reference_id: request.orderNumber,
+      'line_items[0][quantity]': '1',
+      'line_items[0][price_data][currency]': request.amount.currency.toLowerCase(),
+      'line_items[0][price_data][unit_amount]': String(request.amount.amount),
+      'line_items[0][price_data][product_data][name]': `Order ${request.orderNumber}`,
+      'payment_intent_data[description]': `Order ${request.orderNumber}`,
+      'payment_intent_data[metadata][order_id]': request.orderId,
+      'payment_intent_data[metadata][order_number]': request.orderNumber,
       'metadata[order_id]': request.orderId,
       'metadata[order_number]': request.orderNumber,
+      // Stripe's default is 24h, far longer than the stock hold. 30 min is
+      // Stripe's minimum; one extra minute absorbs clock skew. The stock hold
+      // (`reservationTtlMs('stripe')`) is set just above this.
+      expires_at: String(Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS),
     });
-    if (request.customer.email) body.set('receipt_email', request.customer.email);
+    if (request.customer.email) {
+      body.set('customer_email', request.customer.email);
+      body.set('payment_intent_data[receipt_email]', request.customer.email);
+    }
 
-    const intent = await this.post('/payment_intents', body, request.idempotencyKey);
-    return this.mapIntent(intent);
+    const session = await this.post('/checkout/sessions', body, request.idempotencyKey);
+    const url = typeof session.url === 'string' ? session.url : '';
+    if (!url) {
+      return {
+        kind: 'failed',
+        code: 'no_checkout_url',
+        message: 'Stripe did not return a checkout page',
+        retryable: true,
+        raw: session,
+      };
+    }
+    return { kind: 'requires_action', reference: String(session.id ?? ''), redirectUrl: url, raw: session };
   }
 
   async capturePayment(
@@ -88,18 +127,18 @@ export class StripeGateway implements PaymentGateway {
     idempotencyKey: string,
   ): Promise<PaymentOutcome> {
     const body = new URLSearchParams({ amount_to_capture: String(amount.amount) });
-    const intent = await this.post(`/payment_intents/${reference}/capture`, body, idempotencyKey);
+    const intentId = await this.paymentIntentFor(reference);
+    const intent = await this.post(`/payment_intents/${intentId}/capture`, body, idempotencyKey);
     return this.mapIntent(intent);
   }
 
   async refundPayment(request: RefundRequest): Promise<RefundOutcome> {
-    const body = new URLSearchParams({
-      payment_intent: request.transactionReference,
-      amount: String(request.amount.amount),
-      reason: mapRefundReason(request.reason),
-    });
-
     try {
+      const body = new URLSearchParams({
+        payment_intent: await this.paymentIntentFor(request.transactionReference),
+        amount: String(request.amount.amount),
+        reason: mapRefundReason(request.reason),
+      });
       const refund = await this.post('/refunds', body, request.idempotencyKey);
       const status = String(refund.status ?? '');
       return {
@@ -164,7 +203,7 @@ export class StripeGateway implements PaymentGateway {
       eventId: event.id,
       eventType: event.type,
       paymentReference: String(object.id ?? ''),
-      status: mapEventStatus(event.type),
+      status: mapEventStatus(event.type, object),
       ...(typeof object.amount === 'number'
         ? { amount: money(object.amount, String(object.currency ?? 'usd').toUpperCase()) }
         : {}),
@@ -173,7 +212,24 @@ export class StripeGateway implements PaymentGateway {
   }
 
   async fetchStatus(reference: string): Promise<PaymentStatusResult> {
-    const intent = await this.get(`/payment_intents/${reference}`);
+    let intent: Record<string, unknown>;
+
+    if (reference.startsWith('cs_')) {
+      const session = await this.get(`/checkout/sessions/${reference}?expand[]=payment_intent`);
+      const expanded = session.payment_intent;
+      if (!expanded || typeof expanded !== 'object') {
+        // Shopper has not completed (or abandoned) the hosted page.
+        return {
+          reference,
+          status: session.status === 'expired' ? 'cancelled' : 'pending',
+          raw: session,
+        };
+      }
+      intent = expanded as Record<string, unknown>;
+    } else {
+      intent = await this.get(`/payment_intents/${reference}`);
+    }
+
     const status = String(intent.status ?? '');
     return {
       reference,
@@ -202,6 +258,17 @@ export class StripeGateway implements PaymentGateway {
   }
 
   /* ── Internals ────────────────────────────────────────────────────── */
+
+  /** Accepts a `cs_…` session id or a `pi_…` id and returns the PaymentIntent id. */
+  private async paymentIntentFor(reference: string): Promise<string> {
+    if (!reference.startsWith('cs_')) return reference;
+    const session = await this.get(`/checkout/sessions/${reference}`);
+    const id = typeof session.payment_intent === 'string' ? session.payment_intent : '';
+    if (!id) {
+      throw new GatewayError('stripe', 'not_paid', 'Checkout session has no payment yet', false);
+    }
+    return id;
+  }
 
   private mapIntent(intent: Record<string, unknown>): PaymentOutcome {
     const status = String(intent.status ?? '');
@@ -309,7 +376,16 @@ function mapRefundReason(reason?: string): string {
 
 function mapEventStatus(
   eventType: string,
+  object: Record<string, unknown> = {},
 ): 'succeeded' | 'failed' | 'refunded' | 'cancelled' | 'pending' {
+  // Checkout Session events. `completed` can precede funds for delayed methods,
+  // so only a `paid` session counts as success.
+  if (eventType === 'checkout.session.completed') {
+    return object.payment_status === 'paid' ? 'succeeded' : 'pending';
+  }
+  if (eventType === 'checkout.session.async_payment_succeeded') return 'succeeded';
+  if (eventType === 'checkout.session.async_payment_failed') return 'failed';
+  if (eventType === 'checkout.session.expired') return 'cancelled';
   if (eventType.startsWith('charge.refund') || eventType === 'charge.refunded') return 'refunded';
   if (eventType.endsWith('.succeeded')) return 'succeeded';
   if (eventType.endsWith('.payment_failed') || eventType.endsWith('.failed')) return 'failed';

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { money } from '@phoyev/core';
 import { CashOnDeliveryGateway } from './adapters/cod';
 import { StripeGateway } from './adapters/stripe';
+import { reservationTtlMs } from '@phoyev/core';
 import {
   outcomeFromStatus,
   shouldCommitStock,
@@ -296,9 +297,11 @@ describe('stripe webhook verification', () => {
 });
 
 describe('stripe payment flow', () => {
-  it('maps requires_capture to an authorised outcome', async () => {
+  it('creates a hosted Checkout Session and redirects the shopper to it', async () => {
     const fetchImpl = vi.fn(async () =>
-      new Response(JSON.stringify({ id: 'pi_1', status: 'requires_capture' }), { status: 200 }),
+      new Response(JSON.stringify({ id: 'cs_1', url: 'https://checkout.stripe.com/c/pay/cs_1' }), {
+        status: 200,
+      }),
     ) as unknown as typeof fetch;
 
     const gateway = new StripeGateway({ secretKey: 'sk', webhookSecret: 'w', fetchImpl });
@@ -306,14 +309,47 @@ describe('stripe payment flow', () => {
       idempotencyKey: 'idem-1',
       orderId: 'o1',
       orderNumber: '10001',
-      amount: money(1000, 'USD'),
+      amount: money(10_000, 'AED'),
       customer: { email: 'a@b.c' },
       items: [],
-      returnUrl: '',
-      cancelUrl: '',
+      returnUrl: 'https://shop.test/checkout/return',
+      cancelUrl: 'https://shop.test/checkout',
       webhookUrl: '',
     });
-    expect(outcome.kind).toBe('authorised');
+    expect(outcome).toMatchObject({
+      kind: 'requires_action',
+      reference: 'cs_1',
+      redirectUrl: 'https://checkout.stripe.com/c/pay/cs_1',
+    });
+    const call = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls[0]!;
+    expect(String(call[0])).toContain('/checkout/sessions');
+    const sent = new URLSearchParams(String((call[1] as RequestInit).body));
+    expect(sent.get('line_items[0][price_data][currency]')).toBe('aed');
+    expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('10000');
+    expect(sent.get('success_url')).toBe('https://shop.test/checkout/return');
+    // The session must expire before the stock hold does, or a late payment
+    // lands on stock the sweep already released.
+    const expiresIn = Number(sent.get('expires_at')) - Date.now() / 1000;
+    expect(expiresIn).toBeGreaterThanOrEqual(30 * 60);
+    expect(expiresIn * 1000).toBeLessThan(reservationTtlMs('stripe'));
+  });
+
+  it('refunds a Checkout Session by resolving its PaymentIntent first', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: 'cs_1', payment_intent: 'pi_9' }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: 're_1', status: 'succeeded' }), { status: 200 })) as unknown as typeof fetch;
+    const gateway = new StripeGateway({ secretKey: 'sk', webhookSecret: 'w', fetchImpl });
+    const outcome = await gateway.refundPayment({
+      idempotencyKey: 'r1',
+      transactionReference: 'cs_1',
+      amount: money(1000, 'AED'),
+    });
+    expect(outcome.kind).toBe('succeeded');
+    const refundBody = new URLSearchParams(
+      String(((fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls[1]![1] as RequestInit).body),
+    );
+    expect(refundBody.get('payment_intent')).toBe('pi_9');
   });
 
   it('sends the idempotency key so a retried charge cannot double-bill', async () => {
@@ -326,11 +362,11 @@ describe('stripe payment flow', () => {
       idempotencyKey: 'idem-42',
       orderId: 'o1',
       orderNumber: '1',
-      amount: money(1000, 'USD'),
+      amount: money(1000, 'AED'),
       customer: {},
       items: [],
-      returnUrl: '',
-      cancelUrl: '',
+      returnUrl: 'https://shop.test/r',
+      cancelUrl: 'https://shop.test/c',
       webhookUrl: '',
     });
 
