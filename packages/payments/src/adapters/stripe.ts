@@ -13,6 +13,9 @@ import {
 } from '../gateway';
 import { withRetry } from '../retry';
 
+/** Checkout Session lifetime. Keep below `reservationTtlMs('stripe')`. */
+export const SESSION_TTL_SECONDS = 31 * 60;
+
 export interface StripeOptions {
   readonly secretKey: string;
   readonly webhookSecret: string;
@@ -94,6 +97,10 @@ export class StripeGateway implements PaymentGateway {
       'payment_intent_data[metadata][order_number]': request.orderNumber,
       'metadata[order_id]': request.orderId,
       'metadata[order_number]': request.orderNumber,
+      // Stripe's default is 24h, far longer than the stock hold. 30 min is
+      // Stripe's minimum; one extra minute absorbs clock skew. The stock hold
+      // (`reservationTtlMs('stripe')`) is set just above this.
+      expires_at: String(Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS),
     });
     if (request.customer.email) {
       body.set('customer_email', request.customer.email);

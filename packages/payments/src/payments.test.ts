@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { money } from '@phoyev/core';
 import { CashOnDeliveryGateway } from './adapters/cod';
 import { StripeGateway } from './adapters/stripe';
+import { reservationTtlMs } from '@phoyev/core';
 import {
   outcomeFromStatus,
   shouldCommitStock,
@@ -326,6 +327,11 @@ describe('stripe payment flow', () => {
     expect(sent.get('line_items[0][price_data][currency]')).toBe('aed');
     expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('10000');
     expect(sent.get('success_url')).toBe('https://shop.test/checkout/return');
+    // The session must expire before the stock hold does, or a late payment
+    // lands on stock the sweep already released.
+    const expiresIn = Number(sent.get('expires_at')) - Date.now() / 1000;
+    expect(expiresIn).toBeGreaterThanOrEqual(30 * 60);
+    expect(expiresIn * 1000).toBeLessThan(reservationTtlMs('stripe'));
   });
 
   it('refunds a Checkout Session by resolving its PaymentIntent first', async () => {
